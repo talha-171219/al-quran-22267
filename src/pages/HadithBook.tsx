@@ -6,50 +6,45 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, ChevronRight } from "lucide-react";
 import { hadithCollections } from "@/data/hadiths";
 import { getBukhariChapters } from "@/services/bukhariApi";
+import { getTirmidhiChapters } from "@/services/tirmidhiApi";
 import { useEffect, useState } from "react";
 
-// Chapter data for non-Bukhari books
+// Chapter data for non-implemented books
 const muslimChapters = [
-  { id: "1", nameBangla: "ঈমান অধ্যায়", nameEnglish: "Book of Faith", hadithCount: 0 },
-  { id: "2", nameBangla: "পবিত্রতা অধ্যায়", nameEnglish: "Book of Purification", hadithCount: 0 },
-  { id: "3", nameBangla: "নামাজ অধ্যায়", nameEnglish: "Book of Prayer", hadithCount: 0 },
-  { id: "4", nameBangla: "জাকাত অধ্যায়", nameEnglish: "Book of Zakat", hadithCount: 0 },
-];
-
-const tirmidhiChapters = [
-  { id: "1", nameBangla: "পবিত্রতা অধ্যায়", nameEnglish: "Book of Purification", hadithCount: 0 },
-  { id: "2", nameBangla: "নামাজ অধ্যায়", nameEnglish: "Book of Prayer", hadithCount: 0 },
-  { id: "3", nameBangla: "জাকাত অধ্যায়", nameEnglish: "Book of Zakat", hadithCount: 0 },
+  { id: "1", nameBangla: "ঈমান", nameEnglish: "Book of Faith", hadithCount: 0 },
+  { id: "2", nameBangla: "পবিত্রতা", nameEnglish: "Book of Purification", hadithCount: 0 },
+  { id: "3", nameBangla: "সালাত", nameEnglish: "Book of Prayer", hadithCount: 0 },
+  { id: "4", nameBangla: "যাকাত", nameEnglish: "Book of Zakat", hadithCount: 0 },
 ];
 
 const HadithBook = () => {
   const { bookId } = useParams<{ bookId: string }>();
   const collection = hadithCollections.find((c) => c.id === bookId);
-  const [bukhariChapters, setBukhariChapters] = useState<any[]>([]);
+  const [chapters, setChapters] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (bookId === "bukhari") {
-      getBukhariChapters()
-        .then((chapters) => {
-          setBukhariChapters(chapters);
-          setLoading(false);
-        })
-        .catch(() => {
-          setLoading(false);
-          // Silent fail - will show empty state
-        });
-    } else {
-      setLoading(false);
-    }
+    const loadChapters = async () => {
+      setLoading(true);
+      try {
+        if (bookId === "bukhari") {
+          const bukhariChapters = await getBukhariChapters();
+          setChapters(bukhariChapters);
+        } else if (bookId === "tirmidhi") {
+          const tirmidhiChapters = await getTirmidhiChapters();
+          setChapters(tirmidhiChapters);
+        } else if (bookId === "muslim") {
+          setChapters(muslimChapters);
+        }
+      } catch (error) {
+        console.error("Failed to load chapters:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadChapters();
   }, [bookId]);
-
-  const chapters =
-    bookId === "bukhari"
-      ? bukhariChapters
-      : bookId === "muslim"
-      ? muslimChapters
-      : tirmidhiChapters;
 
   if (!collection) {
     return (

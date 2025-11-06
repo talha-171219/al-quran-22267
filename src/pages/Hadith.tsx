@@ -85,7 +85,7 @@ const Hadith = () => {
                       </CardDescription>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <ScrollText className="h-3 w-3" />
-                        <span>মোট হাদিস: {collection.totalHadiths.toLocaleString('bn-BD')}</span>
+                        <span>মোট হাদিস: {collection.totalHadith.toLocaleString('bn-BD')}</span>
                       </div>
                     </div>
                   </div>

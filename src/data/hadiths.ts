@@ -17,28 +17,31 @@ export interface HadithCollection {
   description: string;
 }
 
-export const hadithCollections: HadithCollection[] = [
+export const hadithCollections = [
   {
     id: "bukhari",
-    name: "Sahih Al-Bukhari",
-    nameBangla: "সহিহ বুখারী",
-    totalHadiths: 7563,
-    description: "ইমাম বুখারী (রহঃ) সংকলিত হাদীসের সবচেয়ে নির্ভরযোগ্য সংকলন"
-  },
-  {
-    id: "muslim",
-    name: "Sahih Muslim",
-    nameBangla: "সহিহ মুসলিম",
-    totalHadiths: 7452,
-    description: "ইমাম মুসলিম (রহঃ) সংকলিত দ্বিতীয় সর্বাধিক নির্ভরযোগ্য হাদীস সংকলন"
+    nameBangla: "সহীহ বুখারী",
+    nameEnglish: "Sahih al-Bukhari",
+    description: "ইমাম বুখারী (রহঃ) সংকলিত সবচেয়ে বিশুদ্ধ হাদিস গ্রন্থ",
+    totalHadith: 7563,
+    totalChapters: 97,
   },
   {
     id: "tirmidhi",
-    name: "Jami At-Tirmidhi",
-    nameBangla: "জামে' আত-তিরমিজি",
-    totalHadiths: 3941,
-    description: "ইমাম তিরমিযি (রহঃ) সংকলিত হাদীস গ্রন্থ"
-  }
+    nameBangla: "জামে তিরমিযি",
+    nameEnglish: "Jami at-Tirmidhi",
+    description: "ইমাম তিরমিযি (রহঃ) সংকলিত ছয়টি প্রামাণিক হাদিস গ্রন্থের একটি",
+    totalHadith: 3956,
+    totalChapters: 46,
+  },
+  {
+    id: "muslim",
+    nameBangla: "সহীহ মুসলিম",
+    nameEnglish: "Sahih Muslim",
+    description: "ইমাম মুসলিম (রহঃ) সংকলিত দ্বিতীয় সবচেয়ে বিশুদ্ধ হাদিস গ্রন্থ",
+    totalHadith: 7190,
+    totalChapters: 56,
+  },
 ];
 
 // Sahih Bukhari Hadiths - organized by book and chapter

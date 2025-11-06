@@ -7,7 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, X, Bookmark } from "lucide-react";
-import { getChapterHadiths, prefetchNextPage } from "@/services/bukhariApi";
+import { 
+  getChapterHadiths as getBukhariChapterHadiths, 
+  prefetchNextPage as prefetchBukhariNextPage 
+} from "@/services/bukhariApi";
+import { 
+  getChapterHadiths as getTirmidhiChapterHadiths, 
+  prefetchNextPage as prefetchTirmidhiNextPage 
+} from "@/services/tirmidhiApi";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -52,12 +59,14 @@ const HadithChapter = () => {
 
   // Load hadiths for chapter with prefetching (initial load: 10 for fast render)
   useEffect(() => {
-    if (bookId !== "bukhari" || !chapterId) return;
+    if (!bookId || !chapterId) return;
+    if (bookId !== "bukhari" && bookId !== "tirmidhi") return;
     
     const loadHadiths = async () => {
       setLoading(true);
       try {
         // Load first 10 hadiths for instant display
+        const getChapterHadiths = bookId === "bukhari" ? getBukhariChapterHadiths : getTirmidhiChapterHadiths;
         const { hadiths: fetchedHadiths, hasMore: more } = await getChapterHadiths(chapterId, 1, 10);
         setHadiths(fetchedHadiths);
         setHasMore(more);
@@ -65,6 +74,7 @@ const HadithChapter = () => {
         
         // Prefetch next page in background for smooth scroll
         if (more) {
+          const prefetchNextPage = bookId === "bukhari" ? prefetchBukhariNextPage : prefetchTirmidhiNextPage;
           prefetchNextPage(chapterId, 1, 10);
         }
       } catch (error) {
@@ -79,26 +89,29 @@ const HadithChapter = () => {
 
   // Infinite scroll - load 10 hadiths at a time for smooth experience
   const loadMore = useCallback(async () => {
-    if (loadingMore || !hasMore || searchQuery) return;
+    if (loadingMore || !hasMore || searchQuery || !bookId || !chapterId) return;
+    if (bookId !== "bukhari" && bookId !== "tirmidhi") return;
     
     setLoadingMore(true);
     try {
       const nextPage = page + 1;
-      const { hadiths: moreHadiths, hasMore: more } = await getChapterHadiths(chapterId!, nextPage, 10);
+      const getChapterHadiths = bookId === "bukhari" ? getBukhariChapterHadiths : getTirmidhiChapterHadiths;
+      const { hadiths: moreHadiths, hasMore: more } = await getChapterHadiths(chapterId, nextPage, 10);
       setHadiths((prev) => [...prev, ...moreHadiths]);
       setPage(nextPage);
       setHasMore(more);
       
       // Prefetch next page in background
       if (more) {
-        prefetchNextPage(chapterId!, nextPage, 10);
+        const prefetchNextPage = bookId === "bukhari" ? prefetchBukhariNextPage : prefetchTirmidhiNextPage;
+        prefetchNextPage(chapterId, nextPage, 10);
       }
     } catch (error) {
       toast.error("আরো হাদিস লোড করতে সমস্যা হয়েছে");
     } finally {
       setLoadingMore(false);
     }
-  }, [loadingMore, hasMore, page, chapterId, searchQuery]);
+  }, [loadingMore, hasMore, page, bookId, chapterId, searchQuery]);
 
   // Setup intersection observer for infinite scroll
   useEffect(() => {
