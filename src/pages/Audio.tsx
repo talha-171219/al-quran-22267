@@ -1,0 +1,423 @@
+import { TopBar } from "@/components/layout/TopBar";
+import { BottomNav } from "@/components/layout/BottomNav";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Play, Pause, SkipBack, SkipForward, Download, Volume2, Check } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { surahList } from "@/data/surahs";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { audioCache } from "@/utils/audioCache";
+
+const Audio = () => {
+  const [currentSurah, setCurrentSurah] = useState(1);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [search, setSearch] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingSurah, setLoadingSurah] = useState<number | null>(null);
+  const [cachedSurahs, setCachedSurahs] = useState<number[]>([]);
+  const [autoPlay, setAutoPlay] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const currentAudioUrl = useRef<string>("");
+
+  const surah = surahList.find(s => s.number === currentSurah) || surahList[0];
+  
+  // Full Surah audio sources for Sheikh Mishary Rashid Alafasy
+  const getAudioUrls = (surahNum: number): string[] => {
+    const padded = String(surahNum).padStart(3, '0');
+    return [
+      // Primary: QuranicAudio (full surah, padded)
+      `https://download.quranicaudio.com/quran/mishaari_raashid_al_3afaasee/${padded}.mp3`,
+      // Fallback: QDC (full surah, non-padded)
+      `https://download.quranicaudio.com/qdc/mishari_al_afasy/murattal/${surahNum}.mp3`,
+    ];
+  };
+
+  // Initialize cache and load cached surahs list
+  useEffect(() => {
+    audioCache.init().then(() => {
+      audioCache.getAllCached().then(cached => {
+        setCachedSurahs(cached);
+      });
+    });
+  }, []);
+
+  // Load audio from cache or network with fallback sources
+  useEffect(() => {
+    const loadAudio = async () => {
+      if (!audioRef.current) return;
+      
+      setIsLoading(true);
+      setLoadingSurah(currentSurah);
+      console.log(`Loading audio for Surah ${currentSurah}`);
+      
+      try {
+        // Check if audio is cached
+        const cached = await audioCache.getCachedAudio(currentSurah);
+        
+        if (cached) {
+          // Use cached audio
+          console.log(`Using cached audio for Surah ${currentSurah}`);
+          const url = URL.createObjectURL(cached);
+          if (currentAudioUrl.current) {
+            URL.revokeObjectURL(currentAudioUrl.current);
+          }
+          currentAudioUrl.current = url;
+          audioRef.current.src = url;
+          toast.success("ক্যাশ থেকে লোড হয়েছে");
+        } else {
+          // Try loading from network - directly load, no HEAD check
+          const urls = getAudioUrls(currentSurah);
+          let loaded = false;
+          
+          for (const url of urls) {
+            try {
+              console.log(`Loading audio from: ${url}`);
+              audioRef.current.src = url;
+              // Wait for canplay event to confirm it loaded
+              await new Promise((resolve, reject) => {
+                const onCanPlay = () => {
+                  audioRef.current?.removeEventListener('canplay', onCanPlay);
+                  audioRef.current?.removeEventListener('error', onError);
+                  resolve(true);
+                };
+                const onError = () => {
+                  audioRef.current?.removeEventListener('canplay', onCanPlay);
+                  audioRef.current?.removeEventListener('error', onError);
+                  reject();
+                };
+                audioRef.current?.addEventListener('canplay', onCanPlay);
+                audioRef.current?.addEventListener('error', onError);
+              });
+              loaded = true;
+              console.log(`Audio loaded from: ${url}`);
+              break;
+            } catch (e) {
+              console.log(`Failed to load from ${url}, trying next source...`);
+            }
+          }
+          
+          if (!loaded) {
+            throw new Error("No audio source available");
+          }
+        }
+
+        if (autoPlay) {
+          await audioRef.current.play();
+          setIsPlaying(true);
+        }
+      } catch (e) {
+        console.error("Audio load failed:", e);
+        setIsPlaying(false);
+        setAutoPlay(false);
+        toast.error("এই সূরার অডিও পাওয়া যায়নি");
+      } finally {
+        setIsLoading(false);
+        setLoadingSurah(null);
+      }
+    };
+
+    loadAudio();
+
+    return () => {
+      if (currentAudioUrl.current) {
+        URL.revokeObjectURL(currentAudioUrl.current);
+      }
+    };
+  }, [currentSurah]);
+
+  const togglePlay = async () => {
+    if (!audioRef.current) return;
+    
+    try {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        await audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    } catch (e) {
+      toast.error("অডিও প্লে করতে সমস্যা হয়েছে");
+    }
+  };
+
+  const skipNext = () => {
+    if (currentSurah < 114) {
+      setCurrentSurah(prev => prev + 1);
+      setAutoPlay(isPlaying);
+    }
+  };
+
+  const skipPrev = () => {
+    if (currentSurah > 1) {
+      setCurrentSurah(prev => prev - 1);
+      setAutoPlay(false);
+      setIsPlaying(false);
+    }
+  };
+
+  const handleEnded = () => {
+    if (currentSurah < 114) {
+      skipNext();
+    } else {
+      setIsPlaying(false);
+      setAutoPlay(false);
+    }
+  };
+
+  const handleTimeUpdate = () => {
+    if (audioRef.current) {
+      setCurrentTime(audioRef.current.currentTime);
+    }
+  };
+
+  const handleLoadedMetadata = () => {
+    if (audioRef.current) {
+      setDuration(audioRef.current.duration);
+    }
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const time = parseFloat(e.target.value);
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+      setCurrentTime(time);
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      setIsLoading(true);
+      console.log(`Downloading Surah ${currentSurah}`);
+      
+      // Check if already cached
+      const isCached = await audioCache.isCached(currentSurah);
+      if (isCached) {
+        toast.info("এই সূরা ইতিমধ্যে ডাউনলোড করা আছে");
+        setIsLoading(false);
+        return;
+      }
+
+      // Try downloading from all sources
+      const urls = getAudioUrls(currentSurah);
+      let downloaded = false;
+      
+      for (const url of urls) {
+        try {
+          console.log(`Trying to download from: ${url}`);
+          const response = await fetch(url);
+          
+          if (!response.ok) {
+            console.log(`Failed to download from ${url}`);
+            continue;
+          }
+
+          const blob = await response.blob();
+          console.log(`Successfully downloaded from ${url}, size: ${blob.size} bytes`);
+          
+          // Cache the audio
+          await audioCache.cacheAudio(currentSurah, blob);
+          
+          // Update cached list
+          const cached = await audioCache.getAllCached();
+          setCachedSurahs(cached);
+          
+          toast.success("সূরা সফলভাবে ডাউনলোড হয়েছে");
+          downloaded = true;
+          break;
+        } catch (error) {
+          console.error(`Error downloading from ${url}:`, error);
+        }
+      }
+      
+      if (!downloaded) {
+        toast.error("এই সূরার অডিও পাওয়া যায়নি");
+      }
+    } catch (error) {
+      console.error("Download failed:", error);
+      toast.error("ডাউনলোড করতে সমস্যা হয়েছে");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const formatTime = (time: number) => {
+    const mins = Math.floor(time / 60);
+    const secs = Math.floor(time % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const filteredSurahs = surahList.filter(s =>
+    s.banglaName.toLowerCase().includes(search.toLowerCase()) ||
+    s.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="min-h-screen bg-background pb-20">
+      <TopBar title="কুরআন অডিও" showBack />
+
+      <audio
+        ref={audioRef}
+        preload="auto"
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadedMetadata}
+        onEnded={handleEnded}
+      />
+
+      <main className="max-w-lg mx-auto px-4 py-6 space-y-6">
+        {/* Player */}
+        <Card className="p-6 bg-gradient-primary text-primary-foreground">
+          <div className="text-center mb-6">
+            <h3 className="text-xl font-semibold mb-1">{surah.banglaName}</h3>
+            <p className="text-sm opacity-90">{surah.banglaMeaning} • {surah.verses} আয়াত</p>
+            <p className="text-xs opacity-75 mt-1">Sheikh Mishary Rashid Alafasy</p>
+          </div>
+
+          <div className="flex items-center justify-center gap-4 mb-6">
+            <Button
+              size="icon"
+              variant="ghost"
+              className="text-primary-foreground hover:bg-white/10"
+              onClick={skipPrev}
+              disabled={currentSurah === 1}
+            >
+              <SkipBack className="h-5 w-5" />
+            </Button>
+            
+            <Button
+              size="icon"
+              className="h-16 w-16 bg-white/20 hover:bg-white/30 text-primary-foreground"
+              onClick={togglePlay}
+            >
+              {isPlaying ? (
+                <Pause className="h-8 w-8" />
+              ) : (
+                <Play className="h-8 w-8 ml-1" />
+              )}
+            </Button>
+            
+            <Button
+              size="icon"
+              variant="ghost"
+              className="text-primary-foreground hover:bg-white/10"
+              onClick={skipNext}
+              disabled={currentSurah === 114}
+            >
+              <SkipForward className="h-5 w-5" />
+            </Button>
+          </div>
+
+          <div className="space-y-2">
+            <input
+              type="range"
+              min="0"
+              max={duration || 0}
+              value={currentTime}
+              onChange={handleSeek}
+              className="w-full h-1 bg-white/20 rounded-full appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+            />
+            <div className="flex justify-between text-xs opacity-75">
+              <span>{formatTime(currentTime)}</span>
+              <span>{formatTime(duration)}</span>
+            </div>
+          </div>
+
+          <div className="flex gap-2 mt-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-primary-foreground hover:bg-white/10"
+              onClick={handleDownload}
+              disabled={isLoading || cachedSurahs.includes(currentSurah)}
+            >
+              {cachedSurahs.includes(currentSurah) ? (
+                <>
+                  <Check className="h-4 w-4 mr-2" />
+                  ডাউনলোড হয়েছে
+                </>
+              ) : (
+                <>
+                  <Download className="h-4 w-4 mr-2" />
+                  অফলাইন ডাউনলোড
+                </>
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-primary-foreground hover:bg-white/10"
+              onClick={() => {
+                if (audioRef.current) {
+                  const speeds = [1, 1.25, 1.5, 0.75];
+                  const currentSpeed = audioRef.current.playbackRate;
+                  const nextSpeed = speeds[(speeds.indexOf(currentSpeed) + 1) % speeds.length];
+                  audioRef.current.playbackRate = nextSpeed;
+                  toast.success(`গতি: ${nextSpeed}x`);
+                }
+              }}
+            >
+              <Volume2 className="h-4 w-4 mr-2" />
+              গতি
+            </Button>
+          </div>
+        </Card>
+
+        {/* Surah List */}
+        <Card className="p-4">
+          <h4 className="font-semibold mb-3">সূরা তালিকা</h4>
+          <Input
+            placeholder="সূরা খুঁজুন..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="mb-3"
+          />
+          <div className="space-y-2 max-h-96 overflow-y-auto">
+            {filteredSurahs.map((s) => (
+              <button
+                key={s.number}
+                onClick={() => {
+                  setCurrentSurah(s.number);
+                  setAutoPlay(true);
+                }}
+                className={`w-full text-left p-3 rounded-lg transition-colors ${
+                  currentSurah === s.number
+                    ? 'bg-primary text-primary-foreground'
+                    : 'hover:bg-muted'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 flex items-center justify-center bg-primary/10 rounded text-xs font-bold">
+                    {s.number}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-medium text-sm">{s.banglaName}</span>
+                      <div className="flex items-center gap-2">
+                        {cachedSurahs.includes(s.number) && (
+                          <Check className="h-3 w-3 text-green-500" />
+                        )}
+                        <span className="text-sm font-arabic">{s.arabicName}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs opacity-75">{s.verses} আয়াত</span>
+                      {loadingSurah === s.number && (
+                        <span className="text-xs opacity-75 animate-pulse">লোড হচ্ছে...</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </Card>
+      </main>
+
+      <BottomNav />
+    </div>
+  );
+};
+
+export default Audio;

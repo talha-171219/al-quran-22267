@@ -1,0 +1,305 @@
+import { useState, useEffect, useCallback, useRef } from "react";
+import { useParams, Link } from "react-router-dom";
+import { TopBar } from "@/components/layout/TopBar";
+import { BottomNav } from "@/components/layout/BottomNav";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Search, X, Bookmark } from "lucide-react";
+import { getChapterHadiths, prefetchNextPage } from "@/services/bukhariApi";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+
+const HadithChapter = () => {
+  const { bookId, chapterId } = useParams<{ bookId: string; chapterId: string }>();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
+  const [userId, setUserId] = useState<string | null>(null);
+  const [hadiths, setHadiths] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+  // Get user ID
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+    };
+    getUser();
+  }, []);
+
+  // Load bookmarks
+  useEffect(() => {
+    const loadBookmarks = async () => {
+      if (!userId) return;
+      
+      const { data } = await supabase
+        .from("hadith_bookmarks")
+        .select("hadith_id")
+        .eq("user_id", userId);
+
+      if (data) {
+        setBookmarks(new Set(data.map((b) => b.hadith_id)));
+      }
+    };
+    loadBookmarks();
+  }, [userId]);
+
+  // Load hadiths for chapter with prefetching (initial load: 10 for fast render)
+  useEffect(() => {
+    if (bookId !== "bukhari" || !chapterId) return;
+    
+    const loadHadiths = async () => {
+      setLoading(true);
+      try {
+        // Load first 10 hadiths for instant display
+        const { hadiths: fetchedHadiths, hasMore: more } = await getChapterHadiths(chapterId, 1, 10);
+        setHadiths(fetchedHadiths);
+        setHasMore(more);
+        setPage(1);
+        
+        // Prefetch next page in background for smooth scroll
+        if (more) {
+          prefetchNextPage(chapterId, 1, 10);
+        }
+      } catch (error) {
+        toast.error("হাদিস লোড করতে সমস্যা হয়েছে");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadHadiths();
+  }, [bookId, chapterId]);
+
+  // Infinite scroll - load 10 hadiths at a time for smooth experience
+  const loadMore = useCallback(async () => {
+    if (loadingMore || !hasMore || searchQuery) return;
+    
+    setLoadingMore(true);
+    try {
+      const nextPage = page + 1;
+      const { hadiths: moreHadiths, hasMore: more } = await getChapterHadiths(chapterId!, nextPage, 10);
+      setHadiths((prev) => [...prev, ...moreHadiths]);
+      setPage(nextPage);
+      setHasMore(more);
+      
+      // Prefetch next page in background
+      if (more) {
+        prefetchNextPage(chapterId!, nextPage, 10);
+      }
+    } catch (error) {
+      toast.error("আরো হাদিস লোড করতে সমস্যা হয়েছে");
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [loadingMore, hasMore, page, chapterId, searchQuery]);
+
+  // Setup intersection observer for infinite scroll
+  useEffect(() => {
+    if (observerRef.current) observerRef.current.disconnect();
+
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loadMoreRef.current) {
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [loadMore]);
+
+  // Filter hadiths by search
+  const filteredHadiths = searchQuery.trim()
+    ? hadiths.filter((h) =>
+        h.bangla.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        h.arabic.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        h.hadithNumber.includes(searchQuery)
+      )
+    : hadiths;
+
+  // Chapter name in Bangla
+  const chapterNamesBangla: Record<string, string> = {
+    '1': 'ওহী শুরু হওয়ার বর্ণনা',
+    '2': 'ঈমান',
+    '3': 'ইলম',
+    '4': 'ওযু',
+    '5': 'গোসল',
+    '6': 'হায়েয',
+    '7': 'তায়াম্মুম',
+    '8': 'সালাত',
+    '9': 'সালাতের ওয়াক্তসমূহ',
+    '10': 'আযান',
+  };
+  
+  const chapterName = chapterNamesBangla[chapterId || ''] || hadiths[0]?.chapterEnglish || "অধ্যায়";
+
+  const toggleBookmark = async (hadithId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!userId) {
+      toast.error("বুকমার্ক করতে লগইন করুন");
+      return;
+    }
+
+    if (bookmarks.has(hadithId)) {
+      // Remove bookmark
+      await supabase
+        .from("hadith_bookmarks")
+        .delete()
+        .eq("user_id", userId)
+        .eq("hadith_id", hadithId);
+
+      setBookmarks((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(hadithId);
+        return newSet;
+      });
+      toast.success("বুকমার্ক সরানো হয়েছে");
+    } else {
+      // Add bookmark
+      await supabase
+        .from("hadith_bookmarks")
+        .insert({ user_id: userId, hadith_id: hadithId });
+
+      setBookmarks((prev) => new Set(prev).add(hadithId));
+      toast.success("বুকমার্ক যুক্ত হয়েছে");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar title="হাদিস" showBack />
+        <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
+          {/* Skeleton loading */}
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="animate-pulse">
+              <CardContent className="pt-6">
+                <div className="h-4 bg-muted rounded w-24 mb-3"></div>
+                <div className="h-16 bg-muted/50 rounded mb-3"></div>
+                <div className="h-12 bg-muted/30 rounded"></div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <BottomNav />
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background pb-20">
+      <TopBar title={chapterName} showBack />
+
+      <main className="max-w-lg mx-auto px-4 py-6 space-y-4">
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="আরবি বা বাংলায় সার্চ করুন..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 pr-10 h-12"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2"
+            >
+              <X className="h-5 w-5 text-muted-foreground" />
+            </button>
+          )}
+        </div>
+
+        {/* Hadiths List */}
+        <div className="space-y-4">
+          {filteredHadiths.map((hadith) => (
+            <Link
+              key={hadith.id}
+              to={`/hadith/detail/${bookId}/${chapterId}/${hadith.id}`}
+              className="block"
+            >
+              <Card className="hover:shadow-md transition-shadow border-l-4 border-l-primary">
+                <CardContent className="pt-6">
+                  <div className="flex items-start justify-between mb-3">
+                    <Badge variant="secondary">হাদিস নং: {hadith.hadithNumber}</Badge>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={(e) => toggleBookmark(hadith.id, e)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <Bookmark
+                        className={`h-4 w-4 ${
+                          bookmarks.has(hadith.id)
+                            ? "fill-primary text-primary"
+                            : "text-muted-foreground"
+                        }`}
+                      />
+                    </Button>
+                  </div>
+
+                  {/* Arabic Text - Preview */}
+                  <div className="p-3 bg-muted/30 rounded-lg mb-3">
+                    <p className="text-right text-base leading-loose font-arabic line-clamp-2" dir="rtl">
+                      {hadith.arabic}
+                    </p>
+                  </div>
+
+                  {/* Bangla Translation - Preview */}
+                  <p className="text-sm text-foreground/80 line-clamp-3">
+                    {hadith.bangla}
+                  </p>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+
+        {filteredHadiths.length === 0 && !loadingMore && (
+          <Card className="border-dashed">
+            <CardContent className="pt-6 text-center text-muted-foreground">
+              <p>কোনো হাদিস খুঁজে পাওয়া যায়নি</p>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Infinite scroll trigger - smooth progressive loading */}
+        {!searchQuery && hasMore && (
+          <div ref={loadMoreRef} className="py-4 text-center">
+            {loadingMore && (
+              <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                <div className="h-2 w-2 bg-primary rounded-full animate-bounce"></div>
+                <span className="text-sm ml-2">আরও হাদিস লোড হচ্ছে...</span>
+              </div>
+            )}
+          </div>
+        )}
+      </main>
+
+      <BottomNav />
+    </div>
+  );
+};
+
+export default HadithChapter;

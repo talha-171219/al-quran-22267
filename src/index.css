@@ -1,0 +1,106 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Islamic theme - Emerald green & gold accents */
+    --background: 35 20% 97%;
+    --foreground: 160 30% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 160 30% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 160 30% 15%;
+
+    --primary: 160 84% 35%;
+    --primary-foreground: 0 0% 100%;
+    
+    --primary-light: 160 70% 45%;
+    --primary-glow: 160 75% 60%;
+
+    --secondary: 45 90% 55%;
+    --secondary-foreground: 160 30% 15%;
+
+    --muted: 35 25% 92%;
+    --muted-foreground: 160 15% 45%;
+
+    --accent: 45 85% 60%;
+    --accent-foreground: 160 30% 15%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 160 20% 88%;
+    --input: 160 20% 88%;
+    --ring: 160 84% 35%;
+
+    --radius: 0.75rem;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(160 84% 35%), hsl(160 75% 45%));
+    --gradient-gold: linear-gradient(135deg, hsl(45 90% 55%), hsl(40 85% 65%));
+    --gradient-hero: linear-gradient(180deg, hsl(160 84% 35%) 0%, hsl(160 70% 45%) 100%);
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 8px hsl(160 84% 35% / 0.08);
+    --shadow-md: 0 4px 16px hsl(160 84% 35% / 0.12);
+    --shadow-lg: 0 8px 24px hsl(160 84% 35% / 0.16);
+  }
+
+  .dark {
+    --background: 160 35% 8%;
+    --foreground: 35 20% 95%;
+
+    --card: 160 30% 12%;
+    --card-foreground: 35 20% 95%;
+
+    --popover: 160 30% 12%;
+    --popover-foreground: 35 20% 95%;
+
+    --primary: 160 75% 45%;
+    --primary-foreground: 0 0% 100%;
+    
+    --primary-light: 160 70% 55%;
+    --primary-glow: 160 65% 65%;
+
+    --secondary: 45 85% 60%;
+    --secondary-foreground: 160 30% 10%;
+
+    --muted: 160 25% 18%;
+    --muted-foreground: 35 15% 65%;
+
+    --accent: 45 80% 55%;
+    --accent-foreground: 160 30% 10%;
+
+    --destructive: 0 62.8% 50.6%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 160 25% 20%;
+    --input: 160 25% 20%;
+    --ring: 160 75% 45%;
+    
+    --gradient-primary: linear-gradient(135deg, hsl(160 75% 35%), hsl(160 70% 45%));
+    --gradient-gold: linear-gradient(135deg, hsl(45 85% 50%), hsl(40 80% 60%));
+    --gradient-hero: linear-gradient(180deg, hsl(160 75% 35%) 0%, hsl(160 65% 45%) 100%);
+    
+    --shadow-sm: 0 2px 8px hsl(0 0% 0% / 0.3);
+    --shadow-md: 0 4px 16px hsl(0 0% 0% / 0.4);
+    --shadow-lg: 0 8px 24px hsl(0 0% 0% / 0.5);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
