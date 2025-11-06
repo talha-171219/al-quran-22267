@@ -68,16 +68,38 @@ const HadithBook = () => {
       <div className="min-h-screen bg-background pb-20">
         <TopBar title={collection?.nameBangla || "হাদিস"} showBack />
         <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
-          {/* Header skeleton */}
-          <Card className="animate-pulse bg-gradient-primary">
-            <div className="h-32"></div>
+          {/* Loading header with progress animation */}
+          <Card className="overflow-hidden">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-8 w-8 bg-primary/20 rounded-lg animate-pulse"></div>
+                <div className="flex-1">
+                  <div className="h-5 bg-muted rounded w-2/3 mb-2"></div>
+                  <div className="h-4 bg-muted/60 rounded w-1/2"></div>
+                </div>
+              </div>
+              <div className="h-1 bg-muted rounded-full overflow-hidden">
+                <div className="h-full bg-primary animate-[progress_1s_ease-in-out_infinite]" style={{width: '40%'}}></div>
+              </div>
+            </CardContent>
           </Card>
-          {/* Chapter skeletons */}
-          {[1, 2, 3, 4, 5].map((i) => (
-            <Card key={i} className="animate-pulse">
-              <div className="p-6">
+          
+          {/* Fast skeleton cards with staggered animation */}
+          <div className="text-center py-2">
+            <div className="inline-flex items-center gap-2 text-muted-foreground">
+              <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+              <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+              <div className="h-2 w-2 bg-primary rounded-full animate-bounce"></div>
+              <span className="text-sm ml-2">অধ্যায় লোড হচ্ছে...</span>
+            </div>
+          </div>
+          
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="animate-pulse" style={{animationDelay: `${i * 0.1}s`}}>
+              <div className="p-6 border-l-4 border-l-muted">
                 <div className="h-5 bg-muted rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-muted/70 rounded w-1/2"></div>
+                <div className="h-4 bg-muted/70 rounded w-1/2 mb-3"></div>
+                <div className="h-6 bg-muted/50 rounded-full w-24"></div>
               </div>
             </Card>
           ))}

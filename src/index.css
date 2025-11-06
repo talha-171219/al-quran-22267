@@ -104,3 +104,37 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .bg-gradient-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(160 75% 45%) 100%);
+  }
+  
+  .font-arabic {
+    font-family: 'Amiri Quran', 'Traditional Arabic', serif;
+  }
+}
+
+/* Custom animations for smooth loading */
+@keyframes progress {
+  0%, 100% {
+    transform: translateX(-100%);
+  }
+  50% {
+    transform: translateX(100%);
+  }
+}
+
+/* Smooth scroll behavior */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better animation performance */
+.animate-bounce,
+.animate-pulse {
+  will-change: transform;
+}
+
+/* Arabic font import */
+@import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&display=swap');

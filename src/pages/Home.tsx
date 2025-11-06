@@ -10,62 +10,69 @@ import {
   Sparkles,
   BookText,
   Compass,
+  MessageCircle,
 } from "lucide-react";
 
 const features = [
   {
     icon: BookOpen,
     title: "Al-Quran",
-    description: "Read complete Quran with translation",
+    description: "সম্পূর্ণ কুরআন অনুবাদসহ পড়ুন",
     path: "/quran",
     gradient: true,
   },
   {
     icon: Mic,
     title: "Audio Recitation",
-    description: "Listen to beautiful Quran recitations",
+    description: "সুন্দর তিলাওয়াত শুনুন",
     path: "/audio",
+  },
+  {
+    icon: MessageCircle,
+    title: "Islamic AI",
+    description: "ইসলামিক প্রশ্ন জিজ্ঞাসা করুন",
+    path: "/ai",
   },
   {
     icon: Heart,
     title: "Duas",
-    description: "Daily supplications and prayers",
+    description: "দৈনন্দিন দুআ ও আমল",
     path: "/dua",
   },
   {
     icon: BookText,
     title: "Hadith",
-    description: "Authentic hadith collections",
+    description: "সহীহ হাদিস সংকলন",
     path: "/hadith",
   },
   {
     icon: Calculator,
     title: "Zakat Calculator",
-    description: "Calculate your Zakat obligations",
+    description: "যাকাত হিসাব করুন",
     path: "/zakat",
   },
   {
     icon: Calendar,
     title: "Islamic Calendar",
-    description: "Hijri dates and important events",
+    description: "হিজরী তারিখ ও গুরুত্বপূর্ণ দিবস",
     path: "/calendar",
   },
   {
     icon: Sparkles,
     title: "Digital Tasbih",
-    description: "Count your dhikr and remembrance",
+    description: "যিকির গণনা করুন",
     path: "/tasbih",
   },
   {
     icon: BookText,
     title: "Tafsir",
-    description: "Quran commentary and explanations",
+    description: "কুরআনের ব্যাখ্যা",
     path: "/tafsir",
   },
   {
     icon: Compass,
     title: "Qibla Finder",
-    description: "Find Qibla direction anywhere",
+    description: "কিবলার দিক খুঁজুন",
     path: "/qibla",
   },
 ];

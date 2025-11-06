@@ -133,18 +133,28 @@ const HadithChapter = () => {
       )
     : hadiths;
 
-  // Chapter name in Bangla
+  // সম্পূর্ণ বাংলা অধ্যায়ের নাম
   const chapterNamesBangla: Record<string, string> = {
-    '1': 'ওহী শুরু হওয়ার বর্ণনা',
-    '2': 'ঈমান',
-    '3': 'ইলম',
-    '4': 'ওযু',
-    '5': 'গোসল',
-    '6': 'হায়েয',
-    '7': 'তায়াম্মুম',
-    '8': 'সালাত',
-    '9': 'সালাতের ওয়াক্তসমূহ',
-    '10': 'আযান',
+    '1': 'ওহী শুরু হওয়ার বর্ণনা', '2': 'ঈমান', '3': 'ইলম (জ্ঞান)', '4': 'ওযু', '5': 'গোসল',
+    '6': 'হায়েয', '7': 'তায়াম্মুম', '8': 'সালাত', '9': 'সালাতের ওয়াক্তসমূহ', '10': 'আযান',
+    '11': 'জুমআ', '12': 'ভয়ের সালাত', '13': 'ঈদ', '14': 'বিতর', '15': 'ইস্তিসকা',
+    '16': 'কুসুফ (সূর্যগ্রহণ)', '17': 'সিজদা', '18': 'সালাত সংক্ষিপ্তকরণ', '19': 'তাহাজ্জুদ', '20': 'সালাতে দুআ',
+    '21': 'আমল বিল লাইল', '22': 'মসজিদসমূহের ফযিলত', '23': 'জানাযা', '24': 'যাকাত', '25': 'হজ্জ',
+    '26': 'উমরা', '27': 'মুহসার', '28': 'জাযায়ে সায়েদ', '29': 'ফাযায়েলে মদীনা', '30': 'সাওম (রোযা)',
+    '31': 'তারাবীহ', '32': 'ইতিকাফ', '33': 'বিক্রয়', '34': 'সালাম', '35': 'শুফআ',
+    '36': 'ইজারা', '37': 'হাওয়ালা', '38': 'কাফালত', '39': 'ওয়াকালা', '40': 'কৃষিকাজ',
+    '41': 'পানি সেচ', '42': 'ঋণ', '43': 'হাওয়ালা ও মাজলুম', '44': 'সন্ধি', '45': 'শর্ত',
+    '46': 'অসিয়ত', '47': 'জিহাদ', '48': 'সৃষ্টির সূচনা', '49': 'আম্বিয়া কিরাম', '50': 'মানাকিব',
+    '51': 'ফাযায়েলে সাহাবা', '52': 'মদীনার ফযিলত', '53': 'মাগাজি', '54': 'মানাকিবুল আনসার', '55': 'খুমুস',
+    '56': 'জিযিয়া', '57': 'সৃষ্টির সূচনা', '58': 'নবীদের ঘটনা', '59': 'ফাযায়েল', '60': 'সাহাবিদের ফযিলত',
+    '61': 'খায়বার যুদ্ধ', '62': 'মাগাজি বিবরণ', '63': 'মানাকিবুল আনসার', '64': 'খুমুস বন্টন', '65': 'জিযিয়া ও যুদ্ধবিরতি',
+    '66': 'কুরআনের ফযিলত', '67': 'বিবাহ', '68': 'তালাক', '69': 'ভরণপোষণ', '70': 'খাদ্য',
+    '71': 'আকিকা', '72': 'জবেহ ও শিকার', '73': 'কুরবানী', '74': 'পানীয়', '75': 'রোগী',
+    '76': 'চিকিৎসা', '77': 'পোশাক', '78': 'আদব', '79': 'অনুমতি চাওয়া', '80': 'দুআ',
+    '81': 'রিকাক', '82': 'কদর', '83': 'শপথ ও মানত', '84': 'কসম', '85': 'উত্তরাধিকার',
+    '86': 'হুদুদ', '87': 'দিয়াত', '88': 'মুহারিবীন', '89': 'ফিতান', '90': 'আহকাম',
+    '91': 'ইচ্ছাপূরণ', '92': 'কসম ও মানত', '93': 'তাওহীদ', '94': 'ইতিসাম', '95': 'কদর ও তাকদীর',
+    '96': 'ইলম (জ্ঞানের ফযিলত)', '97': 'তাওহীদের মূলনীতি',
   };
   
   const chapterName = chapterNamesBangla[chapterId || ''] || hadiths[0]?.chapterEnglish || "অধ্যায়";
@@ -186,15 +196,35 @@ const HadithChapter = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <TopBar title="হাদিস" showBack />
+        <TopBar title="হাদিস লোড হচ্ছে..." showBack />
         <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
-          {/* Skeleton loading */}
+          {/* Fast loading progress */}
+          <div className="text-center py-4">
+            <div className="inline-flex items-center gap-2 text-muted-foreground mb-4">
+              <div className="h-3 w-3 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+              <div className="h-3 w-3 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+              <div className="h-3 w-3 bg-primary rounded-full animate-bounce"></div>
+            </div>
+            <p className="text-sm text-muted-foreground">হাদিস লোড হচ্ছে...</p>
+          </div>
+          
+          {/* Improved skeleton cards */}
           {[1, 2, 3].map((i) => (
-            <Card key={i} className="animate-pulse">
+            <Card key={i} className="animate-pulse border-l-4 border-l-muted" style={{animationDelay: `${i * 0.1}s`}}>
               <CardContent className="pt-6">
-                <div className="h-4 bg-muted rounded w-24 mb-3"></div>
-                <div className="h-16 bg-muted/50 rounded mb-3"></div>
-                <div className="h-12 bg-muted/30 rounded"></div>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="h-6 bg-muted rounded-full w-28"></div>
+                  <div className="h-8 w-8 bg-muted/50 rounded"></div>
+                </div>
+                <div className="p-3 bg-muted/20 rounded-lg mb-3">
+                  <div className="h-4 bg-muted rounded w-full mb-2"></div>
+                  <div className="h-4 bg-muted rounded w-4/5"></div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-3 bg-muted/60 rounded w-full"></div>
+                  <div className="h-3 bg-muted/60 rounded w-5/6"></div>
+                  <div className="h-3 bg-muted/60 rounded w-3/4"></div>
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -282,17 +312,36 @@ const HadithChapter = () => {
           </Card>
         )}
 
-        {/* Infinite scroll trigger - smooth progressive loading */}
+        {/* Smooth infinite scroll loading - appears as user scrolls */}
         {!searchQuery && hasMore && (
-          <div ref={loadMoreRef} className="py-4 text-center">
-            {loadingMore && (
-              <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                <div className="h-2 w-2 bg-primary rounded-full animate-bounce"></div>
-                <span className="text-sm ml-2">আরও হাদিস লোড হচ্ছে...</span>
+          <div ref={loadMoreRef} className="py-6">
+            {loadingMore ? (
+              <div className="space-y-3">
+                <div className="flex items-center justify-center gap-2 text-muted-foreground mb-3">
+                  <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="h-2 w-2 bg-primary rounded-full animate-bounce"></div>
+                  <span className="text-sm ml-2">আরও হাদিস লোড হচ্ছে...</span>
+                </div>
+                {/* Mini skeleton while loading more */}
+                <Card className="animate-pulse border-l-4 border-l-muted/50">
+                  <CardContent className="pt-6">
+                    <div className="h-4 bg-muted/50 rounded w-24 mb-2"></div>
+                    <div className="h-12 bg-muted/30 rounded"></div>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : (
+              <div className="text-center text-muted-foreground text-sm">
+                স্ক্রল করুন আরও দেখতে...
               </div>
             )}
+          </div>
+        )}
+        
+        {!searchQuery && !hasMore && hadiths.length > 0 && (
+          <div className="py-6 text-center">
+            <p className="text-muted-foreground text-sm">সব হাদিস লোড হয়ে গেছে</p>
           </div>
         )}
       </main>
