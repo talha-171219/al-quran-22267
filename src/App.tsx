@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { useEffect } from "react";
 import { surahPreloader } from "@/utils/surahPreloader";
+import { hadithPreloader } from "@/utils/hadithPreloader";
 import Home from "./pages/Home";
 import Surahs from "./pages/Surahs";
 import SurahDetail from "./pages/SurahDetail";
@@ -32,8 +33,9 @@ const queryClient = new QueryClient();
 
 const App = () => {
   useEffect(() => {
-    // Start preloading all surahs in the background for offline reading
+    // Start preloading all surahs and hadiths in the background for offline reading
     surahPreloader.checkAndResume();
+    hadithPreloader.checkAndResume();
   }, []);
 
   return (

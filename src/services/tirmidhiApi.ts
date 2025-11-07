@@ -1,4 +1,5 @@
 // API service for fetching Jami` at-Tirmidhi data from fawazahmed0/hadith-api
+import { hadithCache, CachedHadith } from "@/utils/hadithCache";
 
 interface ApiHadith {
   hadithnumber: number;
@@ -204,7 +205,33 @@ export async function getChapterHadiths(
   page: number = 1,
   pageSize: number = 10
 ): Promise<{ hadiths: CombinedHadith[]; totalCount: number; hasMore: boolean }> {
-  // Use cached chapter data if available for instant response
+  // Try cache first
+  const cachedHadiths = await hadithCache.getChapter('tirmidhi', chapterNumber);
+  
+  if (cachedHadiths && cachedHadiths.length > 0) {
+    const totalCount = cachedHadiths.length;
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+    const hasMore = endIndex < totalCount;
+    const paginatedHadiths = cachedHadiths.slice(startIndex, endIndex);
+    
+    const combined = paginatedHadiths.map(h => ({
+      id: h.id,
+      hadithNumber: h.hadithNumber,
+      arabic: h.arabic,
+      bangla: h.bangla,
+      bookNumber: h.bookNumber,
+      bookName: h.bookName,
+      chapterNumber: h.chapterNumber,
+      chapterArabic: h.chapterArabic,
+      chapterEnglish: h.chapterEnglish,
+      reference: h.reference,
+    }));
+    
+    return { hadiths: combined, totalCount, hasMore };
+  }
+
+  // Fallback to API
   let chapterHadiths: ArabicHadith[];
   
   if (chapterCache.has(chapterNumber)) {
@@ -217,7 +244,6 @@ export async function getChapterHadiths(
     chapterCache.set(chapterNumber, chapterHadiths);
   }
   
-  // Get Bangla data (will use cache if available)
   const banglaData = await fetchBanglaHadiths();
   
   const totalCount = chapterHadiths.length;
