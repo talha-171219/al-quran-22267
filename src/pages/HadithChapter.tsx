@@ -57,7 +57,7 @@ const HadithChapter = () => {
     loadBookmarks();
   }, [userId]);
 
-  // Load hadiths for chapter with prefetching (initial load: 10 for fast render)
+  // Load hadiths for chapter with prefetching (initial load: 20 for fast render)
   useEffect(() => {
     if (!bookId || !chapterId) return;
     if (bookId !== "bukhari" && bookId !== "tirmidhi") return;
@@ -65,9 +65,9 @@ const HadithChapter = () => {
     const loadHadiths = async () => {
       setLoading(true);
       try {
-        // Load first 10 hadiths for instant display
+        // Load first 20 hadiths for instant display
         const getChapterHadiths = bookId === "bukhari" ? getBukhariChapterHadiths : getTirmidhiChapterHadiths;
-        const { hadiths: fetchedHadiths, hasMore: more } = await getChapterHadiths(chapterId, 1, 10);
+        const { hadiths: fetchedHadiths, hasMore: more } = await getChapterHadiths(chapterId, 1, 20);
         setHadiths(fetchedHadiths);
         setHasMore(more);
         setPage(1);
@@ -75,7 +75,7 @@ const HadithChapter = () => {
         // Prefetch next page in background for smooth scroll
         if (more) {
           const prefetchNextPage = bookId === "bukhari" ? prefetchBukhariNextPage : prefetchTirmidhiNextPage;
-          prefetchNextPage(chapterId, 1, 10);
+          prefetchNextPage(chapterId, 2, 20);
         }
       } catch (error) {
         toast.error("হাদিস লোড করতে সমস্যা হয়েছে");
@@ -87,7 +87,7 @@ const HadithChapter = () => {
     loadHadiths();
   }, [bookId, chapterId]);
 
-  // Infinite scroll - load 10 hadiths at a time for smooth experience
+  // Infinite scroll - load 20 hadiths at a time for smooth experience
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore || searchQuery || !bookId || !chapterId) return;
     if (bookId !== "bukhari" && bookId !== "tirmidhi") return;
@@ -96,7 +96,7 @@ const HadithChapter = () => {
     try {
       const nextPage = page + 1;
       const getChapterHadiths = bookId === "bukhari" ? getBukhariChapterHadiths : getTirmidhiChapterHadiths;
-      const { hadiths: moreHadiths, hasMore: more } = await getChapterHadiths(chapterId, nextPage, 10);
+      const { hadiths: moreHadiths, hasMore: more } = await getChapterHadiths(chapterId, nextPage, 20);
       setHadiths((prev) => [...prev, ...moreHadiths]);
       setPage(nextPage);
       setHasMore(more);
@@ -104,9 +104,10 @@ const HadithChapter = () => {
       // Prefetch next page in background
       if (more) {
         const prefetchNextPage = bookId === "bukhari" ? prefetchBukhariNextPage : prefetchTirmidhiNextPage;
-        prefetchNextPage(chapterId, nextPage, 10);
+        prefetchNextPage(chapterId, nextPage + 1, 20);
       }
     } catch (error) {
+      console.error("Load more error:", error);
       toast.error("আরো হাদিস লোড করতে সমস্যা হয়েছে");
     } finally {
       setLoadingMore(false);
@@ -119,11 +120,12 @@ const HadithChapter = () => {
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          console.log("Loading more hadiths...");
           loadMore();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.5, rootMargin: "100px" }
     );
 
     if (loadMoreRef.current) {
@@ -327,26 +329,33 @@ const HadithChapter = () => {
 
         {/* Smooth infinite scroll loading - appears as user scrolls */}
         {!searchQuery && hasMore && (
-          <div ref={loadMoreRef} className="py-6">
+          <div ref={loadMoreRef} className="py-8 min-h-[200px]">
             {loadingMore ? (
-              <div className="space-y-3">
-                <div className="flex items-center justify-center gap-2 text-muted-foreground mb-3">
-                  <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                  <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                  <div className="h-2 w-2 bg-primary rounded-full animate-bounce"></div>
-                  <span className="text-sm ml-2">আরও হাদিস লোড হচ্ছে...</span>
+              <div className="space-y-4">
+                <div className="flex items-center justify-center gap-2 text-primary mb-4">
+                  <div className="h-3 w-3 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="h-3 w-3 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="h-3 w-3 bg-primary rounded-full animate-bounce"></div>
+                  <span className="text-sm ml-2 font-medium">আরও হাদিস লোড হচ্ছে...</span>
                 </div>
                 {/* Mini skeleton while loading more */}
-                <Card className="animate-pulse border-l-4 border-l-muted/50">
-                  <CardContent className="pt-6">
-                    <div className="h-4 bg-muted/50 rounded w-24 mb-2"></div>
-                    <div className="h-12 bg-muted/30 rounded"></div>
-                  </CardContent>
-                </Card>
+                {[1, 2].map((i) => (
+                  <Card key={i} className="animate-pulse border-l-4 border-l-muted/50">
+                    <CardContent className="pt-6">
+                      <div className="h-4 bg-muted/50 rounded w-24 mb-3"></div>
+                      <div className="h-16 bg-muted/30 rounded mb-2"></div>
+                      <div className="h-3 bg-muted/40 rounded w-full mb-1"></div>
+                      <div className="h-3 bg-muted/40 rounded w-3/4"></div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             ) : (
-              <div className="text-center text-muted-foreground text-sm">
-                স্ক্রল করুন আরও দেখতে...
+              <div className="text-center py-4">
+                <div className="inline-flex items-center gap-2 px-6 py-3 bg-primary/10 rounded-full text-primary font-medium">
+                  <div className="h-2 w-2 bg-primary rounded-full animate-pulse"></div>
+                  <span className="text-sm">নিচে স্ক্রল করুন আরও হাদিস দেখতে</span>
+                </div>
               </div>
             )}
           </div>
