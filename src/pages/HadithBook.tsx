@@ -62,42 +62,73 @@ const HadithBook = () => {
     return (
       <div className="min-h-screen bg-background pb-20">
         <TopBar title={collection?.nameBangla || "হাদিস"} showBack />
-        <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
-          {/* Loading header with progress animation */}
-          <Card className="overflow-hidden">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="h-8 w-8 bg-primary/20 rounded-lg animate-pulse"></div>
-                <div className="flex-1">
-                  <div className="h-5 bg-muted rounded w-2/3 mb-2"></div>
-                  <div className="h-4 bg-muted/60 rounded w-1/2"></div>
+        <div className="max-w-lg mx-auto px-4 py-8 space-y-6">
+          {/* Main Loading Card */}
+          <Card className="overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+            <CardContent className="pt-8 pb-6">
+              <div className="flex flex-col items-center gap-4 mb-6">
+                <div className="relative">
+                  <div className="h-20 w-20 bg-primary/20 rounded-2xl animate-pulse"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <BookOpen className="h-10 w-10 text-primary animate-pulse" />
+                  </div>
+                </div>
+                <div className="text-center space-y-2">
+                  <div className="h-6 bg-muted rounded-lg w-48 mx-auto animate-pulse"></div>
+                  <div className="h-4 bg-muted/70 rounded w-32 mx-auto animate-pulse"></div>
                 </div>
               </div>
-              <div className="h-1 bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-primary animate-[progress_1s_ease-in-out_infinite]" style={{width: '40%'}}></div>
+              
+              {/* Animated Progress Bar */}
+              <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+                <div 
+                  className="absolute h-full bg-gradient-to-r from-primary via-primary/80 to-primary rounded-full animate-[shimmer_2s_ease-in-out_infinite]"
+                  style={{
+                    width: '50%',
+                    backgroundSize: '200% 100%'
+                  }}
+                ></div>
+              </div>
+              
+              {/* Loading Text */}
+              <div className="text-center mt-4">
+                <div className="inline-flex items-center gap-2">
+                  <div className="flex gap-1">
+                    <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                    <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                    <div className="h-2 w-2 bg-primary rounded-full animate-bounce"></div>
+                  </div>
+                  <span className="text-base font-medium text-primary">অধ্যায়গুলো লোড হচ্ছে</span>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">অনুগ্রহ করে অপেক্ষা করুন...</p>
               </div>
             </CardContent>
           </Card>
           
-          {/* Fast skeleton cards with staggered animation */}
-          <div className="text-center py-2">
-            <div className="inline-flex items-center gap-2 text-muted-foreground">
-              <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-              <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-              <div className="h-2 w-2 bg-primary rounded-full animate-bounce"></div>
-              <span className="text-sm ml-2">অধ্যায় লোড হচ্ছে...</span>
-            </div>
+          {/* Skeleton Chapter Cards */}
+          <div className="space-y-3">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card 
+                key={i} 
+                className="animate-pulse border-l-4 border-l-primary/30"
+                style={{
+                  animationDelay: `${i * 0.1}s`,
+                  animationDuration: '1.5s'
+                }}
+              >
+                <div className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 space-y-3">
+                      <div className="h-5 bg-muted rounded-lg w-3/4"></div>
+                      <div className="h-4 bg-muted/70 rounded w-1/2"></div>
+                      <div className="h-7 bg-muted/50 rounded-full w-28"></div>
+                    </div>
+                    <div className="h-5 w-5 bg-muted rounded ml-4"></div>
+                  </div>
+                </div>
+              </Card>
+            ))}
           </div>
-          
-          {[1, 2, 3, 4].map((i) => (
-            <Card key={i} className="animate-pulse" style={{animationDelay: `${i * 0.1}s`}}>
-              <div className="p-6 border-l-4 border-l-muted">
-                <div className="h-5 bg-muted rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-muted/70 rounded w-1/2 mb-3"></div>
-                <div className="h-6 bg-muted/50 rounded-full w-24"></div>
-              </div>
-            </Card>
-          ))}
         </div>
         <BottomNav />
       </div>

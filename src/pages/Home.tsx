@@ -28,12 +28,6 @@ const features = [
     path: "/audio",
   },
   {
-    icon: MessageCircle,
-    title: "Islamic AI",
-    description: "ইসলামিক প্রশ্ন জিজ্ঞাসা করুন",
-    path: "/ai",
-  },
-  {
     icon: Heart,
     title: "Duas",
     description: "দৈনন্দিন দুআ ও আমল",
@@ -46,10 +40,22 @@ const features = [
     path: "/hadith",
   },
   {
+    icon: BookText,
+    title: "Tafsir",
+    description: "কুরআনের ব্যাখ্যা",
+    path: "/tafsir",
+  },
+  {
     icon: Calculator,
     title: "Zakat Calculator",
     description: "যাকাত হিসাব করুন",
     path: "/zakat",
+  },
+  {
+    icon: MessageCircle,
+    title: "Islamic AI",
+    description: "ইসলামিক প্রশ্ন জিজ্ঞাসা করুন",
+    path: "/ai",
   },
   {
     icon: Calendar,
@@ -62,12 +68,6 @@ const features = [
     title: "Digital Tasbih",
     description: "যিকির গণনা করুন",
     path: "/tasbih",
-  },
-  {
-    icon: BookText,
-    title: "Tafsir",
-    description: "কুরআনের ব্যাখ্যা",
-    path: "/tafsir",
   },
   {
     icon: Compass,
