@@ -111,7 +111,7 @@ async function fetchArabicHadiths(): Promise<ArabicHadith[]> {
     for (let section = 1; section <= 97; section++) {
       try {
         const response = await fetch(
-          `https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-bukhari/sections/${section}.json`
+          `https://raw.githubusercontent.com/fawazahmed0/hadith-api/1/editions/ara-bukhari/sections/${section}.json`
         );
         const data: ApiSection = await response.json();
         
@@ -162,7 +162,7 @@ async function fetchBanglaHadiths(): Promise<BanglaData> {
     for (let section = 1; section <= 97; section++) {
       try {
         const response = await fetch(
-          `https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ben-bukhari/sections/${section}.json`
+          `https://raw.githubusercontent.com/fawazahmed0/hadith-api/1/editions/ben-bukhari/sections/${section}.json`
         );
         const data: ApiSection = await response.json();
         

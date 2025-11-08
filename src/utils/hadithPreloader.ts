@@ -116,8 +116,8 @@ class HadithPreloader {
       const benEdition = bookId === 'bukhari' ? 'bukhari' : 'tirmizi';
 
       const [arabicRes, bengaliRes] = await Promise.all([
-        fetch(`https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ara-${edition}/sections/${chapterNumber}.json`),
-        fetch(`https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions/ben-${benEdition}/sections/${chapterNumber}.json`)
+        fetch(`https://raw.githubusercontent.com/fawazahmed0/hadith-api/1/editions/ara-${edition}/sections/${chapterNumber}.json`),
+        fetch(`https://raw.githubusercontent.com/fawazahmed0/hadith-api/1/editions/ben-${benEdition}/sections/${chapterNumber}.json`)
       ]);
 
       if (!arabicRes.ok || !bengaliRes.ok) {
