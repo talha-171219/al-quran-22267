@@ -120,12 +120,12 @@ const HadithChapter = () => {
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !loadingMore) {
-          console.log("Loading more hadiths...");
+        if (entries[0].isIntersecting && hasMore && !loadingMore && hadiths.length > 0) {
+          console.log("Loading more hadiths...", { page, totalHadiths: hadiths.length });
           loadMore();
         }
       },
-      { threshold: 0.5, rootMargin: "100px" }
+      { threshold: 0.1, rootMargin: "200px" }
     );
 
     if (loadMoreRef.current) {
@@ -137,7 +137,7 @@ const HadithChapter = () => {
         observerRef.current.disconnect();
       }
     };
-  }, [loadMore]);
+  }, [loadMore, hasMore, loadingMore, hadiths.length, page]);
 
   // Filter hadiths by search
   const filteredHadiths = searchQuery.trim()
