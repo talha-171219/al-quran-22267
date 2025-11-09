@@ -3,6 +3,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { BookOpen, ChevronRight } from "lucide-react";
 import { hadithCollections } from "@/data/hadiths";
 import { getBukhariChapters } from "@/services/bukhariApi";
@@ -63,58 +64,44 @@ const HadithBook = () => {
       <div className="min-h-screen bg-background pb-20">
         <TopBar title={collection?.nameBangla || "হাদিস"} showBack />
         <div className="max-w-lg mx-auto px-4 py-8 space-y-6">
-          {/* Main Loading Card */}
-          <Card className="overflow-hidden border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+          {/* Main Loading Card with Percentage */}
+          <Card className="overflow-hidden border-2 border-primary/20">
             <CardContent className="pt-8 pb-6">
-              <div className="flex flex-col items-center gap-4 mb-6">
+              <div className="flex flex-col items-center gap-6">
                 <div className="relative">
-                  <div className="h-20 w-20 bg-primary/20 rounded-2xl animate-pulse"></div>
-                  <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="h-20 w-20 bg-primary/20 rounded-2xl flex items-center justify-center">
                     <BookOpen className="h-10 w-10 text-primary animate-pulse" />
                   </div>
                 </div>
-                <div className="text-center space-y-2">
-                  <div className="h-6 bg-muted rounded-lg w-48 mx-auto animate-pulse"></div>
-                  <div className="h-4 bg-muted/70 rounded w-32 mx-auto animate-pulse"></div>
+                
+                <div className="text-center space-y-2 w-full">
+                  <p className="text-base font-semibold text-primary">হাদিস গ্রন্থ লোড হচ্ছে...</p>
+                  <p className="text-sm text-muted-foreground">অনুগ্রহ করে অপেক্ষা করুন</p>
                 </div>
-              </div>
-              
-              {/* Animated Progress Bar */}
-              <div className="relative h-2 bg-muted rounded-full overflow-hidden">
-                <div 
-                  className="absolute h-full bg-gradient-to-r from-primary via-primary/80 to-primary rounded-full animate-[shimmer_2s_ease-in-out_infinite]"
-                  style={{
-                    width: '50%',
-                    backgroundSize: '200% 100%'
-                  }}
-                ></div>
-              </div>
-              
-              {/* Loading Text */}
-              <div className="text-center mt-4">
-                <div className="inline-flex items-center gap-2">
-                  <div className="flex gap-1">
-                    <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                    <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                    <div className="h-2 w-2 bg-primary rounded-full animate-bounce"></div>
-                  </div>
-                  <span className="text-base font-medium text-primary">অধ্যায়গুলো লোড হচ্ছে</span>
+                
+                {/* Progress with Percentage */}
+                <div className="w-full space-y-2">
+                  <Progress value={60} className="h-2" />
+                  <p className="text-center text-lg font-bold text-primary">৬০%</p>
                 </div>
-                <p className="text-sm text-muted-foreground mt-2">অনুগ্রহ করে অপেক্ষা করুন...</p>
+                
+                {/* Loading dots */}
+                <div className="flex gap-1">
+                  <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="h-2 w-2 bg-primary rounded-full animate-bounce"></div>
+                </div>
               </div>
             </CardContent>
           </Card>
           
           {/* Skeleton Chapter Cards */}
           <div className="space-y-3">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
+            {[1, 2, 3, 4].map((i) => (
               <Card 
                 key={i} 
                 className="animate-pulse border-l-4 border-l-primary/30"
-                style={{
-                  animationDelay: `${i * 0.1}s`,
-                  animationDuration: '1.5s'
-                }}
+                style={{animationDelay: `${i * 0.1}s`}}
               >
                 <div className="p-6">
                   <div className="flex items-center justify-between">

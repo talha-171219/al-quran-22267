@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
 import { Search, X, Bookmark } from "lucide-react";
 import { 
   getChapterHadiths as getBukhariChapterHadiths, 
@@ -228,26 +229,30 @@ const HadithChapter = () => {
     return (
       <div className="min-h-screen bg-background pb-20">
         <TopBar title={chapterName || "হাদিস লোড হচ্ছে..."} showBack />
-        <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
-          {/* Enhanced loading progress with percentage */}
-          <div className="text-center py-8">
-            <div className="inline-flex flex-col items-center gap-4">
-              <div className="relative">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="h-4 w-4 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                  <div className="h-4 w-4 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                  <div className="h-4 w-4 bg-primary rounded-full animate-bounce"></div>
+        <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
+          {/* Loading progress with percentage */}
+          <Card className="border-2 border-primary/20">
+            <CardContent className="pt-8 pb-6">
+              <div className="text-center space-y-4">
+                <div className="flex items-center justify-center gap-2">
+                  <div className="h-3 w-3 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="h-3 w-3 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="h-3 w-3 bg-primary rounded-full animate-bounce"></div>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-base font-semibold text-primary">হাদিস লোড হচ্ছে...</p>
+                  <p className="text-sm text-muted-foreground">অনুগ্রহ করে অপেক্ষা করুন</p>
+                </div>
+                <div className="space-y-2">
+                  <Progress value={45} className="h-2" />
+                  <p className="text-lg font-bold text-primary">৪৫%</p>
                 </div>
               </div>
-              <div className="space-y-2">
-                <p className="text-sm text-primary font-semibold">হাদিস লোড হচ্ছে...</p>
-                <p className="text-xs text-muted-foreground">অনুগ্রহ করে অপেক্ষা করুন</p>
-              </div>
-            </div>
-          </div>
+            </CardContent>
+          </Card>
           
-          {/* Improved skeleton cards with staggered animation */}
-          {[1, 2, 3, 4].map((i) => (
+          {/* Skeleton cards */}
+          {[1, 2, 3].map((i) => (
             <Card key={i} className="animate-pulse border-l-4 border-l-primary/30" style={{animationDelay: `${i * 0.1}s`}}>
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between mb-3">
@@ -256,13 +261,11 @@ const HadithChapter = () => {
                 </div>
                 <div className="p-4 bg-muted/20 rounded-lg mb-3">
                   <div className="h-4 bg-muted rounded w-full mb-2"></div>
-                  <div className="h-4 bg-muted rounded w-4/5 mb-2"></div>
-                  <div className="h-4 bg-muted rounded w-3/5"></div>
+                  <div className="h-4 bg-muted rounded w-4/5"></div>
                 </div>
                 <div className="space-y-2">
                   <div className="h-3 bg-muted/60 rounded w-full"></div>
                   <div className="h-3 bg-muted/60 rounded w-5/6"></div>
-                  <div className="h-3 bg-muted/60 rounded w-4/5"></div>
                   <div className="h-3 bg-muted/60 rounded w-2/3"></div>
                 </div>
               </CardContent>

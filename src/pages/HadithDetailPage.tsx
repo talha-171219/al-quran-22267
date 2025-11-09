@@ -5,6 +5,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Bookmark, Share2, Copy, Loader2 } from "lucide-react";
 import { getHadithByNumber as getBukhariHadithByNumber } from "@/services/bukhariApi";
 import { getHadithByNumber as getTirmidhiHadithByNumber } from "@/services/tirmidhiApi";
@@ -133,38 +134,27 @@ const HadithDetailPage = () => {
     return (
       <div className="min-h-screen bg-background pb-20">
         <TopBar title="হাদিস বিস্তারিত" showBack />
-        <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
-          {/* Loading progress indicator */}
-          <div className="text-center py-8">
-            <div className="inline-flex flex-col items-center gap-4">
-              <div className="flex items-center gap-2">
-                <div className="h-3 w-3 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                <div className="h-3 w-3 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                <div className="h-3 w-3 bg-primary rounded-full animate-bounce"></div>
-              </div>
-              <p className="text-sm text-muted-foreground font-medium">হাদিস বিস্তারিত লোড হচ্ছে...</p>
-            </div>
-          </div>
-          
-          {/* Header skeleton */}
-          <Card className="animate-pulse border-l-4 border-l-primary/50">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-2 flex-1">
-                  <div className="h-5 bg-muted rounded w-3/4"></div>
-                  <div className="h-4 bg-muted/70 rounded w-1/2"></div>
+        <div className="max-w-lg mx-auto px-4 py-6 space-y-6">
+          {/* Loading progress with percentage */}
+          <Card className="border-2 border-primary/20">
+            <CardContent className="pt-8 pb-6">
+              <div className="text-center space-y-4">
+                <div className="flex items-center justify-center gap-2">
+                  <div className="h-3 w-3 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="h-3 w-3 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="h-3 w-3 bg-primary rounded-full animate-bounce"></div>
                 </div>
-                <div className="h-8 w-24 bg-muted rounded-full"></div>
+                <div className="space-y-2">
+                  <p className="text-base font-semibold text-primary">হাদিস বিস্তারিত লোড হচ্ছে...</p>
+                  <p className="text-sm text-muted-foreground">অনুগ্রহ করে অপেক্ষা করুন</p>
+                </div>
+                <div className="space-y-2">
+                  <Progress value={75} className="h-2" />
+                  <p className="text-lg font-bold text-primary">৭৫%</p>
+                </div>
               </div>
             </CardContent>
           </Card>
-          
-          {/* Action buttons skeleton */}
-          <div className="flex gap-2">
-            <div className="flex-1 h-10 bg-muted rounded-lg animate-pulse"></div>
-            <div className="h-10 w-20 bg-muted rounded-lg animate-pulse"></div>
-            <div className="h-10 w-20 bg-muted rounded-lg animate-pulse"></div>
-          </div>
           
           {/* Content skeleton */}
           <Card className="animate-pulse">
