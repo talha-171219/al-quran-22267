@@ -227,34 +227,43 @@ const HadithChapter = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background pb-20">
-        <TopBar title="হাদিস লোড হচ্ছে..." showBack />
+        <TopBar title={chapterName || "হাদিস লোড হচ্ছে..."} showBack />
         <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
-          {/* Fast loading progress */}
-          <div className="text-center py-4">
-            <div className="inline-flex items-center gap-2 text-muted-foreground mb-4">
-              <div className="h-3 w-3 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-              <div className="h-3 w-3 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-              <div className="h-3 w-3 bg-primary rounded-full animate-bounce"></div>
+          {/* Enhanced loading progress with percentage */}
+          <div className="text-center py-8">
+            <div className="inline-flex flex-col items-center gap-4">
+              <div className="relative">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="h-4 w-4 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="h-4 w-4 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="h-4 w-4 bg-primary rounded-full animate-bounce"></div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <p className="text-sm text-primary font-semibold">হাদিস লোড হচ্ছে...</p>
+                <p className="text-xs text-muted-foreground">অনুগ্রহ করে অপেক্ষা করুন</p>
+              </div>
             </div>
-            <p className="text-sm text-muted-foreground">হাদিস লোড হচ্ছে...</p>
           </div>
           
-          {/* Improved skeleton cards */}
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="animate-pulse border-l-4 border-l-muted" style={{animationDelay: `${i * 0.1}s`}}>
+          {/* Improved skeleton cards with staggered animation */}
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i} className="animate-pulse border-l-4 border-l-primary/30" style={{animationDelay: `${i * 0.1}s`}}>
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between mb-3">
-                  <div className="h-6 bg-muted rounded-full w-28"></div>
-                  <div className="h-8 w-8 bg-muted/50 rounded"></div>
+                  <div className="h-6 bg-muted rounded-full w-32"></div>
+                  <div className="h-8 w-8 bg-muted/50 rounded-lg"></div>
                 </div>
-                <div className="p-3 bg-muted/20 rounded-lg mb-3">
+                <div className="p-4 bg-muted/20 rounded-lg mb-3">
                   <div className="h-4 bg-muted rounded w-full mb-2"></div>
-                  <div className="h-4 bg-muted rounded w-4/5"></div>
+                  <div className="h-4 bg-muted rounded w-4/5 mb-2"></div>
+                  <div className="h-4 bg-muted rounded w-3/5"></div>
                 </div>
                 <div className="space-y-2">
                   <div className="h-3 bg-muted/60 rounded w-full"></div>
                   <div className="h-3 bg-muted/60 rounded w-5/6"></div>
-                  <div className="h-3 bg-muted/60 rounded w-3/4"></div>
+                  <div className="h-3 bg-muted/60 rounded w-4/5"></div>
+                  <div className="h-3 bg-muted/60 rounded w-2/3"></div>
                 </div>
               </CardContent>
             </Card>
