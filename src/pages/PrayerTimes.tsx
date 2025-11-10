@@ -491,6 +491,8 @@ const PrayerTimes = () => {
                   const granted = await requestNotificationPermission();
                   if (granted) {
                     toast.success("নোটিফিকেশন চালু হয়েছে");
+                    // Force a re-check of permissions
+                    window.location.reload();
                   } else {
                     toast.error("নোটিফিকেশন অনুমতি প্রয়োজন");
                   }

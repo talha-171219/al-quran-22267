@@ -11,6 +11,7 @@ import {
   Download,
   Info,
   Share2,
+  Bell,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
@@ -20,12 +21,18 @@ const Settings = () => {
   const { theme, setTheme } = useTheme();
   const [autoPlay, setAutoPlay] = useState(false);
   const [offlineMode, setOfflineMode] = useState(false);
+  const [notificationEnabled, setNotificationEnabled] = useState(false);
 
   useEffect(() => {
     const savedAutoPlay = localStorage.getItem('autoPlay') === 'true';
     const savedOffline = localStorage.getItem('offlineMode') === 'true';
     setAutoPlay(savedAutoPlay);
     setOfflineMode(savedOffline);
+    
+    // Check notification permission
+    if ('Notification' in window) {
+      setNotificationEnabled(Notification.permission === 'granted');
+    }
   }, []);
 
   const handleThemeToggle = (checked: boolean) => {
@@ -43,6 +50,42 @@ const Settings = () => {
     setOfflineMode(checked);
     localStorage.setItem('offlineMode', String(checked));
     toast.success(checked ? 'অফলাইন মোড চালু' : 'অফলাইন মোড বন্ধ');
+  };
+
+  const handleNotificationToggle = async (checked: boolean) => {
+    if (!('Notification' in window)) {
+      toast.error('আপনার ব্রাউজার নোটিফিকেশন সাপোর্ট করে না');
+      return;
+    }
+
+    if (checked) {
+      try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+          setNotificationEnabled(true);
+          toast.success('নোটিফিকেশন চালু হয়েছে');
+          
+          // Request persistent notification permission for background
+          if ('serviceWorker' in navigator && 'permissions' in navigator) {
+            try {
+              const result = await navigator.permissions.query({ name: 'notifications' as PermissionName });
+              console.log('Notification permission:', result.state);
+            } catch (err) {
+              console.log('Permission query not supported');
+            }
+          }
+        } else {
+          toast.error('নোটিফিকেশন অনুমতি দেওয়া হয়নি');
+          setNotificationEnabled(false);
+        }
+      } catch (error) {
+        console.error('Notification permission error:', error);
+        toast.error('নোটিফিকেশন চালু করতে ব্যর্থ');
+        setNotificationEnabled(false);
+      }
+    } else {
+      toast.info('নোটিফিকেশন বন্ধ করতে ব্রাউজার সেটিংস ব্যবহার করুন');
+    }
   };
 
   const handleShare = async () => {
@@ -106,6 +149,25 @@ const Settings = () => {
                 <p className="text-xs text-muted-foreground">বাংলা</p>
               </div>
             </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Bell className="h-5 w-5 text-primary" />
+              <div>
+                <Label htmlFor="notification-mode" className="font-medium cursor-pointer">
+                  নোটিফিকেশন
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  {notificationEnabled ? 'চালু আছে' : 'বন্ধ আছে'}
+                </p>
+              </div>
+            </div>
+            <Switch 
+              id="notification-mode" 
+              checked={notificationEnabled}
+              onCheckedChange={handleNotificationToggle}
+            />
           </div>
 
           <div className="flex items-center justify-between">
