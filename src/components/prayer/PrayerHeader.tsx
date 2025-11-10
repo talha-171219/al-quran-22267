@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { MapPin, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
+import { convertTo12Hour } from "@/utils/timeUtils";
+import { toBengaliNumerals } from "@/utils/bengaliUtils";
 
 interface PrayerTimes {
   Fajr: string;
@@ -201,9 +203,12 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
               <h3 className="text-2xl font-bold">{prayerNamesBn[currentPrayer.name]}</h3>
               <div className="h-3 w-3 bg-white rounded-full animate-pulse"></div>
             </div>
-            <p className="text-4xl font-bold mt-1">{currentPrayer.time.replace(/:\d{2}$/, "")} <span className="text-xl">PM</span></p>
+            <div className="flex items-baseline gap-2 mt-1">
+              <p className="text-4xl font-bold">{convertTo12Hour(currentPrayer.time).time}</p>
+              <span className="text-xl font-semibold opacity-90">{convertTo12Hour(currentPrayer.time).periodBn}</span>
+            </div>
             <p className="text-sm opacity-90 mt-1">
-              পরবর্তী নামাজ {countdown} এ
+              পরবর্তী নামাজ {toBengaliNumerals(countdown)} এ
             </p>
           </div>
 
