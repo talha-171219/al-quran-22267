@@ -90,6 +90,7 @@ async function fetchArabicHadiths(): Promise<ArabicHadith[]> {
   
   const promise = (async () => {
     const allHadiths: ArabicHadith[] = [];
+    const seenHadithNumbers = new Set<string>(); // Track unique hadith numbers
     
     // Muslim has 56 sections
     for (let section = 1; section <= 56; section++) {
@@ -102,19 +103,24 @@ async function fetchArabicHadiths(): Promise<ArabicHadith[]> {
         const sectionName = data.metadata.section[section] || `Section ${section}`;
         
         data.hadiths.forEach((h) => {
-          allHadiths.push({
-            hadithNumber: h.hadithnumber.toString(),
-            arabicText: h.text,
-            book: {
-              bookNumber: '1',
-              bookName: 'Sahih Muslim'
-            },
-            chapter: {
-              chapterNumber: section.toString(),
-              chapterArabic: '',
-              chapterEnglish: sectionName
-            }
-          });
+          const hadithNum = h.hadithnumber.toString();
+          // Only add if we haven't seen this hadith number before
+          if (!seenHadithNumbers.has(hadithNum)) {
+            seenHadithNumbers.add(hadithNum);
+            allHadiths.push({
+              hadithNumber: hadithNum,
+              arabicText: h.text,
+              book: {
+                bookNumber: '1',
+                bookName: 'Sahih Muslim'
+              },
+              chapter: {
+                chapterNumber: section.toString(),
+                chapterArabic: '',
+                chapterEnglish: sectionName
+              }
+            });
+          }
         });
       } catch (error) {
         console.error(`Failed to fetch Muslim section ${section}:`, error);
@@ -151,7 +157,11 @@ async function fetchBanglaHadiths(): Promise<Record<string, string>> {
         const data: ApiSection = await response.json();
         
         data.hadiths.forEach((h) => {
-          allBangla[h.hadithnumber.toString()] = h.text;
+          const hadithNum = h.hadithnumber.toString();
+          // Only store the first occurrence of each hadith translation
+          if (!allBangla[hadithNum]) {
+            allBangla[hadithNum] = h.text;
+          }
         });
       } catch (error) {
         console.error(`Failed to fetch Bengali Muslim section ${section}:`, error);
