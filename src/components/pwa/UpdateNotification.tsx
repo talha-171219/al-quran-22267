@@ -1,14 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 
 export const UpdateNotification = () => {
   const [showUpdate, setShowUpdate] = useState(false);
@@ -16,14 +9,23 @@ export const UpdateNotification = () => {
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      // Check for updates every 5 minutes
+      let refreshing = false;
+
+      // Check for updates every 2 minutes
       const interval = setInterval(() => {
         navigator.serviceWorker.getRegistration().then((reg) => {
           if (reg) {
             reg.update();
           }
         });
-      }, 5 * 60 * 1000);
+      }, 2 * 60 * 1000);
+
+      // Check immediately on mount
+      navigator.serviceWorker.getRegistration().then((reg) => {
+        if (reg) {
+          reg.update();
+        }
+      });
 
       // Listen for new service worker waiting
       navigator.serviceWorker.ready.then((reg) => {
@@ -31,6 +33,10 @@ export const UpdateNotification = () => {
         
         if (reg.waiting) {
           setShowUpdate(true);
+          toast.info("নতুন আপডেট উপলব্ধ!", {
+            description: "অ্যাপ আপডেট করতে ক্লিক করুন",
+            duration: 10000,
+          });
         }
 
         // Listen for updates
@@ -40,6 +46,10 @@ export const UpdateNotification = () => {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                 setShowUpdate(true);
+                toast.info("নতুন আপডেট উপলব্ধ!", {
+                  description: "অ্যাপ আপডেট করতে ক্লিক করুন",
+                  duration: 10000,
+                });
               }
             });
           }
@@ -48,7 +58,10 @@ export const UpdateNotification = () => {
 
       // Listen for controller change (new service worker took over)
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        window.location.reload();
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
       });
 
       return () => clearInterval(interval);
@@ -56,42 +69,56 @@ export const UpdateNotification = () => {
   }, []);
 
   const handleUpdate = () => {
+    setShowUpdate(false);
     if (registration?.waiting) {
       // Tell the service worker to skip waiting
       registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      toast.loading("আপডেট হচ্ছে...", {
+        description: "অনুগ্রহ করে অপেক্ষা করুন",
+      });
     }
   };
 
+  if (!showUpdate) return null;
+
   return (
-    <AlertDialog open={showUpdate} onOpenChange={setShowUpdate}>
-      <AlertDialogContent className="max-w-md">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
-            <RefreshCw className="h-5 w-5 text-primary" />
-            নতুন আপডেট উপলব্ধ
-          </AlertDialogTitle>
-          <AlertDialogDescription className="text-base">
-            আপনার অ্যাপের একটি নতুন সংস্করণ উপলব্ধ। সর্বশেষ বৈশিষ্ট্য এবং উন্নতি পেতে এখনই আপডেট করুন।
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter className="flex-col sm:flex-col gap-2">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
+      <div className="bg-background border border-border rounded-lg shadow-2xl max-w-md w-full p-6 space-y-4 animate-in slide-in-from-bottom-4 duration-300">
+        <div className="flex items-start gap-4">
+          <div className="flex-shrink-0">
+            <div className="relative">
+              <Sparkles className="h-10 w-10 text-primary animate-pulse" />
+              <RefreshCw className="h-5 w-5 text-primary absolute -bottom-1 -right-1 animate-spin" style={{ animationDuration: '3s' }} />
+            </div>
+          </div>
+          <div className="flex-1 space-y-2">
+            <h3 className="text-xl font-bold text-foreground">
+              আপডেট উপলব্ধ
+            </h3>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              অ্যাপের একটি নতুন সংস্করণ প্রস্তুত। সর্বশেষ বৈশিষ্ট্য এবং উন্নতি পেতে এখনই আপডেট করুন।
+            </p>
+          </div>
+        </div>
+        
+        <div className="flex flex-col gap-2 pt-2">
           <Button 
             onClick={handleUpdate} 
-            className="w-full"
+            className="w-full group"
             size="lg"
           >
-            <RefreshCw className="mr-2 h-4 w-4" />
+            <RefreshCw className="mr-2 h-4 w-4 group-hover:rotate-180 transition-transform duration-500" />
             এখনই আপডেট করুন
           </Button>
           <Button 
-            variant="outline" 
+            variant="ghost" 
             onClick={() => setShowUpdate(false)}
             className="w-full"
           >
             পরে আপডেট করব
           </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+        </div>
+      </div>
+    </div>
   );
 };

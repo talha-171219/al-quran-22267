@@ -18,7 +18,7 @@ const features = [
     icon: BookOpen,
     title: "Al-Quran",
     description: "সম্পূর্ণ কুরআন অনুবাদসহ পড়ুন",
-    path: "/quran",
+    path: "/surahs",
     gradient: true,
   },
   {
