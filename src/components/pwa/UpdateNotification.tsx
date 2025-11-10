@@ -82,46 +82,57 @@ export const UpdateNotification = () => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-300">
       <div className="bg-background border border-border rounded-lg shadow-2xl max-w-md w-full p-6 space-y-4 animate-in slide-in-from-bottom-4 duration-300">
-        <div className="flex items-start gap-4">
-          <div className="flex-shrink-0">
+        {isUpdating ? (
+          // Updating progress view
+          <div className="flex flex-col items-center justify-center space-y-6 py-4">
             <div className="relative">
-              <Sparkles className="h-10 w-10 text-primary animate-pulse" />
-              <RefreshCw className="h-5 w-5 text-primary absolute -bottom-1 -right-1 animate-spin" style={{ animationDuration: '3s' }} />
+              <div className="w-20 h-20 rounded-full border-4 border-primary/20 animate-pulse" />
+              <RefreshCw className="h-20 w-20 text-primary absolute inset-0 animate-spin" style={{ animationDuration: '1s' }} />
+            </div>
+            <div className="text-center space-y-2">
+              <h3 className="text-xl font-bold text-foreground animate-pulse">
+                আপডেট হচ্ছে...
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                অনুগ্রহ করে অপেক্ষা করুন
+              </p>
+            </div>
+            <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
+              <div className="h-full bg-primary animate-[slide-in-right_1.5s_ease-in-out_infinite]" />
             </div>
           </div>
-          <div className="flex-1 space-y-2">
-            <h3 className="text-xl font-bold text-foreground">
-              আপডেট উপলব্ধ
-            </h3>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              অ্যাপের একটি নতুন সংস্করণ প্রস্তুত। সর্বশেষ বৈশিষ্ট্য এবং উন্নতি পেতে এখনই আপডেট করুন।
-            </p>
-          </div>
-        </div>
-        
-        <div className="flex flex-col gap-2 pt-2">
-          <Button 
-            onClick={handleUpdate} 
-            className="w-full group relative overflow-hidden"
-            size="lg"
-            disabled={isUpdating}
-          >
-            {isUpdating ? (
-              <>
-                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                আপডেট হচ্ছে...
-              </>
-            ) : (
-              <>
+        ) : (
+          // Update available view
+          <>
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0">
+                <div className="relative">
+                  <Sparkles className="h-10 w-10 text-primary animate-pulse" />
+                  <RefreshCw className="h-5 w-5 text-primary absolute -bottom-1 -right-1 animate-spin" style={{ animationDuration: '3s' }} />
+                </div>
+              </div>
+              <div className="flex-1 space-y-2">
+                <h3 className="text-xl font-bold text-foreground">
+                  আপডেট উপলব্ধ
+                </h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  অ্যাপের একটি নতুন সংস্করণ প্রস্তুত। সর্বশেষ বৈশিষ্ট্য এবং উন্নতি পেতে এখনই আপডেট করুন।
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex flex-col gap-2 pt-2">
+              <Button 
+                onClick={handleUpdate} 
+                className="w-full group"
+                size="lg"
+              >
                 <RefreshCw className="mr-2 h-4 w-4 group-hover:rotate-180 transition-transform duration-500" />
                 এখনই আপডেট করুন
-              </>
-            )}
-            {isUpdating && (
-              <div className="absolute inset-0 bg-primary/20 animate-pulse" />
-            )}
-          </Button>
-        </div>
+              </Button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
