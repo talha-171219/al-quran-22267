@@ -2,7 +2,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, Plus, Settings } from "lucide-react";
+import { RotateCcw, Plus, BarChart3, Award, CheckCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   Select,
@@ -11,6 +11,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TasbihStats } from "@/components/tasbih/TasbihStats";
+import { TasbihMilestones } from "@/components/tasbih/TasbihMilestones";
+import {
+  saveSession,
+  calculateTasbihStats,
+  getMonthlyTasbihStats,
+  loadMilestones,
+  getNewlyAchievedMilestones,
+  getTodayTasbihRecord,
+} from "@/utils/tasbihTracker";
+import { useToast } from "@/hooks/use-toast";
 
 const dhikrTypes = [
   { value: "subhanallah", arabic: "سُبْحَانَ اللهِ", bangla: "সুবহানাল্লাহ", meaning: "আল্লাহ পবিত্র" },
@@ -21,34 +33,64 @@ const dhikrTypes = [
 ];
 
 const Tasbih = () => {
+  const { toast } = useToast();
   const [count, setCount] = useState(0);
   const [target, setTarget] = useState(33);
   const [dhikrType, setDhikrType] = useState("subhanallah");
-  const [totalCount, setTotalCount] = useState(0);
+  const [stats, setStats] = useState(calculateTasbihStats());
+  const [monthlyStats, setMonthlyStats] = useState(getMonthlyTasbihStats());
+  const [milestones, setMilestones] = useState(loadMilestones());
+  const [todayTotal, setTodayTotal] = useState(0);
   
   const currentDhikr = dhikrTypes.find(d => d.value === dhikrType) || dhikrTypes[0];
 
   useEffect(() => {
-    const saved = localStorage.getItem('tasbih_count');
-    if (saved) setTotalCount(parseInt(saved));
+    // Load today's total
+    const todayRecord = getTodayTasbihRecord();
+    setTodayTotal(todayRecord.totalCount);
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('tasbih_count', totalCount.toString());
-  }, [totalCount]);
+  const refreshStats = () => {
+    setStats(calculateTasbihStats());
+    setMonthlyStats(getMonthlyTasbihStats());
+    setMilestones(loadMilestones());
+    const todayRecord = getTodayTasbihRecord();
+    setTodayTotal(todayRecord.totalCount);
+  };
 
   const increment = () => {
-    if (count >= target) {
-      // Completed target - celebrate!
+    const newCount = count + 1;
+    setCount(newCount);
+    setTodayTotal(prev => prev + 1);
+    
+    if (newCount >= target) {
+      // Completed target - save session and celebrate!
+      saveSession(dhikrType, newCount, target, true);
+      
       if (navigator.vibrate) {
-        navigator.vibrate([100, 50, 100]);
+        navigator.vibrate([100, 50, 100, 50, 100]);
       }
+      
+      // Check for new milestones
+      const newMilestones = getNewlyAchievedMilestones();
+      if (newMilestones.length > 0) {
+        toast({
+          title: "🏆 নতুন অর্জন!",
+          description: newMilestones[0].titleBn + " - " + newMilestones[0].descriptionBn,
+          duration: 5000,
+        });
+      } else {
+        toast({
+          title: "✓ লক্ষ্য সম্পন্ন!",
+          description: `${target} ${currentDhikr.bangla} সম্পন্ন হয়েছে`,
+          duration: 3000,
+        });
+      }
+      
+      refreshStats();
       setCount(0);
       return;
     }
-    
-    setCount(prev => prev + 1);
-    setTotalCount(prev => prev + 1);
     
     // Haptic feedback on mobile
     if (navigator.vibrate) {
@@ -57,7 +99,24 @@ const Tasbih = () => {
   };
 
   const reset = () => {
+    if (count > 0) {
+      // Save incomplete session
+      saveSession(dhikrType, count, target, false);
+      refreshStats();
+    }
     setCount(0);
+  };
+
+  const completeSession = () => {
+    if (count > 0) {
+      saveSession(dhikrType, count, target, count >= target);
+      toast({
+        title: "সেশন সংরক্ষিত",
+        description: `${count} ${currentDhikr.bangla} সংরক্ষণ করা হয়েছে`,
+      });
+      refreshStats();
+      setCount(0);
+    }
   };
 
   return (
@@ -65,6 +124,23 @@ const Tasbih = () => {
       <TopBar title="ডিজিটাল তাসবীহ" showBack />
 
       <main className="max-w-lg mx-auto px-4 py-6 space-y-6">
+        <Tabs defaultValue="counter" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="counter">
+              <Plus className="h-4 w-4 mr-1" />
+              গণনা
+            </TabsTrigger>
+            <TabsTrigger value="stats">
+              <BarChart3 className="h-4 w-4 mr-1" />
+              পরিসংখ্যান
+            </TabsTrigger>
+            <TabsTrigger value="achievements">
+              <Award className="h-4 w-4 mr-1" />
+              অর্জন
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="counter" className="space-y-6 mt-6">
         {/* Settings Card */}
         <Card className="p-4">
           <div className="space-y-4">
@@ -103,9 +179,15 @@ const Tasbih = () => {
               </Select>
             </div>
 
-            <div className="p-3 bg-muted rounded-lg text-center">
-              <p className="text-xs text-muted-foreground mb-1">মোট গণনা</p>
-              <p className="text-2xl font-bold text-primary">{totalCount}</p>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 bg-muted rounded-lg text-center">
+                <p className="text-xs text-muted-foreground mb-1">আজকের মোট</p>
+                <p className="text-2xl font-bold text-primary">{todayTotal}</p>
+              </div>
+              <div className="p-3 bg-gradient-to-br from-primary/10 to-primary/5 rounded-lg text-center border border-primary/20">
+                <p className="text-xs text-muted-foreground mb-1">সর্বমোট</p>
+                <p className="text-2xl font-bold text-primary">{stats.totalCount}</p>
+              </div>
             </div>
           </div>
         </Card>
@@ -191,17 +273,40 @@ const Tasbih = () => {
               </button>
             </div>
 
-            <Button
-              variant="outline"
-              onClick={reset}
-              className="gap-2 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50"
-              size="lg"
-            >
-              <RotateCcw className="h-4 w-4" />
-              রিসেট করুন
-            </Button>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={reset}
+                className="flex-1 gap-2 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50"
+                size="lg"
+              >
+                <RotateCcw className="h-4 w-4" />
+                রিসেট
+              </Button>
+              {count > 0 && count < target && (
+                <Button
+                  variant="default"
+                  onClick={completeSession}
+                  className="flex-1 gap-2"
+                  size="lg"
+                >
+                  <CheckCircle className="h-4 w-4" />
+                  সংরক্ষণ করুন
+                </Button>
+              )}
+            </div>
           </div>
         </Card>
+          </TabsContent>
+
+          <TabsContent value="stats" className="space-y-4 mt-6">
+            <TasbihStats stats={stats} monthlyStats={monthlyStats} />
+          </TabsContent>
+
+          <TabsContent value="achievements" className="space-y-4 mt-6">
+            <TasbihMilestones milestones={milestones} />
+          </TabsContent>
+        </Tabs>
       </main>
 
       <BottomNav />
