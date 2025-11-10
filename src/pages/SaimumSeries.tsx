@@ -242,6 +242,86 @@ const SaimumSeries = () => {
       author: "আবুল আসাদ",
       pdfUrl: "/books/saimum/saimum-28.pdf",
       description: "সাইমুম সিরিজ - ২৮"
+    },
+    {
+      id: 29,
+      title: "Pamirer Artonad",
+      titleBn: "পামিরের আর্তনাদ",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-29.pdf",
+      description: "সাইমুম সিরিজ - ২৯"
+    },
+    {
+      id: 30,
+      title: "Pattanir Sabuj Aronye",
+      titleBn: "পাত্তানীর সবুজ অরণ্যে",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-30.pdf",
+      description: "সাইমুম সিরিজ - ৩০"
+    },
+    {
+      id: 31,
+      title: "Notun Gulag",
+      titleBn: "নতুন গুলাগ",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-31.pdf",
+      description: "সাইমুম সিরিজ - ৩১"
+    },
+    {
+      id: 32,
+      title: "Dhongso Taworer Niche",
+      titleBn: "ধ্বংস টাওয়ারের নীচে",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-32.pdf",
+      description: "সাইমুম সিরিজ - ৩২"
+    },
+    {
+      id: 33,
+      title: "Dhongso Tower",
+      titleBn: "ধ্বংস টাওয়ার",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-33.pdf",
+      description: "সাইমুম সিরিজ - ৩৩"
+    },
+    {
+      id: 34,
+      title: "Daniyuber Deshe",
+      titleBn: "দানিয়ুবের দেশে",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-34.pdf",
+      description: "সাইমুম সিরিজ - ৩৪"
+    },
+    {
+      id: 35,
+      title: "Tiyenshaner Opare",
+      titleBn: "তিয়েনশানের ওপারে",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-35.pdf",
+      description: "সাইমুম সিরিজ - ৩৫"
+    },
+    {
+      id: 36,
+      title: "Dubo Pahar",
+      titleBn: "ডুবো পাহাড়",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-36.pdf",
+      description: "সাইমুম সিরিজ - ৩৬"
+    },
+    {
+      id: 37,
+      title: "Death Valley",
+      titleBn: "ডেথ ভ্যালি",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-37.pdf",
+      description: "সাইমুম সিরিজ - ৩৭"
+    },
+    {
+      id: 38,
+      title: "Rajchokro",
+      titleBn: "রাজচক্র",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-38.pdf",
+      description: "সাইমুম সিরিজ - ৩৮"
     }
   ];
 
