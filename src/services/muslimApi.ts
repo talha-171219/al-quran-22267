@@ -212,11 +212,16 @@ export async function getChapterHadiths(
   const cachedHadiths = await hadithCache.getChapter('muslim', chapterNumber);
   
   if (cachedHadiths && cachedHadiths.length > 0) {
-    const totalCount = cachedHadiths.length;
+    // Sort by hadith number to ensure sequential display
+    const sortedHadiths = [...cachedHadiths].sort((a, b) => 
+      parseInt(a.hadithNumber) - parseInt(b.hadithNumber)
+    );
+    
+    const totalCount = sortedHadiths.length;
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
     const hasMore = endIndex < totalCount;
-    const paginatedHadiths = cachedHadiths.slice(startIndex, endIndex);
+    const paginatedHadiths = sortedHadiths.slice(startIndex, endIndex);
     
     const combined = paginatedHadiths.map((h, index) => ({
       id: h.id,
@@ -247,6 +252,9 @@ export async function getChapterHadiths(
     );
     chapterCache.set(chapterNumber, chapterHadiths);
   }
+  
+  // Sort hadiths by their global hadith number for sequential display
+  chapterHadiths.sort((a, b) => parseInt(a.hadithNumber) - parseInt(b.hadithNumber));
   
   const banglaData = await fetchBanglaHadiths();
   
