@@ -12,16 +12,16 @@ export const UpdateNotification = () => {
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
-      let refreshing = false;
+      let userInitiatedUpdate = false;
 
-      // Check for updates every 2 minutes
+      // Check for updates every 5 minutes (not too aggressive)
       const interval = setInterval(() => {
         navigator.serviceWorker.getRegistration().then((reg) => {
           if (reg) {
             reg.update();
           }
         });
-      }, 2 * 60 * 1000);
+      }, 5 * 60 * 1000);
 
       // Check immediately on mount
       navigator.serviceWorker.getRegistration().then((reg) => {
@@ -34,50 +34,84 @@ export const UpdateNotification = () => {
       navigator.serviceWorker.ready.then((reg) => {
         setRegistration(reg);
         
+        // Check if there's already a waiting worker
         if (reg.waiting) {
+          console.log('Update available - waiting worker found');
           setShowUpdate(true);
         }
 
         // Listen for updates
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
+          console.log('Update found - new worker installing');
+          
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
+              console.log('Worker state changed:', newWorker.state);
+              
+              // Only show update notification if there's already an active controller
+              // This prevents showing notification on first install
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('Update ready - showing notification');
                 setShowUpdate(true);
+                setRegistration(reg);
+                toast.info('নতুন আপডেট উপলব্ধ!');
               }
             });
           }
         });
       });
 
-      // Listen for controller change (new service worker took over)
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (!refreshing) {
-          refreshing = true;
+      // Listen for controller change ONLY after user initiates update
+      const handleControllerChange = () => {
+        if (userInitiatedUpdate) {
+          console.log('Controller changed - reloading');
           window.location.reload();
         }
-      });
+      };
 
-      return () => clearInterval(interval);
+      navigator.serviceWorker.addEventListener('controllerchange', handleControllerChange);
+
+      // Store the setter for user-initiated updates
+      (window as any).__userInitiatedUpdate = () => {
+        userInitiatedUpdate = true;
+      };
+
+      return () => {
+        clearInterval(interval);
+        navigator.serviceWorker.removeEventListener('controllerchange', handleControllerChange);
+      };
     }
   }, []);
 
   const handleUpdate = async () => {
     setIsUpdating(true);
+    console.log('User initiated update');
+    
+    // Mark that this update is user-initiated
+    if ((window as any).__userInitiatedUpdate) {
+      (window as any).__userInitiatedUpdate();
+    }
     
     // Clear all caches before updating
-    await versionManager.clearAllCaches();
+    try {
+      await versionManager.clearAllCaches();
+      console.log('Caches cleared');
+    } catch (error) {
+      console.error('Error clearing caches:', error);
+    }
     
     // Show success message
     setUpdateSuccess(true);
     
-    // Wait a moment to show success, then reload
+    // Wait a moment to show success, then activate new service worker
     setTimeout(() => {
       if (registration?.waiting) {
-        // Tell the service worker to skip waiting
+        console.log('Telling service worker to skip waiting');
+        // Tell the service worker to skip waiting and take control
         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
       } else {
+        console.log('No waiting worker, reloading directly');
         // If no waiting worker, just reload
         window.location.reload();
       }
