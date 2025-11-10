@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { convertTo12Hour, formatCurrentTime12Hour } from "@/utils/timeUtils";
 import { toBengaliNumerals } from "@/utils/bengaliUtils";
 import { getLocationName } from "@/utils/prayerNotifications";
+import { buildPrayerTimesApiUrl } from "@/utils/prayerSettings";
 import mosqueImage from "@/assets/mosque-sunset.jpg";
 
 interface PrayerTimes {
@@ -62,14 +63,28 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
     };
 
     initializePrayerTimes();
+
+    // Listen for prayer times updates from midnight refresh
+    const handlePrayerTimesUpdate = (event: CustomEvent) => {
+      const { timings, hijriDate, location } = event.detail;
+      setPrayerTimes(timings);
+      setHijriDate(hijriDate);
+      setLocation(location);
+    };
+
+    window.addEventListener('prayerTimesUpdated', handlePrayerTimesUpdate as EventListener);
+
+    return () => {
+      window.removeEventListener('prayerTimesUpdated', handlePrayerTimesUpdate as EventListener);
+    };
   }, []);
 
   const fetchPrayerTimes = async (lat: number, lon: number) => {
     try {
-      const date = new Date();
-      const response = await fetch(
-        `https://api.aladhan.com/v1/timings/${Math.floor(date.getTime() / 1000)}?latitude=${lat}&longitude=${lon}&method=2`
-      );
+      const timestamp = Math.floor(Date.now() / 1000);
+      const apiUrl = buildPrayerTimesApiUrl(lat, lon, timestamp);
+      
+      const response = await fetch(apiUrl);
       const data = await response.json();
 
       if (data.code === 200) {
@@ -99,8 +114,10 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
 
   const fetchPrayerTimesByCity = async (city: string, country: string) => {
     try {
+      const date = new Date();
+      const dateStr = date.toISOString().split('T')[0];
       const response = await fetch(
-        `https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=2`
+        `https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=1&tune=+1,0,+2,0,+2,+1,+2&date=${dateStr}`
       );
       const data = await response.json();
 
