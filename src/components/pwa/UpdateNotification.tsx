@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { versionManager } from "@/utils/versionManager";
 
 export const UpdateNotification = () => {
   const [showUpdate, setShowUpdate] = useState(false);
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -60,10 +62,18 @@ export const UpdateNotification = () => {
     }
   }, []);
 
-  const handleUpdate = () => {
+  const handleUpdate = async () => {
+    setIsUpdating(true);
+    
+    // Clear all caches before updating
+    await versionManager.clearAllCaches();
+    
     if (registration?.waiting) {
       // Tell the service worker to skip waiting
       registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+    } else {
+      // If no waiting worker, just reload
+      window.location.reload();
     }
   };
 
@@ -92,11 +102,24 @@ export const UpdateNotification = () => {
         <div className="flex flex-col gap-2 pt-2">
           <Button 
             onClick={handleUpdate} 
-            className="w-full group"
+            className="w-full group relative overflow-hidden"
             size="lg"
+            disabled={isUpdating}
           >
-            <RefreshCw className="mr-2 h-4 w-4 group-hover:rotate-180 transition-transform duration-500" />
-            এখনই আপডেট করুন
+            {isUpdating ? (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                আপডেট হচ্ছে...
+              </>
+            ) : (
+              <>
+                <RefreshCw className="mr-2 h-4 w-4 group-hover:rotate-180 transition-transform duration-500" />
+                এখনই আপডেট করুন
+              </>
+            )}
+            {isUpdating && (
+              <div className="absolute inset-0 bg-primary/20 animate-pulse" />
+            )}
           </Button>
         </div>
       </div>

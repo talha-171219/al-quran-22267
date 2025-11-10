@@ -3,10 +3,12 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { surahPreloader } from "@/utils/surahPreloader";
 import { hadithPreloader } from "@/utils/hadithPreloader";
+import { versionManager } from "@/utils/versionManager";
 import { UpdateNotification } from "@/components/pwa/UpdateNotification";
+import { toast } from "sonner";
 import Home from "./pages/Home";
 import Surahs from "./pages/Surahs";
 import SurahDetail from "./pages/SurahDetail";
@@ -33,14 +35,43 @@ import HadithSearch from "./pages/HadithSearch";
 const queryClient = new QueryClient();
 
 const App = () => {
+  const [isInitializing, setIsInitializing] = useState(true);
+
   useEffect(() => {
-    // Start preloading all surahs and hadiths immediately on app launch
-    const startPreloading = async () => {
-      await surahPreloader.startPreloading();
-      await hadithPreloader.startPreloading();
+    // Check version and clear cache if needed, then start preloading
+    const initializeApp = async () => {
+      try {
+        // Check if cache needs to be cleared due to version change
+        const cacheCleared = await versionManager.checkAndClearCacheIfNeeded();
+        
+        if (cacheCleared) {
+          toast.info("নতুন সংস্করণ শনাক্ত করা হয়েছে", {
+            description: "ডেটা রিফ্রেশ করা হচ্ছে...",
+          });
+        }
+
+        // Start preloading all surahs and hadiths in the background
+        // This runs quietly without blocking the UI
+        const preloadPromises = [
+          surahPreloader.checkAndResume(),
+          hadithPreloader.checkAndResume(),
+        ];
+
+        // Don't await - let it run in background
+        Promise.all(preloadPromises).then(() => {
+          console.log('Background data refresh completed');
+        }).catch(err => {
+          console.error('Background refresh error:', err);
+        });
+
+        setIsInitializing(false);
+      } catch (error) {
+        console.error('App initialization error:', error);
+        setIsInitializing(false);
+      }
     };
     
-    startPreloading();
+    initializeApp();
   }, []);
 
   return (
