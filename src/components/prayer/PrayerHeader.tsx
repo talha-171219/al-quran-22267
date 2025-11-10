@@ -3,8 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 import { MapPin, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
-import { convertTo12Hour } from "@/utils/timeUtils";
+import { convertTo12Hour, formatCurrentTime12Hour } from "@/utils/timeUtils";
 import { toBengaliNumerals } from "@/utils/bengaliUtils";
+import mosqueImage from "@/assets/mosque-sunset.jpg";
 
 interface PrayerTimes {
   Fajr: string;
@@ -26,6 +27,7 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
   const [nextPrayer, setNextPrayer] = useState<{ name: string; time: string } | null>(null);
   const [countdown, setCountdown] = useState("");
   const [location, setLocation] = useState<string>("");
+  const [currentTime, setCurrentTime] = useState("");
 
   const prayerNamesBn: { [key: string]: string } = {
     Fajr: "ফজর",
@@ -153,7 +155,7 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
       setCurrentPrayer({ name: current.name, time: current.time });
       setNextPrayer({ name: next.name, time: next.time });
 
-      // Calculate countdown
+      // Calculate countdown with seconds
       let nextMinutes = next.minutes;
       if (nextMinutes <= currentTime) {
         nextMinutes += 24 * 60; // Next day
@@ -161,14 +163,26 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
       const diff = nextMinutes - currentTime;
       const hours = Math.floor(diff / 60);
       const minutes = diff % 60;
-      setCountdown(`${hours}:${minutes.toString().padStart(2, "0")}`);
+      const seconds = (60 - now.getSeconds()) % 60;
+      setCountdown(`${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`);
     };
 
     updateCurrentPrayer();
-    const interval = setInterval(updateCurrentPrayer, 60000); // Update every minute
+    const interval = setInterval(updateCurrentPrayer, 1000); // Update every second
 
     return () => clearInterval(interval);
   }, [prayerTimes]);
+
+  useEffect(() => {
+    const updateTime = () => {
+      setCurrentTime(formatCurrentTime12Hour(new Date()));
+    };
+    
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    
+    return () => clearInterval(interval);
+  }, []);
 
   if (!prayerTimes || !currentPrayer) return null;
 
@@ -194,7 +208,10 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
             <MapPin className="h-4 w-4" />
             <span>{location}</span>
           </div>
-          <span className="text-xs opacity-75">{hijriDate}</span>
+          <div className="flex flex-col items-end gap-1">
+            <span className="text-sm font-semibold">{currentTime}</span>
+            <span className="text-xs opacity-75">{hijriDate}</span>
+          </div>
         </div>
 
         <div className="flex items-center justify-between">
@@ -214,12 +231,9 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
 
           <div className="flex flex-col items-end justify-center">
             <img
-              src="https://cdn-icons-png.flaticon.com/512/3976/3976625.png"
-              alt="Praying"
-              className="h-20 w-20 object-contain opacity-90"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
+              src={mosqueImage}
+              alt="Mosque"
+              className="h-24 w-24 object-cover rounded-lg opacity-90"
             />
           </div>
         </div>
