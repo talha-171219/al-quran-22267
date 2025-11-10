@@ -13,9 +13,13 @@ interface PDFViewerProps {
   pdfUrl: string;
   title: string;
   onClose: () => void;
+  onPrevious?: () => void;
+  onNext?: () => void;
+  hasPrevious?: boolean;
+  hasNext?: boolean;
 }
 
-export const PDFViewer = ({ pdfUrl, title, onClose }: PDFViewerProps) => {
+export const PDFViewer = ({ pdfUrl, title, onClose, onPrevious, onNext, hasPrevious, hasNext }: PDFViewerProps) => {
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [pageInput, setPageInput] = useState<string>("1");
@@ -134,7 +138,31 @@ export const PDFViewer = ({ pdfUrl, title, onClose }: PDFViewerProps) => {
       </div>
 
       {/* PDF Content */}
-      <div className="flex-1 overflow-auto bg-muted/30 p-4">
+      <div className="flex-1 overflow-auto bg-muted/30 p-4 relative">
+        {/* Previous Book Button */}
+        {hasPrevious && onPrevious && (
+          <Button
+            variant="default"
+            size="icon"
+            className="fixed left-4 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full shadow-lg"
+            onClick={onPrevious}
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </Button>
+        )}
+
+        {/* Next Book Button */}
+        {hasNext && onNext && (
+          <Button
+            variant="default"
+            size="icon"
+            className="fixed right-4 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full shadow-lg"
+            onClick={onNext}
+          >
+            <ChevronRight className="h-6 w-6" />
+          </Button>
+        )}
+
         <div className="max-w-4xl mx-auto">
           {loading && (
             <Card className="p-8 flex flex-col items-center justify-center gap-4">

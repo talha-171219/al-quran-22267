@@ -162,6 +162,86 @@ const SaimumSeries = () => {
       author: "আবুল আসাদ",
       pdfUrl: "/books/saimum/saimum-18.pdf",
       description: "সাইমুম সিরিজ - ১৮"
+    },
+    {
+      id: 19,
+      title: "Zarer Guptodhon",
+      titleBn: "জারের গুপ্তধন",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-19.pdf",
+      description: "সাইমুম সিরিজ - ১৯"
+    },
+    {
+      id: 20,
+      title: "Goyadelkuivare Notun Srot",
+      titleBn: "গোয়াদেলকুইভারে নতুন স্রোত",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-20.pdf",
+      description: "সাইমুম সিরিজ - ২০"
+    },
+    {
+      id: 21,
+      title: "Gulag Theke Twin Tower",
+      titleBn: "গুলাগ থেকে টুইনটাওয়ার",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-21.pdf",
+      description: "সাইমুম সিরিজ - ২১"
+    },
+    {
+      id: 22,
+      title: "Gulag Ovijan",
+      titleBn: "গুলাগ অভিযান",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-22.pdf",
+      description: "সাইমুম সিরিজ - ২২"
+    },
+    {
+      id: 23,
+      title: "Clone Shodojontro",
+      titleBn: "ক্লোন ষড়যন্ত্র",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-23.pdf",
+      description: "সাইমুম সিরিজ - ২৩"
+    },
+    {
+      id: 24,
+      title: "Cross and Crescent",
+      titleBn: "ক্রস এবং ক্রিসেন্ট",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-24.pdf",
+      description: "সাইমুম সিরিজ - ২৪"
+    },
+    {
+      id: 25,
+      title: "Caribianer Dwipdeshey",
+      titleBn: "ক্যারিবিয়ানের দ্বীপদেশে",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-25.pdf",
+      description: "সাইমুম সিরিজ - ২৫"
+    },
+    {
+      id: 26,
+      title: "Cordovar Osru",
+      titleBn: "কর্ডোভার অশ্রু",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-26.pdf",
+      description: "সাইমুম সিরিজ - ২৬"
+    },
+    {
+      id: 27,
+      title: "Free America",
+      titleBn: "ফ্রি আমেরিকা",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-27.pdf",
+      description: "সাইমুম সিরিজ - ২৭"
+    },
+    {
+      id: 28,
+      title: "Pacifiker Voyankor Dwipe",
+      titleBn: "প্যাসেফিকের ভয়ংকর দ্বীপে",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-28.pdf",
+      description: "সাইমুম সিরিজ - ২৮"
     }
   ];
 
@@ -173,12 +253,38 @@ const SaimumSeries = () => {
     setSelectedBook(null);
   };
 
+  const handlePreviousBook = () => {
+    if (selectedBook) {
+      const currentIndex = books.findIndex(b => b.id === selectedBook.id);
+      if (currentIndex > 0) {
+        setSelectedBook(books[currentIndex - 1]);
+      }
+    }
+  };
+
+  const handleNextBook = () => {
+    if (selectedBook) {
+      const currentIndex = books.findIndex(b => b.id === selectedBook.id);
+      if (currentIndex < books.length - 1) {
+        setSelectedBook(books[currentIndex + 1]);
+      }
+    }
+  };
+
+  const currentBookIndex = selectedBook ? books.findIndex(b => b.id === selectedBook.id) : -1;
+  const hasPrevious = currentBookIndex > 0;
+  const hasNext = currentBookIndex >= 0 && currentBookIndex < books.length - 1;
+
   if (selectedBook) {
     return (
       <PDFViewer
         pdfUrl={selectedBook.pdfUrl}
         title={selectedBook.titleBn}
         onClose={handleClosePDF}
+        onPrevious={handlePreviousBook}
+        onNext={handleNextBook}
+        hasPrevious={hasPrevious}
+        hasNext={hasNext}
       />
     );
   }
