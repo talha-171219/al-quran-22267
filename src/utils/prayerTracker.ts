@@ -37,13 +37,26 @@ export const savePrayerRecords = (records: PrayerRecord[]) => {
 export const getTodayRecord = (): PrayerRecord => {
   const today = getTodayDate();
   const records = loadPrayerRecords();
-  const todayRecord = records.find(r => r.date === today);
+  
+  // Clean up old records (keep only last 30 days)
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().split('T')[0];
+  
+  const filteredRecords = records.filter(r => r.date >= thirtyDaysAgoStr);
+  
+  if (filteredRecords.length !== records.length) {
+    savePrayerRecords(filteredRecords);
+  }
+  
+  const todayRecord = filteredRecords.find(r => r.date === today);
   
   if (todayRecord) {
     return todayRecord;
   }
   
-  return {
+  // Create new record for today (auto-resets)
+  const newRecord: PrayerRecord = {
     date: today,
     prayers: {
       Fajr: false,
@@ -53,6 +66,11 @@ export const getTodayRecord = (): PrayerRecord => {
       Isha: false,
     },
   };
+  
+  filteredRecords.push(newRecord);
+  savePrayerRecords(filteredRecords);
+  
+  return newRecord;
 };
 
 // Toggle prayer completion
