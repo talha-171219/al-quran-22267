@@ -2,7 +2,8 @@ import { useState } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut, X, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { ChevronLeft, ChevronRight, X, Loader2, Search } from "lucide-react";
 import { toast } from "sonner";
 
 // Configure PDF.js worker
@@ -17,7 +18,7 @@ interface PDFViewerProps {
 export const PDFViewer = ({ pdfUrl, title, onClose }: PDFViewerProps) => {
   const [numPages, setNumPages] = useState<number>(0);
   const [pageNumber, setPageNumber] = useState<number>(1);
-  const [scale, setScale] = useState<number>(1.0);
+  const [pageInput, setPageInput] = useState<string>("1");
   const [loading, setLoading] = useState<boolean>(true);
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
@@ -37,16 +38,33 @@ export const PDFViewer = ({ pdfUrl, title, onClose }: PDFViewerProps) => {
       const newPage = prevPageNumber + offset;
       if (newPage < 1) return 1;
       if (newPage > numPages) return numPages;
+      setPageInput(String(newPage));
       return newPage;
     });
   };
 
-  const handleZoomIn = () => {
-    setScale((prev) => Math.min(prev + 0.2, 3.0));
+  const handlePageJump = () => {
+    const targetPage = parseInt(pageInput);
+    if (isNaN(targetPage)) {
+      toast.error("সঠিক পৃষ্ঠা নম্বর লিখুন");
+      return;
+    }
+    if (targetPage < 1 || targetPage > numPages) {
+      toast.error(`পৃষ্ঠা নম্বর ১ থেকে ${numPages} এর মধ্যে হতে হবে`);
+      return;
+    }
+    setPageNumber(targetPage);
+    toast.success(`পৃষ্ঠা ${targetPage} এ চলে গেছে`);
   };
 
-  const handleZoomOut = () => {
-    setScale((prev) => Math.max(prev - 0.2, 0.5));
+  const handlePageInputChange = (value: string) => {
+    setPageInput(value);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handlePageJump();
+    }
   };
 
   return (
@@ -92,27 +110,27 @@ export const PDFViewer = ({ pdfUrl, title, onClose }: PDFViewerProps) => {
 
         <div className="border-l mx-2 h-6" />
 
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleZoomOut}
-          disabled={loading}
-        >
-          <ZoomOut className="h-4 w-4" />
-        </Button>
-        
-        <span className="text-sm font-medium px-2">
-          {Math.round(scale * 100)}%
-        </span>
-        
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleZoomIn}
-          disabled={loading}
-        >
-          <ZoomIn className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Input
+            type="number"
+            value={pageInput}
+            onChange={(e) => handlePageInputChange(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="পৃষ্ঠা"
+            className="w-20 h-8 text-sm"
+            disabled={loading}
+            min={1}
+            max={numPages}
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handlePageJump}
+            disabled={loading}
+          >
+            <Search className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
       {/* PDF Content */}
@@ -137,7 +155,7 @@ export const PDFViewer = ({ pdfUrl, title, onClose }: PDFViewerProps) => {
           >
             <Page
               pageNumber={pageNumber}
-              scale={scale}
+              scale={1.0}
               renderTextLayer={true}
               renderAnnotationLayer={true}
               className="shadow-lg"
