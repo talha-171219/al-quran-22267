@@ -19,7 +19,6 @@ const features = [
     icon: BookOpen,
     title: "Al-Quran",
     path: "/surahs",
-    gradient: true,
   },
   {
     icon: Mic,
