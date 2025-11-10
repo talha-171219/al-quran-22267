@@ -4,7 +4,8 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { BookOpen, ChevronRight } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { BookOpen, ChevronRight, Search, X } from "lucide-react";
 import { hadithCollections } from "@/data/hadiths";
 import { getBukhariChapters } from "@/services/bukhariApi";
 import { getTirmidhiChapters } from "@/services/tirmidhiApi";
@@ -16,6 +17,7 @@ const HadithBook = () => {
   const collection = hadithCollections.find((c) => c.id === bookId);
   const [chapters, setChapters] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const loadChapters = async () => {
@@ -40,6 +42,14 @@ const HadithBook = () => {
     
     loadChapters();
   }, [bookId]);
+
+  // Filter chapters by search query
+  const filteredChapters = searchQuery.trim()
+    ? chapters.filter((chapter) =>
+        chapter.nameBangla.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        chapter.nameEnglish.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : chapters;
 
   if (!collection) {
     return (
@@ -139,9 +149,36 @@ const HadithBook = () => {
           </CardContent>
         </Card>
 
+        {/* Search Bar */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="অধ্যায় সার্চ করুন..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 pr-10 h-12"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2"
+            >
+              <X className="h-5 w-5 text-muted-foreground" />
+            </button>
+          )}
+        </div>
+
         {/* Chapters List */}
         <div className="space-y-3">
-          {chapters.map((chapter) => (
+          {filteredChapters.length === 0 && (
+            <Card className="border-dashed">
+              <CardContent className="pt-6 text-center text-muted-foreground">
+                <p>কোনো অধ্যায় খুঁজে পাওয়া যায়নি</p>
+              </CardContent>
+            </Card>
+          )}
+          {filteredChapters.map((chapter) => (
             <Link
               key={chapter.id}
               to={`/hadith/book/${bookId}/chapter/${chapter.id}`}
