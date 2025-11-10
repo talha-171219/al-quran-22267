@@ -10,7 +10,7 @@ export interface AdhanSettings {
   [key: string]: boolean;
 }
 
-// Schedule notification 5 minutes before prayer
+// Schedule notification 5 minutes before prayer with alarm sound
 export const scheduleNotification = (prayerName: string, prayerTime: string, prayerNameBn: string) => {
   if (!('Notification' in window) || Notification.permission !== 'granted') {
     return false;
@@ -33,6 +33,11 @@ export const scheduleNotification = (prayerName: string, prayerTime: string, pra
 
   if (timeUntilNotification > 0) {
     setTimeout(() => {
+      // Play alarm sound
+      const alarmAudio = new Audio('/alarm-clock-short-6402.mp3');
+      alarmAudio.volume = 0.7;
+      alarmAudio.play().catch(err => console.error('Alarm sound error:', err));
+      
       new Notification(`${prayerNameBn} এর সময় হয়ে গেছে`, {
         body: `${prayerNameBn} নামাজের সময় ৫ মিনিট পরে`,
         icon: '/icon-192.png',

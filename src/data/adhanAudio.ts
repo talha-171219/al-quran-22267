@@ -10,6 +10,13 @@ export interface AdhanStyle {
 
 export const adhanStyles: AdhanStyle[] = [
   {
+    id: "custom",
+    name: "Custom",
+    nameBn: "কাস্টম",
+    audioUrl: "/azan1.mp3",
+    muezzin: "Custom Adhan"
+  },
+  {
     id: "makkah",
     name: "Makkah",
     nameBn: "মক্কা",
