@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Sunrise, Sunset, Sun, Moon, MapPin, Bell, Volume2, Calendar as CalendarIcon, ChevronDown, X } from "lucide-react";
 import { toast } from "sonner";
 import { PrayerCalendar } from "@/components/prayer/PrayerCalendar";
+import { AdhanPlayer } from "@/components/prayer/AdhanPlayer";
 import { toBengaliNumerals, formatCountdownToBengali, formatBengaliDate } from "@/utils/bengaliUtils";
 import { getUpcomingEvents } from "@/data/islamicEvents";
 import {
@@ -49,7 +50,9 @@ const PrayerTimes = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
   const [showEvents, setShowEvents] = useState(false);
+  const [showAdhanPlayer, setShowAdhanPlayer] = useState(false);
   const [battery, setBattery] = useState("--");
+  const [audioPermission, setAudioPermission] = useState(false);
 
   const prayerIcons = {
     Fajr: Sunrise,
@@ -84,6 +87,10 @@ const PrayerTimes = () => {
           console.error('Permission check error:', error);
         }
       }
+
+      // Check audio permission
+      const audioAllowed = localStorage.getItem("audioPermission");
+      setAudioPermission(audioAllowed === "granted");
     };
 
     checkPermissions();
@@ -94,6 +101,25 @@ const PrayerTimes = () => {
       setPrayerTimes(data.timings);
       setHijriDate(data.hijriDate);
       setLocation(data.location);
+      
+      // Auto-refresh prayer times if cached data is old
+      const cacheTime = data.timestamp || 0;
+      const now = Date.now();
+      const oneHour = 60 * 60 * 1000;
+      
+      if (now - cacheTime > oneHour) {
+        // Refresh if more than 1 hour old
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              getPrayerTimes(position.coords.latitude, position.coords.longitude);
+            },
+            () => {
+              // Silently fail, use cached data
+            }
+          );
+        }
+      }
     } else {
       setShowPermissionDialog(true);
     }
@@ -190,10 +216,16 @@ const PrayerTimes = () => {
           getPrayerTimes(position.coords.latitude, position.coords.longitude);
           toast.success("লোকেশন অনুমতি প্রদান করা হয়েছে");
         },
-        () => {
+        (error) => {
+          console.error("Location error:", error);
           toast.error("লোকেশন অনুমতি প্রয়োজন");
           // Fallback to Bogra
           getPrayerTimesByCity("Bogra", "Bangladesh");
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0
         }
       );
     }
@@ -204,12 +236,15 @@ const PrayerTimes = () => {
       setNotificationPermission(permission === 'granted');
       if (permission === 'granted') {
         toast.success("নোটিফিকেশন অনুমতি প্রদান করা হয়েছে");
-        setShowAthanDialog(true);
       }
     } else if (Notification.permission === 'granted') {
       setNotificationPermission(true);
-      setShowAthanDialog(true);
     }
+
+    // Request audio permission (implicit)
+    localStorage.setItem("audioPermission", "granted");
+    setAudioPermission(true);
+    setShowAthanDialog(true);
   };
 
   const getPrayerTimes = async (lat: number, lon: number) => {
@@ -293,7 +328,7 @@ const PrayerTimes = () => {
       <TopBar title="নামাজের সময়" showBack />
 
       <main className="max-w-lg mx-auto px-4 py-6 space-y-4">
-        {/* Enhanced Header Card with Status */}
+        {/* Compact Header Card with Status */}
         <Card className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground">
           <div className="absolute inset-0 opacity-10">
             <svg viewBox="0 0 800 400" className="w-full h-full">
@@ -306,58 +341,68 @@ const PrayerTimes = () => {
             </svg>
           </div>
 
-          <CardContent className="pt-6 relative z-10">
-            <div className="flex items-center justify-between mb-6">
-              <Button variant="ghost" size="sm" className="text-primary-foreground/90 hover:bg-white/10 gap-2">
-                <MapPin className="h-4 w-4" />
-                <span className="font-medium">{location || "বগুড়া, রাজশাহী"}</span>
-                <ChevronDown className="h-3 w-3" />
+          <CardContent className="py-4 relative z-10">
+            <div className="flex items-center justify-between mb-3">
+              <Button variant="ghost" size="sm" className="text-primary-foreground/90 hover:bg-white/10 gap-1 h-8 px-2">
+                <MapPin className="h-3 w-3" />
+                <span className="text-xs font-medium">{location || "বগুড়া"}</span>
               </Button>
-              <div className="flex items-center gap-4 text-sm font-medium">
-                <span className="text-3xl">{toBengaliNumerals(currentTime)}</span>
-                <span className="opacity-90">🔋 {toBengaliNumerals(battery)}%</span>
+              <div className="flex items-center gap-3 text-xs font-medium">
+                <span className="text-lg">{toBengaliNumerals(currentTime)}</span>
+                <span className="opacity-90 text-xs">🔋 {toBengaliNumerals(battery)}%</span>
               </div>
             </div>
 
-            <div className="text-center space-y-3 py-4">
-              <div className="flex items-center justify-center gap-3">
-                <h2 className="text-3xl font-bold">{currentPrayer ? prayerNamesBn[currentPrayer] : ""}</h2>
-                <div className="h-2 w-2 bg-white rounded-full animate-pulse"></div>
+            <div className="text-center space-y-2 py-2">
+              <div className="flex items-center justify-center gap-2">
+                <h2 className="text-xl font-bold">{currentPrayer ? prayerNamesBn[currentPrayer] : ""}</h2>
+                <div className="h-1.5 w-1.5 bg-white rounded-full animate-pulse"></div>
               </div>
-              <p className="text-6xl font-bold tracking-tight">
+              <p className="text-4xl font-bold tracking-tight">
                 {currentPrayer && prayerTimes ? toBengaliNumerals(prayerTimes[currentPrayer as keyof PrayerTimes]?.replace(/:\d{2}$/, "")) : ""}
               </p>
-              <p className="text-lg opacity-90 font-medium">
-                পরবর্তী নামাজ শুরু হবে: {countdown}
+              <p className="text-sm opacity-90 font-medium">
+                পরবর্তী: {countdown}
               </p>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-white/20 text-center">
-              <p className="text-sm opacity-90">{today}</p>
-              <p className="text-base font-semibold mt-1">{hijriDate}</p>
+            <div className="mt-3 pt-3 border-t border-white/20 text-center">
+              <p className="text-xs opacity-90">{today}</p>
+              <p className="text-xs font-semibold mt-0.5">{hijriDate}</p>
             </div>
           </CardContent>
         </Card>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-2">
           <Button
             variant="outline"
-            className="h-auto py-4 flex flex-col items-center gap-2"
+            className="h-auto py-3 flex flex-col items-center gap-1.5"
             onClick={() => setShowCalendar(!showCalendar)}
           >
-            <CalendarIcon className="h-5 w-5" />
-            <span className="text-sm font-medium">মাসিক ক্যালেন্ডার</span>
+            <CalendarIcon className="h-4 w-4" />
+            <span className="text-xs font-medium">ক্যালেন্ডার</span>
           </Button>
           <Button
             variant="outline"
-            className="h-auto py-4 flex flex-col items-center gap-2"
+            className="h-auto py-3 flex flex-col items-center gap-1.5"
+            onClick={() => setShowAdhanPlayer(!showAdhanPlayer)}
+          >
+            <Volume2 className="h-4 w-4" />
+            <span className="text-xs font-medium">আযান শুনুন</span>
+          </Button>
+          <Button
+            variant="outline"
+            className="h-auto py-3 flex flex-col items-center gap-1.5"
             onClick={() => setShowEvents(!showEvents)}
           >
-            <Bell className="h-5 w-5" />
-            <span className="text-sm font-medium">ইসলামিক দিবস</span>
+            <Bell className="h-4 w-4" />
+            <span className="text-xs font-medium">দিবস</span>
           </Button>
         </div>
+
+        {/* Adhan Player */}
+        {showAdhanPlayer && <AdhanPlayer />}
 
         {/* Calendar View */}
         {showCalendar && (
@@ -543,6 +588,21 @@ const PrayerTimes = () => {
                 <h4 className="font-semibold mb-1">নোটিফিকেশন অনুমতি</h4>
                 <p className="text-sm text-muted-foreground">
                   নামাজের নোটিফিকেশন পেতে
+                </p>
+              </div>
+              <div className="w-6 h-6 rounded bg-primary flex items-center justify-center">
+                <svg className="w-4 h-4 text-primary-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                  <path d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-4 p-4 rounded-lg bg-muted/50">
+              <Volume2 className="h-6 w-6 text-primary mt-1" />
+              <div className="flex-1">
+                <h4 className="font-semibold mb-1">আযান অডিও অনুমতি</h4>
+                <p className="text-sm text-muted-foreground">
+                  আযান শুনতে ও বাজাতে
                 </p>
               </div>
               <div className="w-6 h-6 rounded bg-primary flex items-center justify-center">
