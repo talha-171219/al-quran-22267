@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 interface FeatureCardProps {
   icon: LucideIcon;
   title: string;
-  description: string;
+  description?: string;
   path: string;
   gradient?: boolean;
 }
@@ -40,14 +40,16 @@ export const FeatureCard = ({
           </div>
           <div className="flex-1">
             <h3 className="font-semibold text-lg mb-1">{title}</h3>
-            <p
-              className={cn(
-                "text-sm",
-                gradient ? "text-primary-foreground/80" : "text-muted-foreground"
-              )}
-            >
-              {description}
-            </p>
+            {description && (
+              <p
+                className={cn(
+                  "text-sm",
+                  gradient ? "text-primary-foreground/80" : "text-muted-foreground"
+                )}
+              >
+                {description}
+              </p>
+            )}
           </div>
         </div>
       </Card>

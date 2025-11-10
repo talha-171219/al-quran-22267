@@ -18,62 +18,52 @@ const features = [
   {
     icon: BookOpen,
     title: "Al-Quran",
-    description: "সম্পূর্ণ কুরআন অনুবাদসহ পড়ুন",
     path: "/surahs",
     gradient: true,
   },
   {
     icon: Mic,
     title: "Audio Recitation",
-    description: "সুন্দর তিলাওয়াত শুনুন",
     path: "/audio",
   },
   {
     icon: Heart,
     title: "Duas",
-    description: "দৈনন্দিন দুআ ও আমল",
     path: "/dua",
   },
   {
     icon: BookText,
     title: "Hadith",
-    description: "সহীহ হাদিস সংকলন",
     path: "/hadith",
   },
   {
     icon: BookText,
     title: "Tafsir",
-    description: "কুরআনের ব্যাখ্যা",
     path: "/tafsir",
   },
   {
     icon: Calculator,
     title: "Zakat Calculator",
-    description: "যাকাত হিসাব করুন",
     path: "/zakat",
   },
   {
     icon: MessageCircle,
     title: "Islamic AI",
-    description: "ইসলামিক প্রশ্ন জিজ্ঞাসা করুন",
     path: "/ai",
   },
   {
     icon: Calendar,
     title: "Islamic Calendar",
-    description: "হিজরী তারিখ ও গুরুত্বপূর্ণ দিবস",
     path: "/calendar",
   },
   {
     icon: Sparkles,
     title: "Digital Tasbih",
-    description: "যিকির গণনা করুন",
     path: "/tasbih",
   },
   {
     icon: Compass,
     title: "Qibla Finder",
-    description: "কিবলার দিক খুঁজুন",
     path: "/qibla",
   },
 ];
