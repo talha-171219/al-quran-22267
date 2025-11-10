@@ -3,7 +3,6 @@ import { Document, Page, pdfjs } from "react-pdf";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { ChevronLeft, ChevronRight, X, Loader2, Search } from "lucide-react";
 import { toast } from "sonner";
 
@@ -135,10 +134,10 @@ export const PDFViewer = ({ pdfUrl, title, onClose }: PDFViewerProps) => {
       </div>
 
       {/* PDF Content */}
-      <ScrollArea className="flex-1 bg-muted/30">
-        <div className="flex justify-center p-4 min-h-full">
+      <div className="flex-1 overflow-auto bg-muted/30 p-4">
+        <div className="max-w-4xl mx-auto">
           {loading && (
-            <Card className="p-8 flex flex-col items-center justify-center gap-4 my-8">
+            <Card className="p-8 flex flex-col items-center justify-center gap-4">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
               <div className="text-center space-y-2">
                 <p className="font-semibold">পিডিএফ লোড হচ্ছে...</p>
@@ -152,17 +151,18 @@ export const PDFViewer = ({ pdfUrl, title, onClose }: PDFViewerProps) => {
             onLoadSuccess={onDocumentLoadSuccess}
             onLoadError={onDocumentLoadError}
             loading=""
+            className="flex justify-center"
           >
             <Page
               pageNumber={pageNumber}
-              width={Math.min(window.innerWidth - 32, 800)}
+              scale={1.0}
               renderTextLayer={true}
               renderAnnotationLayer={true}
-              className="shadow-lg bg-white"
+              className="shadow-lg"
             />
           </Document>
         </div>
-      </ScrollArea>
+      </div>
     </div>
   );
 };
