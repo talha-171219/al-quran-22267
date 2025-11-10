@@ -6,6 +6,7 @@ const DB_VERSION = 1;
 export interface CachedHadith {
   id: string;
   hadithNumber: string;
+  chapterHadithNumber?: string;
   arabic: string;
   bangla: string;
   bookId: string;

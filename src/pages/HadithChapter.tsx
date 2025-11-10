@@ -343,7 +343,14 @@ const HadithChapter = () => {
               <Card className="hover:shadow-md transition-shadow border-l-4 border-l-primary">
                 <CardContent className="pt-6">
                   <div className="flex items-start justify-between mb-3">
-                    <Badge variant="secondary">হাদিস নং: {hadith.hadithNumber}</Badge>
+                    <div className="flex flex-col gap-1">
+                      {hadith.chapterHadithNumber && bookId === 'muslim' && (
+                        <Badge variant="outline" className="text-xs w-fit">
+                          {hadith.chapterHadithNumber}. অধ্যায়
+                        </Badge>
+                      )}
+                      <Badge variant="secondary">হাদিস নং: {hadith.hadithNumber}</Badge>
+                    </div>
                     <Button
                       variant="ghost"
                       size="sm"

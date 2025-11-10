@@ -38,6 +38,7 @@ interface ArabicHadith {
 interface CombinedHadith {
   id: string;
   hadithNumber: string;
+  chapterHadithNumber?: string; // Chapter-relative hadith number (1, 2, 3...)
   arabic: string;
   bangla: string;
   bookNumber: string;
@@ -217,9 +218,10 @@ export async function getChapterHadiths(
     const hasMore = endIndex < totalCount;
     const paginatedHadiths = cachedHadiths.slice(startIndex, endIndex);
     
-    const combined = paginatedHadiths.map(h => ({
+    const combined = paginatedHadiths.map((h, index) => ({
       id: h.id,
       hadithNumber: h.hadithNumber,
+      chapterHadithNumber: h.chapterHadithNumber || (startIndex + index + 1).toString(),
       arabic: h.arabic,
       bangla: h.bangla,
       bookNumber: h.bookNumber,
@@ -254,11 +256,12 @@ export async function getChapterHadiths(
   const hasMore = endIndex < totalCount;
   const paginatedHadiths = chapterHadiths.slice(startIndex, endIndex);
   
-  const combined = paginatedHadiths.map((arabic) => {
+  const combined = paginatedHadiths.map((arabic, index) => {
     const bangla = banglaData[arabic.hadithNumber];
     return {
       id: arabic.hadithNumber,
       hadithNumber: arabic.hadithNumber,
+      chapterHadithNumber: (startIndex + index + 1).toString(),
       arabic: arabic.arabicText,
       bangla: bangla || 'অনুবাদ শীঘ্রই যুক্ত হবে',
       bookNumber: arabic.book.bookNumber,
