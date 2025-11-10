@@ -3,45 +3,44 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { Card } from "@/components/ui/card";
 import { BookOpen, Library } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PDFViewer } from "@/components/pdf/PDFViewer";
-import { useState } from "react";
-interface Book {
-  id: number;
-  title: string;
-  titleBn: string;
-  author: string;
-  authorBn: string;
-  description: string;
-  pdfUrl: string;
-}
+import { useNavigate } from "react-router-dom";
 const IslamicBooks = () => {
-  const [selectedPdf, setSelectedPdf] = useState<{
-    url: string;
-    title: string;
-  } | null>(null);
+  const navigate = useNavigate();
 
-  // Placeholder books - PDFs will be added later
-  const books: Book[] = [{
-    id: 1,
-    title: "Sample Book 1",
-    titleBn: "ইসলামী বই ১",
-    author: "Author Name",
-    authorBn: "লেখক",
-    description: "বইয়ের সংক্ষিপ্ত বিবরণ এখানে থাকবে।",
-    pdfUrl: "" // Will be added later
-  }];
-  const handleBookClick = (book: Book) => {
-    if (book.pdfUrl) {
-      setSelectedPdf({
-        url: book.pdfUrl,
-        title: book.titleBn
-      });
+  // Book sections for different authors/series
+  interface BookSection {
+    id: number;
+    title: string;
+    titleBn: string;
+    description: string;
+    path: string;
+    bookCount: number;
+  }
+
+  const bookSections: BookSection[] = [
+    {
+      id: 1,
+      title: "Arif Azad Books Collection",
+      titleBn: "আরিফ আজাদ বই সমগ্রী",
+      description: "আরিফ আজাদ এর সকল বই এক জায়গায়",
+      path: "/books/arif-azad",
+      bookCount: 4
+    },
+    {
+      id: 2,
+      title: "Saimum Series (1-62)",
+      titleBn: "সাইমুম সিরিজ (১-৬২)",
+      description: "সাইমুম সিরিজের সম্পূর্ণ সংগ্রহ",
+      path: "/books/saimum-series",
+      bookCount: 62
     }
+  ];
+  const handleSectionClick = (path: string) => {
+    navigate(path);
   };
-  return <>
-      {selectedPdf && <PDFViewer pdfUrl={selectedPdf.url} title={selectedPdf.title} onClose={() => setSelectedPdf(null)} />}
-      
-      <div className="min-h-screen bg-background pb-20">
+
+  return (
+    <div className="min-h-screen bg-background pb-20">
         <TopBar title="ইসলামী বই" showBack />
 
         <main className="max-w-lg mx-auto px-4 py-6 space-y-4">
@@ -56,45 +55,45 @@ const IslamicBooks = () => {
           </Card>
 
           <div className="space-y-3">
-            {books.length > 0 ? books.map(book => <Card key={book.id} className={`p-4 transition-all border-l-4 border-l-primary/50 ${book.pdfUrl ? 'hover:shadow-lg hover:scale-[1.02] cursor-pointer' : 'opacity-60'}`} onClick={() => book.pdfUrl && handleBookClick(book)}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 flex-1">
-                      <div className="bg-primary/10 p-3 rounded-lg">
-                        <BookOpen className="h-6 w-6 text-primary" />
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-lg">{book.titleBn}</h4>
-                        <p className="text-sm text-muted-foreground">
-                          {book.authorBn}
-                        </p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {book.description}
-                        </p>
-                      </div>
+            {bookSections.map(section => (
+              <Card 
+                key={section.id} 
+                className="p-4 transition-all border-l-4 border-l-primary/50 hover:shadow-lg hover:scale-[1.02] cursor-pointer"
+                onClick={() => handleSectionClick(section.path)}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="bg-primary/10 p-3 rounded-lg">
+                      <BookOpen className="h-6 w-6 text-primary" />
                     </div>
-                    {book.pdfUrl ? <Button variant="default" size="sm" className="gap-2">
-                        📖 পড়ুন
-                      </Button> : <Button variant="outline" size="sm" disabled>
-                        শীঘ্রই
-                      </Button>}
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-lg">{section.titleBn}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {section.description}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        মোট বই: {section.bookCount}টি
+                      </p>
+                    </div>
                   </div>
-                </Card>) : <Card className="p-8 text-center">
-                <Library className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                <p className="text-muted-foreground">
-                  বই যুক্ত করা হচ্ছে...
-                </p>
-              </Card>}
+                  <Button variant="default" size="sm" className="gap-2">
+                    📖 দেখুন
+                  </Button>
+                </div>
+              </Card>
+            ))}
           </div>
 
           <Card className="p-4 bg-muted/30 border-dashed">
             <p className="text-xs text-center text-muted-foreground">
-              📱 পিডিএফ অ্যাপের মধ্যেই খুলবে। ইন্টারনেট সংযোগ প্রয়োজন।
+              📚 বিভিন্ন লেখক ও সিরিজের বই সংগ্রহ। পড়ুন এবং জ্ঞান অর্জন করুন।
             </p>
           </Card>
         </main>
 
         <BottomNav />
       </div>
-    </>;
+  );
 };
+
 export default IslamicBooks;
