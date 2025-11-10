@@ -8,6 +8,7 @@ import { surahPreloader } from "@/utils/surahPreloader";
 import { hadithPreloader } from "@/utils/hadithPreloader";
 import { versionManager } from "@/utils/versionManager";
 import { UpdateNotification } from "@/components/pwa/UpdateNotification";
+import { InstallPromptModal } from "@/components/pwa/InstallPromptModal";
 import { toast } from "sonner";
 import Home from "./pages/Home";
 import Surahs from "./pages/Surahs";
@@ -77,9 +78,10 @@ const App = () => {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <QueryClientProvider client={queryClient}>
-        <BrowserRouter>
-          <UpdateNotification />
-          <Routes>
+      <BrowserRouter>
+        <UpdateNotification />
+        <InstallPromptModal />
+        <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/surahs" element={<Surahs />} />
             <Route path="/surah/:id" element={<SurahDetail />} />
