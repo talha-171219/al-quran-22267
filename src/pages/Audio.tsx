@@ -2,7 +2,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Play, Pause, SkipBack, SkipForward, Download, Volume2, Check } from "lucide-react";
+import { Play, Pause, SkipBack, SkipForward, Download, Volume2, Check, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { surahList } from "@/data/surahs";
 import { Input } from "@/components/ui/input";
@@ -45,7 +45,16 @@ const Audio = () => {
         <Card className="p-6 bg-gradient-primary text-primary-foreground">
           <div className="text-center mb-6">
             <h3 className="text-xl font-semibold mb-1">{surah.banglaName}</h3>
-            <p className="text-sm opacity-90">{surah.banglaMeaning} • {surah.verses} আয়াত</p>
+            <p className="text-sm opacity-90">
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  অডিও লোড হচ্ছে...
+                </span>
+              ) : (
+                `${surah.banglaMeaning} • ${surah.verses} আয়াত`
+              )}
+            </p>
             <p className="text-xs opacity-75 mt-1">Sheikh Mishary Rashid Alafasy</p>
           </div>
 
@@ -55,7 +64,7 @@ const Audio = () => {
               variant="ghost"
               className="text-primary-foreground hover:bg-white/10"
               onClick={skipPrev}
-              disabled={currentSurah === 1}
+              disabled={currentSurah === 1 || isLoading}
             >
               <SkipBack className="h-5 w-5" />
             </Button>
@@ -64,8 +73,11 @@ const Audio = () => {
               size="icon"
               className="h-16 w-16 bg-white/20 hover:bg-white/30 text-primary-foreground"
               onClick={togglePlay}
+              disabled={isLoading}
             >
-              {isPlaying ? (
+              {isLoading ? (
+                <Loader2 className="h-8 w-8 animate-spin" />
+              ) : isPlaying ? (
                 <Pause className="h-8 w-8" />
               ) : (
                 <Play className="h-8 w-8 ml-1" />
@@ -77,7 +89,7 @@ const Audio = () => {
               variant="ghost"
               className="text-primary-foreground hover:bg-white/10"
               onClick={skipNext}
-              disabled={currentSurah === 114}
+              disabled={currentSurah === 114 || isLoading}
             >
               <SkipForward className="h-5 w-5" />
             </Button>
