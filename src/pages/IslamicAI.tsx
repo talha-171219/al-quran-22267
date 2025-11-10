@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Sparkles, Settings } from "lucide-react";
+import { Send, Sparkles, Settings, Lock, Key } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
 import {
@@ -25,7 +25,11 @@ type Message = {
   content: string;
 };
 
+const PREMIUM_SECRET_CODE = "171219";
+
 const IslamicAI = () => {
+  const [isPremium, setIsPremium] = useState(false);
+  const [secretCode, setSecretCode] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -37,6 +41,14 @@ const IslamicAI = () => {
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [loadingConvos, setLoadingConvos] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+
+  // Check premium status on mount
+  useEffect(() => {
+    const premiumStatus = localStorage.getItem("islamic_ai_premium");
+    if (premiumStatus === "true") {
+      setIsPremium(true);
+    }
+  }, []);
 
   // Get user ID
   useEffect(() => {
@@ -59,6 +71,21 @@ const IslamicAI = () => {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const handleUnlock = () => {
+    if (secretCode.trim() === PREMIUM_SECRET_CODE) {
+      localStorage.setItem("islamic_ai_premium", "true");
+      setIsPremium(true);
+      toast.success("🎉 প্রিমিয়াম আনলক হয়েছে!", {
+        description: "এখন আপনি ইসলামিক AI ব্যবহার করতে পারবেন"
+      });
+      setSecretCode("");
+    } else {
+      toast.error("ভুল কোড", {
+        description: "সঠিক সিক্রেট কোড দিন"
+      });
+    }
+  };
 
   const saveSettings = () => {
     localStorage.setItem("ai_use_custom_key", useCustomKey.toString());
@@ -247,6 +274,76 @@ const IslamicAI = () => {
     }
   };
 
+  // Show unlock screen if not premium
+  if (!isPremium) {
+    return (
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar title="ইসলামিক AI" showBack />
+        
+        <main className="max-w-md mx-auto px-4 py-12 flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
+          <Card className="w-full p-8 space-y-6 text-center">
+            <div className="flex justify-center">
+              <div className="relative">
+                <div className="w-24 h-24 bg-gradient-to-br from-primary/20 to-primary/5 rounded-full flex items-center justify-center">
+                  <Lock className="h-12 w-12 text-primary" />
+                </div>
+                <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-primary rounded-full flex items-center justify-center animate-pulse">
+                  <Sparkles className="h-5 w-5 text-primary-foreground" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <h2 className="text-2xl font-bold text-foreground">
+                প্রিমিয়াম ফিচার
+              </h2>
+              <p className="text-muted-foreground leading-relaxed">
+                Upgrade your app with secret code from developer
+              </p>
+            </div>
+
+            <div className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label htmlFor="secret-code" className="text-left flex items-center gap-2">
+                  <Key className="h-4 w-4 text-primary" />
+                  Secret Code
+                </Label>
+                <Input
+                  id="secret-code"
+                  type="text"
+                  placeholder="সিক্রেট কোড দিন"
+                  value={secretCode}
+                  onChange={(e) => setSecretCode(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleUnlock()}
+                  className="text-center text-lg tracking-widest"
+                />
+              </div>
+              
+              <Button 
+                onClick={handleUnlock} 
+                className="w-full"
+                size="lg"
+                disabled={!secretCode.trim()}
+              >
+                <Lock className="mr-2 h-4 w-4" />
+                আনলক করুন
+              </Button>
+            </div>
+
+            <div className="pt-4 border-t border-border">
+              <p className="text-xs text-muted-foreground">
+                ডেভেলপারের কাছ থেকে সিক্রেট কোড সংগ্রহ করুন
+              </p>
+            </div>
+          </Card>
+        </main>
+
+        <BottomNav />
+      </div>
+    );
+  }
+
+  // Show main AI interface if premium
   return (
     <div className="min-h-screen bg-background pb-20">
       <TopBar 
