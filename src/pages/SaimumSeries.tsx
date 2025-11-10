@@ -402,6 +402,70 @@ const SaimumSeries = () => {
       author: "আবুল আসাদ",
       pdfUrl: "/books/saimum/saimum-48.pdf",
       description: "সাইমুম সিরিজ - ৪৮"
+    },
+    {
+      id: 49,
+      title: "Bipode Anatolia",
+      titleBn: "বিপদে আনাতোলিয়া",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-49.pdf",
+      description: "সাইমুম সিরিজ - ৪৯"
+    },
+    {
+      id: 50,
+      title: "Bosforaser Ahban",
+      titleBn: "বসফরাসের আহ্বান",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-50.pdf",
+      description: "সাইমুম সিরিজ - ৫০"
+    },
+    {
+      id: 51,
+      title: "Bosforase Bisforon",
+      titleBn: "বসফরাসে বিস্ফোরণ",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-51.pdf",
+      description: "সাইমুম সিরিজ - ৫১"
+    },
+    {
+      id: 52,
+      title: "Bolkaner Kanna",
+      titleBn: "বলকানের কান্না",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-52.pdf",
+      description: "সাইমুম সিরিজ - ৫২"
+    },
+    {
+      id: 53,
+      title: "Surinamer Songkote",
+      titleBn: "সুরিনামের সংকটে",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-53.pdf",
+      description: "সাইমুম সিরিজ - ৫৩"
+    },
+    {
+      id: 54,
+      title: "Suriname Mafia",
+      titleBn: "সুরিনামে মাফিয়া",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-54.pdf",
+      description: "সাইমুম সিরিজ - ৫৪"
+    },
+    {
+      id: 55,
+      title: "Sinkiang Theke Kokeshash",
+      titleBn: "সিংকিয়াং থেকে ককেশাস",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-55.pdf",
+      description: "সাইমুম সিরিজ - ৫৫"
+    },
+    {
+      id: 56,
+      title: "Romeli Durge",
+      titleBn: "রোমেলি দুর্গে",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-56.pdf",
+      description: "সাইমুম সিরিজ - ৫৬"
     }
   ];
 
