@@ -38,16 +38,16 @@ export const PrayerCalendar = ({ onDateSelect, selectedDate }: PrayerCalendarPro
   today.setHours(0, 0, 0, 0);
 
   return (
-    <Card>
+    <Card className="animate-fade-in">
       <CardContent className="pt-6">
         <div className="flex items-center justify-between mb-4">
-          <Button variant="ghost" size="icon" onClick={prevMonth}>
+          <Button variant="ghost" size="icon" onClick={prevMonth} className="hover-scale">
             <ChevronLeft className="h-5 w-5" />
           </Button>
           <h3 className="font-semibold text-lg">
             {getBengaliMonthName(currentMonth.getMonth())} {toBengaliNumerals(currentMonth.getFullYear())}
           </h3>
-          <Button variant="ghost" size="icon" onClick={nextMonth}>
+          <Button variant="ghost" size="icon" onClick={nextMonth} className="hover-scale">
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
@@ -76,12 +76,13 @@ export const PrayerCalendar = ({ onDateSelect, selectedDate }: PrayerCalendarPro
                 key={i}
                 onClick={() => onDateSelect(date)}
                 className={`
-                  aspect-square rounded-lg text-sm font-medium transition-all
-                  ${isToday ? 'bg-primary text-primary-foreground' : ''}
-                  ${isSelected && !isToday ? 'bg-primary/20 border-2 border-primary' : ''}
+                  aspect-square rounded-lg text-sm font-medium transition-all duration-200
+                  ${isToday ? 'bg-primary text-primary-foreground shadow-lg scale-105' : ''}
+                  ${isSelected && !isToday ? 'bg-primary/20 border-2 border-primary ring-2 ring-primary/20' : ''}
                   ${isFriday && !isToday && !isSelected ? 'bg-accent/20 text-accent-foreground' : ''}
-                  ${!isToday && !isSelected && !isFriday ? 'hover:bg-muted' : ''}
+                  ${!isToday && !isSelected && !isFriday ? 'hover:bg-muted hover:scale-105' : ''}
                   flex items-center justify-center
+                  hover-scale
                 `}
               >
                 {toBengaliNumerals(i + 1)}
@@ -92,12 +93,16 @@ export const PrayerCalendar = ({ onDateSelect, selectedDate }: PrayerCalendarPro
 
         <div className="mt-4 pt-4 border-t flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded bg-primary"></div>
+            <div className="w-3 h-3 rounded bg-primary shadow-sm"></div>
             <span>আজ</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded bg-accent/20"></div>
             <span>জুম্মা</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded border-2 border-primary"></div>
+            <span>নির্বাচিত</span>
           </div>
         </div>
       </CardContent>

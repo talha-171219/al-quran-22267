@@ -4,7 +4,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Sunrise, Sunset, Sun, Moon, MapPin, Bell, Volume2, Calendar as CalendarIcon, ChevronDown, X, AlarmClock } from "lucide-react";
+import { Sunrise, Sunset, Sun, Moon, MapPin, Bell, Volume2, Calendar as CalendarIcon, ChevronDown, X, AlarmClock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { PrayerCalendar } from "@/components/prayer/PrayerCalendar";
 import { AdhanPlayer } from "@/components/prayer/AdhanPlayer";
@@ -24,6 +24,20 @@ import {
   requestNotificationPermission,
   playAdhan,
 } from "@/utils/prayerNotifications";
+import {
+  savePrayerTimesToCache,
+  getPrayerTimesFromCache,
+  formatDateKey,
+  isCacheValid,
+  clearOldCache,
+} from "@/utils/prayerTimesCache";
+import {
+  startBackgroundTimer,
+  stopBackgroundTimer,
+  updatePrayerTimes,
+  updateAlarmSettings as updateBgAlarmSettings,
+  updateAdhanSettings as updateBgAdhanSettings,
+} from "@/utils/backgroundPrayerTimer";
 import {
   Dialog,
   DialogContent,
@@ -62,6 +76,8 @@ const PrayerTimes = () => {
   const [showAdhanPlayer, setShowAdhanPlayer] = useState(false);
   const [battery, setBattery] = useState("--");
   const [audioPermission, setAudioPermission] = useState(false);
+  const [loadingDate, setLoadingDate] = useState(false);
+  const [currentCoords, setCurrentCoords] = useState<{ lat: number; lon: number } | null>(null);
 
   const prayerIcons = {
     Fajr: Sunrise,
@@ -83,8 +99,13 @@ const PrayerTimes = () => {
 
   useEffect(() => {
     // Load saved settings
-    setAlarmSettings(loadAlarmSettings());
-    setAdhanSettings(loadAdhanSettings());
+    const savedAlarms = loadAlarmSettings();
+    const savedAdhan = loadAdhanSettings();
+    setAlarmSettings(savedAlarms);
+    setAdhanSettings(savedAdhan);
+
+    // Clear old cache entries
+    clearOldCache();
 
     const cached = localStorage.getItem("prayerTimes");
     if (cached) {
@@ -92,6 +113,9 @@ const PrayerTimes = () => {
       setPrayerTimes(data.timings);
       setHijriDate(data.hijriDate);
       setLocation(data.location);
+      
+      // Start background timer with cached data
+      startBackgroundTimer(data.timings, savedAlarms, savedAdhan);
       
       // Auto-refresh prayer times if cached data is old
       const cacheTime = data.timestamp || 0;
@@ -103,6 +127,7 @@ const PrayerTimes = () => {
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(
             (position) => {
+              setCurrentCoords({ lat: position.coords.latitude, lon: position.coords.longitude });
               getPrayerTimes(position.coords.latitude, position.coords.longitude);
             },
             () => {
@@ -124,6 +149,8 @@ const PrayerTimes = () => {
       Object.values(adhanTimeouts.current).forEach(timeout => {
         if (timeout) clearTimeout(timeout);
       });
+      // Stop background timer
+      stopBackgroundTimer();
     };
   }, []);
 
@@ -131,6 +158,10 @@ const PrayerTimes = () => {
   useEffect(() => {
     if (prayerTimes && Object.keys(alarmSettings).length > 0) {
       scheduleAllPrayers(prayerTimes);
+      // Update background timer
+      updatePrayerTimes(prayerTimes);
+      updateBgAlarmSettings(alarmSettings);
+      updateBgAdhanSettings(adhanSettings);
     }
   }, [prayerTimes, alarmSettings, adhanSettings]);
 
@@ -216,6 +247,7 @@ const PrayerTimes = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
+          setCurrentCoords({ lat: position.coords.latitude, lon: position.coords.longitude });
           getPrayerTimes(position.coords.latitude, position.coords.longitude);
           toast.success("লোকেশন অনুমতি প্রদান করা হয়েছে");
         },
@@ -239,32 +271,61 @@ const PrayerTimes = () => {
     setShowAthanDialog(true);
   };
 
-  const getPrayerTimes = async (lat: number, lon: number) => {
+  const getPrayerTimes = async (lat: number, lon: number, targetDate?: Date) => {
     try {
-      const date = new Date();
+      const date = targetDate || new Date();
+      const timestamp = Math.floor(date.getTime() / 1000);
+      const dateKey = formatDateKey(date);
+
+      // Check cache first
+      const cached = await getPrayerTimesFromCache(dateKey);
+      if (cached && isCacheValid(cached)) {
+        setPrayerTimes(cached.timings);
+        setHijriDate(cached.hijriDate);
+        setLocation(cached.location);
+        toast.success(`ক্যাশ থেকে লোড হয়েছে - ${cached.location}`);
+        return;
+      }
+
       const response = await fetch(
-        `https://api.aladhan.com/v1/timings/${Math.floor(date.getTime() / 1000)}?latitude=${lat}&longitude=${lon}&method=2`
+        `https://api.aladhan.com/v1/timings/${timestamp}?latitude=${lat}&longitude=${lon}&method=2`
       );
       const data = await response.json();
 
       if (data.code === 200) {
-        setPrayerTimes(data.data.timings);
+        const timings = data.data.timings;
         const hijri = `${data.data.date.hijri.month.en} ${data.data.date.hijri.day}, ${data.data.date.hijri.year} AH`;
-        setHijriDate(hijri);
         
         // Get actual city name using reverse geocoding
         const cityName = await getLocationName(lat, lon);
+        
+        setPrayerTimes(timings);
+        setHijriDate(hijri);
         setLocation(cityName);
 
-        localStorage.setItem(
-          "prayerTimes",
-          JSON.stringify({
-            timings: data.data.timings,
-            hijriDate: hijri,
-            location: cityName,
-            timestamp: Date.now(),
-          })
-        );
+        // Save to cache
+        await savePrayerTimesToCache({
+          date: dateKey,
+          timings,
+          hijriDate: hijri,
+          location: cityName,
+          latitude: lat,
+          longitude: lon,
+          timestamp: Date.now(),
+        });
+
+        // Save to localStorage for current day
+        if (!targetDate || dateKey === formatDateKey(new Date())) {
+          localStorage.setItem(
+            "prayerTimes",
+            JSON.stringify({
+              timings,
+              hijriDate: hijri,
+              location: cityName,
+              timestamp: Date.now(),
+            })
+          );
+        }
 
         toast.success(`নামাজের সময় লোড হয়েছে - ${cityName}`);
       }
@@ -351,6 +412,32 @@ const PrayerTimes = () => {
   const today = formatBengaliDate(new Date());
   const upcomingEvents = getUpcomingEvents(3);
 
+  const handleDateSelect = async (date: Date) => {
+    setSelectedDate(date);
+    setLoadingDate(true);
+
+    try {
+      if (currentCoords) {
+        await getPrayerTimes(currentCoords.lat, currentCoords.lon, date);
+      } else {
+        // Try to get location
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            async (position) => {
+              setCurrentCoords({ lat: position.coords.latitude, lon: position.coords.longitude });
+              await getPrayerTimes(position.coords.latitude, position.coords.longitude, date);
+            },
+            () => {
+              toast.error("লোকেশন প্রয়োজন");
+            }
+          );
+        }
+      }
+    } finally {
+      setLoadingDate(false);
+    }
+  };
+
   const toggleAlarm = async (prayer: string) => {
     // Request notification permission if not granted
     if (!notificationPermission) {
@@ -367,6 +454,7 @@ const PrayerTimes = () => {
     };
     setAlarmSettings(newSettings);
     saveAlarmSettings(newSettings);
+    updateBgAlarmSettings(newSettings);
 
     if (prayerTimes && newSettings[prayer]) {
       const time = prayerTimes[prayer as keyof PrayerTimes];
@@ -393,6 +481,7 @@ const PrayerTimes = () => {
     };
     setAdhanSettings(newSettings);
     saveAdhanSettings(newSettings);
+    updateBgAdhanSettings(newSettings);
 
     if (prayerTimes) {
       scheduleAllPrayers(prayerTimes);
@@ -532,9 +621,10 @@ const PrayerTimes = () => {
                 size="sm"
                 variant="outline"
                 onClick={() => {
-                  if (navigator.geolocation) {
+                   if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                       (position) => {
+                        setCurrentCoords({ lat: position.coords.latitude, lon: position.coords.longitude });
                         getPrayerTimes(position.coords.latitude, position.coords.longitude);
                       },
                       () => {
@@ -588,13 +678,20 @@ const PrayerTimes = () => {
 
         {/* Calendar View */}
         {showCalendar && (
-          <PrayerCalendar
-            selectedDate={selectedDate}
-            onDateSelect={(date) => {
-              setSelectedDate(date);
-              toast.success(`${formatBengaliDate(date)} এর নামাজের সময় দেখানো হচ্ছে`);
-            }}
-          />
+          <div className="space-y-3">
+            {loadingDate && (
+              <Card className="border-primary/50 bg-primary/5">
+                <CardContent className="py-3 flex items-center justify-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                  <span className="text-sm font-medium">নামাজের সময় লোড হচ্ছে...</span>
+                </CardContent>
+              </Card>
+            )}
+            <PrayerCalendar
+              selectedDate={selectedDate}
+              onDateSelect={handleDateSelect}
+            />
+          </div>
         )}
 
         {/* Islamic Events */}
