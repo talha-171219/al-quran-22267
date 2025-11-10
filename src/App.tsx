@@ -29,7 +29,6 @@ import IslamicAI from "./pages/IslamicAI";
 import InstallApp from "./pages/InstallApp";
 import PrayerTracker from "./pages/PrayerTracker";
 import Azkar from "./pages/Azkar";
-import IslamicCalendar from "./pages/IslamicCalendar";
 import NotFound from "./pages/NotFound";
 import Hadith from "./pages/Hadith";
 import HadithBook from "./pages/HadithBook";
@@ -104,8 +103,7 @@ const App = () => {
           <Route path="/hadith/detail/:bookId/:chapterId/:hadithId" element={<HadithDetailPage />} />
           <Route path="/hadith/bookmarks" element={<HadithBookmarks />} />
             <Route path="/zakat" element={<Zakat />} />
-            <Route path="/calendar" element={<IslamicCalendar />} />
-            <Route path="/prayer-times" element={<PrayerTimes />} />
+            <Route path="/calendar" element={<PrayerTimes />} />
             <Route path="/tasbih" element={<Tasbih />} />
             <Route path="/tafsir" element={<Tafsir />} />
             <Route path="/qibla" element={<Qibla />} />
