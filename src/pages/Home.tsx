@@ -49,7 +49,7 @@ const features = [
   },
   {
     icon: Calendar,
-    title: "Islamic Calendar",
+    title: "Prayer Times",
     path: "/calendar",
   },
   {
