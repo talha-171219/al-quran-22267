@@ -40,6 +40,7 @@ import HadithSearch from "./pages/HadithSearch";
 import DatePrayerTimes from "./pages/DatePrayerTimes";
 import IslamicBooks from "./pages/IslamicBooks";
 import ArifAzadBooks from "./pages/ArifAzadBooks";
+import SaimumSeries from "./pages/SaimumSeries";
 
 const queryClient = new QueryClient();
 
@@ -114,8 +115,9 @@ const App = () => {
             <Route path="/calendar/date/:date" element={<DatePrayerTimes />} />
             <Route path="/tasbih" element={<Tasbih />} />
             <Route path="/tafsir" element={<Tafsir />} />
-            <Route path="/books" element={<IslamicBooks />} />
-            <Route path="/books/arif-azad" element={<ArifAzadBooks />} />
+          <Route path="/books" element={<IslamicBooks />} />
+          <Route path="/books/arif-azad" element={<ArifAzadBooks />} />
+          <Route path="/books/saimum-series" element={<SaimumSeries />} />
             <Route path="/qibla" element={<Qibla />} />
             <Route path="/ai" element={<IslamicAI />} />
             <Route path="/install" element={<InstallApp />} />
