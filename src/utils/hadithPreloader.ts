@@ -7,6 +7,7 @@ const BATCH_SIZE = 2; // Download 2 chapters at a time
 interface PreloadStatus {
   bukhari: { completed: string[]; total: number };
   tirmidhi: { completed: string[]; total: number };
+  muslim: { completed: string[]; total: number };
   lastUpdate: number;
   isComplete: boolean;
 }
@@ -42,6 +43,7 @@ class HadithPreloader {
     return {
       bukhari: { completed: [], total: 97 },
       tirmidhi: { completed: [], total: 46 },
+      muslim: { completed: [], total: 56 },
       lastUpdate: 0,
       isComplete: false
     };
@@ -92,6 +94,20 @@ class HadithPreloader {
       }
     }
 
+    // Download Muslim chapters
+    const muslimRemaining = Array.from({ length: 56 }, (_, i) => (i + 1).toString())
+      .filter(num => !status.muslim.completed.includes(num));
+
+    for (let i = 0; i < muslimRemaining.length; i += BATCH_SIZE) {
+      const batch = muslimRemaining.slice(i, i + BATCH_SIZE);
+      await Promise.all(
+        batch.map(chapter => this.downloadChapter('muslim', chapter, status))
+      );
+      if (i + BATCH_SIZE < muslimRemaining.length) {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+    }
+
     status.isComplete = true;
     status.lastUpdate = Date.now();
     await this.saveStatus(status);
@@ -112,8 +128,8 @@ class HadithPreloader {
         return;
       }
 
-      const edition = bookId === 'bukhari' ? 'bukhari' : 'tirmidhi';
-      const benEdition = bookId === 'bukhari' ? 'bukhari' : 'tirmidhi';
+      const edition = bookId === 'bukhari' ? 'bukhari' : bookId === 'tirmidhi' ? 'tirmidhi' : 'muslim';
+      const benEdition = bookId === 'bukhari' ? 'bukhari' : bookId === 'tirmidhi' ? 'tirmidhi' : 'muslim';
 
       const [arabicRes, bengaliRes] = await Promise.all([
         fetch(`https://raw.githubusercontent.com/fawazahmed0/hadith-api/1/editions/ara-${edition}/sections/${chapterNumber}.json`),
@@ -130,6 +146,8 @@ class HadithPreloader {
         bengaliRes.json() as Promise<ApiSection>
       ]);
 
+      const bookName = bookId === 'bukhari' ? 'সহীহ বুখারী' : bookId === 'tirmidhi' ? 'জামে তিরমিযি' : 'সহীহ মুসলিম';
+      
       const hadiths: CachedHadith[] = arabicData.hadiths.map((h, idx) => ({
         id: h.hadithnumber.toString(),
         hadithNumber: h.hadithnumber.toString(),
@@ -137,23 +155,23 @@ class HadithPreloader {
         bangla: bengaliData.hadiths[idx]?.text || 'অনুবাদ শীঘ্রই যুক্ত হবে',
         bookId,
         bookNumber: '1',
-        bookName: bookId === 'bukhari' ? 'সহীহ বুখারী' : 'জামে তিরমিযি',
+        bookName,
         chapterNumber,
         chapterArabic: '',
         chapterEnglish: arabicData.metadata.section[parseInt(chapterNumber)] || '',
-        reference: `${bookId === 'bukhari' ? 'সহীহ বুখারী' : 'জামে তিরমিযি'} ${h.hadithnumber}`
+        reference: `${bookName} ${h.hadithnumber}`
       }));
 
       await hadithCache.saveChapter(bookId, chapterNumber, hadiths);
       
-      const bookStatus = bookId === 'bukhari' ? status.bukhari : status.tirmidhi;
+      const bookStatus = bookId === 'bukhari' ? status.bukhari : bookId === 'tirmidhi' ? status.tirmidhi : status.muslim;
       if (!bookStatus.completed.includes(chapterNumber)) {
         bookStatus.completed.push(chapterNumber);
         await this.saveStatus(status);
       }
 
-      const totalCompleted = status.bukhari.completed.length + status.tirmidhi.completed.length;
-      const totalChapters = status.bukhari.total + status.tirmidhi.total;
+      const totalCompleted = status.bukhari.completed.length + status.tirmidhi.completed.length + status.muslim.completed.length;
+      const totalChapters = status.bukhari.total + status.tirmidhi.total + status.muslim.total;
       console.log(`✓ ডাউনলোড সম্পন্ন: ${bookId} অধ্যায় ${chapterNumber} (${totalCompleted}/${totalChapters})`);
     } catch (error) {
       console.error(`Error downloading ${bookId} chapter ${chapterNumber}:`, error);

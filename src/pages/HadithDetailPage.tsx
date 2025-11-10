@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Bookmark, Share2, Copy, Loader2 } from "lucide-react";
 import { getHadithByNumber as getBukhariHadithByNumber } from "@/services/bukhariApi";
 import { getHadithByNumber as getTirmidhiHadithByNumber } from "@/services/tirmidhiApi";
+import { getHadithByNumber as getMuslimHadithByNumber } from "@/services/muslimApi";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -40,7 +41,7 @@ const HadithDetailPage = () => {
       return;
     }
     
-    if (bookId !== "bukhari" && bookId !== "tirmidhi") {
+    if (bookId !== "bukhari" && bookId !== "tirmidhi" && bookId !== "muslim") {
       setLoading(false);
       return;
     }
@@ -50,7 +51,9 @@ const HadithDetailPage = () => {
       try {
         const getHadithByNumber = bookId === "bukhari" 
           ? getBukhariHadithByNumber 
-          : getTirmidhiHadithByNumber;
+          : bookId === "tirmidhi"
+          ? getTirmidhiHadithByNumber
+          : getMuslimHadithByNumber;
         
         const fetchedHadith = await getHadithByNumber(hadithId);
         setHadith(fetchedHadith);

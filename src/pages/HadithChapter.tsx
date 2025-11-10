@@ -16,6 +16,10 @@ import {
   getChapterHadiths as getTirmidhiChapterHadiths, 
   prefetchNextPage as prefetchTirmidhiNextPage 
 } from "@/services/tirmidhiApi";
+import { 
+  getChapterHadiths as getMuslimChapterHadiths, 
+  prefetchNextPage as prefetchMuslimNextPage 
+} from "@/services/muslimApi";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -61,13 +65,15 @@ const HadithChapter = () => {
   // Load hadiths for chapter with prefetching (initial load: 20 for fast render)
   useEffect(() => {
     if (!bookId || !chapterId) return;
-    if (bookId !== "bukhari" && bookId !== "tirmidhi") return;
+    if (bookId !== "bukhari" && bookId !== "tirmidhi" && bookId !== "muslim") return;
     
     const loadHadiths = async () => {
       setLoading(true);
       try {
         // Load first 20 hadiths for instant display
-        const getChapterHadiths = bookId === "bukhari" ? getBukhariChapterHadiths : getTirmidhiChapterHadiths;
+        const getChapterHadiths = bookId === "bukhari" ? getBukhariChapterHadiths : 
+                                   bookId === "tirmidhi" ? getTirmidhiChapterHadiths :
+                                   getMuslimChapterHadiths;
         const { hadiths: fetchedHadiths, hasMore: more } = await getChapterHadiths(chapterId, 1, 20);
         setHadiths(fetchedHadiths);
         setHasMore(more);
@@ -75,7 +81,9 @@ const HadithChapter = () => {
         
         // Prefetch next page in background for smooth scroll
         if (more) {
-          const prefetchNextPage = bookId === "bukhari" ? prefetchBukhariNextPage : prefetchTirmidhiNextPage;
+          const prefetchNextPage = bookId === "bukhari" ? prefetchBukhariNextPage : 
+                                    bookId === "tirmidhi" ? prefetchTirmidhiNextPage :
+                                    prefetchMuslimNextPage;
           prefetchNextPage(chapterId, 2, 20);
         }
       } catch (error) {
@@ -91,12 +99,14 @@ const HadithChapter = () => {
   // Infinite scroll - load 20 hadiths at a time for smooth experience
   const loadMore = useCallback(async () => {
     if (loadingMore || !hasMore || searchQuery || !bookId || !chapterId) return;
-    if (bookId !== "bukhari" && bookId !== "tirmidhi") return;
+    if (bookId !== "bukhari" && bookId !== "tirmidhi" && bookId !== "muslim") return;
     
     setLoadingMore(true);
     try {
       const nextPage = page + 1;
-      const getChapterHadiths = bookId === "bukhari" ? getBukhariChapterHadiths : getTirmidhiChapterHadiths;
+      const getChapterHadiths = bookId === "bukhari" ? getBukhariChapterHadiths : 
+                                 bookId === "tirmidhi" ? getTirmidhiChapterHadiths :
+                                 getMuslimChapterHadiths;
       const { hadiths: moreHadiths, hasMore: more } = await getChapterHadiths(chapterId, nextPage, 20);
       setHadiths((prev) => [...prev, ...moreHadiths]);
       setPage(nextPage);
@@ -104,7 +114,9 @@ const HadithChapter = () => {
       
       // Prefetch next page in background
       if (more) {
-        const prefetchNextPage = bookId === "bukhari" ? prefetchBukhariNextPage : prefetchTirmidhiNextPage;
+        const prefetchNextPage = bookId === "bukhari" ? prefetchBukhariNextPage : 
+                                  bookId === "tirmidhi" ? prefetchTirmidhiNextPage :
+                                  prefetchMuslimNextPage;
         prefetchNextPage(chapterId, nextPage + 1, 20);
       }
     } catch (error) {
@@ -187,8 +199,26 @@ const HadithChapter = () => {
     '46': 'তিলাওয়াত', '47': 'তাফসীর', '48': 'দুআ', '49': 'মানাকিব (ফযিলত)',
   };
 
+  // সহীহ মুসলিম - বাংলা অধ্যায়ের নাম (৫৬টি অধ্যায়)
+  const muslimChapterNames: Record<string, string> = {
+    '1': 'ঈমান', '2': 'পবিত্রতা', '3': 'হায়েয', '4': 'সালাত', '5': 'মসজিদ ও সালাতের স্থান',
+    '6': 'মুসাফিরের সালাত', '7': 'জুমআ', '8': 'দুই ঈদ', '9': 'ইস্তিসকা (বৃষ্টির জন্য দুআ)', '10': 'সূর্যগ্রহণ',
+    '11': 'জানাযা', '12': 'যাকাত', '13': 'সাওম (রোযা)', '14': 'ইতিকাফ', '15': 'হজ্জ',
+    '16': 'বিবাহ', '17': 'দুধপান', '18': 'তালাক', '19': 'লিআন', '20': 'মুক্তি ও দাসত্ব',
+    '21': 'ক্রয়-বিক্রয়', '22': 'মুসাকাত (ভাগচাষ)', '23': 'মীরাস (উত্তরাধিকার)', '24': 'হাদিয়া (উপহার)', '25': 'অসিয়ত',
+    '26': 'মানত', '27': 'শপথ', '28': 'কিসাস (প্রতিশোধ)', '29': 'হুদুদ (শাস্তি)', '30': 'বিচার-আচার',
+    '31': 'হারানো জিনিস', '32': 'জিহাদ', '33': 'ইমারত (নেতৃত্ব)', '34': 'শিকার ও জবেহ', '35': 'কুরবানী',
+    '36': 'পানীয়', '37': 'পোশাক ও সাজসজ্জা', '38': 'আদব', '39': 'সালাম', '40': 'শব্দ ও বাক্য',
+    '41': 'কবিতা', '42': 'স্বপ্ন', '43': 'ফযিলত', '44': 'সাহাবায়ে কিরাম', '45': 'সৎকাজ ও আত্মীয়তার সম্পর্ক',
+    '46': 'তাকদীর', '47': 'ইলম (জ্ঞান)', '48': 'যিকির ও দুআ', '49': 'তাওবা', '50': 'মুনাফিকদের বৈশিষ্ট্য',
+    '51': 'জান্নাতের বর্ণনা', '52': 'ফিতনা ও কিয়ামতের আলামত', '53': 'যুহুদ', '54': 'তাফসীর', '55': 'যুহদ',
+    '56': 'জান্নাত ও জান্নাতবাসীদের বর্ণনা',
+  };
+
   // Select appropriate chapter names based on book
-  const chapterNamesDict = bookId === 'bukhari' ? bukhariChapterNames : tirmidhiChapterNames;
+  const chapterNamesDict = bookId === 'bukhari' ? bukhariChapterNames : 
+                            bookId === 'tirmidhi' ? tirmidhiChapterNames :
+                            muslimChapterNames;
   const chapterName = chapterNamesDict[chapterId || ''] || "অধ্যায়";
 
   const toggleBookmark = async (hadithId: string, e: React.MouseEvent) => {

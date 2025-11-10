@@ -8,15 +8,8 @@ import { BookOpen, ChevronRight } from "lucide-react";
 import { hadithCollections } from "@/data/hadiths";
 import { getBukhariChapters } from "@/services/bukhariApi";
 import { getTirmidhiChapters } from "@/services/tirmidhiApi";
+import { getMuslimChapters } from "@/services/muslimApi";
 import { useEffect, useState } from "react";
-
-// Chapter data for non-implemented books
-const muslimChapters = [
-  { id: "1", nameBangla: "ঈমান", nameEnglish: "Book of Faith", hadithCount: 0 },
-  { id: "2", nameBangla: "পবিত্রতা", nameEnglish: "Book of Purification", hadithCount: 0 },
-  { id: "3", nameBangla: "সালাত", nameEnglish: "Book of Prayer", hadithCount: 0 },
-  { id: "4", nameBangla: "যাকাত", nameEnglish: "Book of Zakat", hadithCount: 0 },
-];
 
 const HadithBook = () => {
   const { bookId } = useParams<{ bookId: string }>();
@@ -35,6 +28,7 @@ const HadithBook = () => {
           const tirmidhiChapters = await getTirmidhiChapters();
           setChapters(tirmidhiChapters);
         } else if (bookId === "muslim") {
+          const muslimChapters = await getMuslimChapters();
           setChapters(muslimChapters);
         }
       } catch (error) {
