@@ -12,6 +12,7 @@ export interface PrayerRecord {
 }
 
 const STORAGE_KEY = 'prayer_tracker_history';
+const MAX_HISTORY_DAYS = 30; // Keep 30 days of history
 
 // Get today's date in YYYY-MM-DD format
 export const getTodayDate = (): string => {
@@ -30,7 +31,14 @@ export const loadPrayerRecords = (): PrayerRecord[] => {
 
 // Save prayer records to localStorage
 export const savePrayerRecords = (records: PrayerRecord[]) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+  // Clean up old records (keep only last 30 days)
+  const today = new Date();
+  const cutoffDate = new Date(today);
+  cutoffDate.setDate(cutoffDate.getDate() - MAX_HISTORY_DAYS);
+  const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
+  
+  const filteredRecords = records.filter(r => r.date >= cutoffDateStr);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(filteredRecords));
 };
 
 // Get today's prayer record
