@@ -139,29 +139,27 @@ export const PDFViewer = ({ pdfUrl, title, onClose, onPrevious, onNext, hasPrevi
 
       {/* PDF Content */}
       <div className="flex-1 overflow-auto bg-muted/30 p-4 relative">
-        {/* Previous Book Button */}
-        {hasPrevious && onPrevious && (
-          <Button
-            variant="default"
-            size="icon"
-            className="fixed left-4 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full shadow-lg"
-            onClick={onPrevious}
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </Button>
-        )}
+        {/* Previous Page Button */}
+        <Button
+          variant="default"
+          size="icon"
+          className="fixed left-4 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full shadow-lg"
+          onClick={() => changePage(-1)}
+          disabled={pageNumber <= 1 || loading}
+        >
+          <ChevronLeft className="h-6 w-6" />
+        </Button>
 
-        {/* Next Book Button */}
-        {hasNext && onNext && (
-          <Button
-            variant="default"
-            size="icon"
-            className="fixed right-4 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full shadow-lg"
-            onClick={onNext}
-          >
-            <ChevronRight className="h-6 w-6" />
-          </Button>
-        )}
+        {/* Next Page Button */}
+        <Button
+          variant="default"
+          size="icon"
+          className="fixed right-4 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full shadow-lg"
+          onClick={() => changePage(1)}
+          disabled={pageNumber >= numPages || loading}
+        >
+          <ChevronRight className="h-6 w-6" />
+        </Button>
 
         <div className="max-w-4xl mx-auto">
           {loading && (
