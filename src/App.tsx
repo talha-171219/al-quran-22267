@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { surahPreloader } from "@/utils/surahPreloader";
 import { hadithPreloader } from "@/utils/hadithPreloader";
 import { versionManager } from "@/utils/versionManager";
+import { initializeMidnightRefresh } from "@/utils/prayerTimesRefresh";
 import { UpdateNotification } from "@/components/pwa/UpdateNotification";
 import { InstallPromptModal } from "@/components/pwa/InstallPromptModal";
 import { AudioProvider } from "@/contexts/AudioContext";
@@ -69,6 +70,9 @@ const App = () => {
         }).catch(err => {
           console.error('Background refresh error:', err);
         });
+
+        // Initialize automatic midnight refresh for prayer times
+        initializeMidnightRefresh();
 
         setIsInitializing(false);
       } catch (error) {
