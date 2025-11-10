@@ -209,9 +209,9 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
 
           <div className="flex flex-col items-end justify-center">
             <img
-              src="https://raw.githubusercontent.com/prayer-times-web/assets/main/praying-man.png"
+              src="https://cdn-icons-png.flaticon.com/512/3976/3976625.png"
               alt="Praying"
-              className="h-24 w-24 object-contain"
+              className="h-20 w-20 object-contain opacity-90"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = 'none';
               }}
