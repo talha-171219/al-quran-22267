@@ -1,16 +1,29 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, Circle } from "lucide-react";
 import { PrayerRecord } from "@/utils/prayerTracker";
 import { toBengaliNumerals } from "@/utils/bengaliUtils";
+import { DailyPrayerDetails } from "./DailyPrayerDetails";
 
 interface MonthlyCalendarProps {
   records: PrayerRecord[];
 }
 
 export const MonthlyCalendar = ({ records }: MonthlyCalendarProps) => {
+  const [selectedRecord, setSelectedRecord] = useState<PrayerRecord | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  
   const now = new Date();
   const currentMonth = now.getMonth();
   const currentYear = now.getFullYear();
+
+  const handleDateClick = (dateStr: string) => {
+    const record = records.find(r => r.date === dateStr);
+    if (record) {
+      setSelectedRecord(record);
+      setIsDetailsOpen(true);
+    }
+  };
   
   // Get first day of month and total days
   const firstDay = new Date(currentYear, currentMonth, 1);
@@ -53,13 +66,14 @@ export const MonthlyCalendar = ({ records }: MonthlyCalendarProps) => {
   }
   
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-center">
-          {monthNamesBn[currentMonth]} {toBengaliNumerals(currentYear)}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-center">
+            {monthNamesBn[currentMonth]} {toBengaliNumerals(currentYear)}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
         {/* Week day headers */}
         <div className="grid grid-cols-7 gap-1 mb-2">
           {weekDaysBn.map((day) => (
@@ -76,16 +90,20 @@ export const MonthlyCalendar = ({ records }: MonthlyCalendarProps) => {
               return <div key={`empty-${index}`} className="aspect-square" />;
             }
             
-            const { day, completedCount, isToday } = dayData;
+            const { day, completedCount, isToday, dateStr } = dayData;
             const isPerfectDay = completedCount === 5;
             
             return (
-              <div
+              <button
                 key={day}
+                onClick={() => handleDateClick(dateStr)}
+                disabled={completedCount === 0}
                 className={`
                   aspect-square flex flex-col items-center justify-center rounded-lg text-xs
+                  transition-all hover:scale-105
                   ${isToday ? 'ring-2 ring-primary' : ''}
                   ${isPerfectDay ? 'bg-green-100 dark:bg-green-950/40 border border-green-500' : 'bg-muted/30'}
+                  ${completedCount > 0 ? 'cursor-pointer hover:bg-primary/10' : 'cursor-default opacity-50'}
                 `}
               >
                 <div className="font-medium">{toBengaliNumerals(day)}</div>
@@ -100,9 +118,15 @@ export const MonthlyCalendar = ({ records }: MonthlyCalendarProps) => {
                     ))}
                   </div>
                 )}
-              </div>
+              </button>
             );
           })}
+        </div>
+        
+        <div className="mt-4 text-center">
+          <p className="text-xs text-muted-foreground">
+            তারিখে ক্লিক করে বিস্তারিত দেখুন
+          </p>
         </div>
         
         <div className="mt-4 flex items-center justify-center gap-4 text-xs text-muted-foreground">
@@ -117,5 +141,12 @@ export const MonthlyCalendar = ({ records }: MonthlyCalendarProps) => {
         </div>
       </CardContent>
     </Card>
+
+    <DailyPrayerDetails
+      record={selectedRecord}
+      isOpen={isDetailsOpen}
+      onClose={() => setIsDetailsOpen(false)}
+    />
+    </>
   );
 };

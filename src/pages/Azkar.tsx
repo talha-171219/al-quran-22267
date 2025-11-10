@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -9,12 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Sunrise, Sunset, Sparkles, Search, Volume2, CheckCircle } from "lucide-react";
 import { azkarCategories } from "@/data/azkar";
 import { toBengaliNumerals } from "@/utils/bengaliUtils";
-import { AzkarStatsCard } from "@/components/azkar/AzkarStats";
 import { 
   getTodayDhikrCount, 
   updateDhikrCount, 
   resetDhikrCount,
-  calculateAzkarStats,
   isCategoryCompleted,
   markCategoryCompleted
 } from "@/utils/azkarTracker";
@@ -22,19 +20,13 @@ import { toast } from "sonner";
 
 const Azkar = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const [stats, setStats] = useState(calculateAzkarStats());
   const [activeTab, setActiveTab] = useState("morning");
-
-  useEffect(() => {
-    setStats(calculateAzkarStats());
-  }, []);
 
   const handleCount = (categoryId: string, dhikrIndex: number, maxCount: number) => {
     const currentCount = getTodayDhikrCount(categoryId, dhikrIndex);
     
     if (currentCount < maxCount) {
       updateDhikrCount(categoryId, dhikrIndex, currentCount + 1, maxCount);
-      setStats(calculateAzkarStats());
       
       // Check if all dhikrs in category are completed
       const category = azkarCategories.find(c => c.id === categoryId);
@@ -47,7 +39,6 @@ const Azkar = () => {
 
   const handleReset = (categoryId: string, dhikrIndex: number) => {
     resetDhikrCount(categoryId, dhikrIndex);
-    setStats(calculateAzkarStats());
   };
 
   const playAudio = (text: string) => {
@@ -91,9 +82,6 @@ const Azkar = () => {
       <TopBar title="আযকার" showBack />
 
       <main className="max-w-lg mx-auto px-4 py-6 space-y-4">
-        {/* Statistics Card */}
-        <AzkarStatsCard stats={stats} />
-
         {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

@@ -14,16 +14,22 @@ import {
   Info,
   Share2,
   Bell,
+  TrendingUp,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
+import { AzkarStatsCard } from "@/components/azkar/AzkarStats";
+import { calculateAzkarStats } from "@/utils/azkarTracker";
+import { useNavigate } from "react-router-dom";
 
 const Settings = () => {
   const { theme, setTheme } = useTheme();
+  const navigate = useNavigate();
   const [autoPlay, setAutoPlay] = useState(false);
   const [offlineMode, setOfflineMode] = useState(false);
   const [notificationEnabled, setNotificationEnabled] = useState(false);
+  const [azkarStats, setAzkarStats] = useState(calculateAzkarStats());
 
   useEffect(() => {
     const savedAutoPlay = localStorage.getItem('autoPlay') === 'true';
@@ -35,6 +41,9 @@ const Settings = () => {
     if ('Notification' in window) {
       setNotificationEnabled(Notification.permission === 'granted');
     }
+
+    // Refresh azkar stats
+    setAzkarStats(calculateAzkarStats());
   }, []);
 
   const handleThemeToggle = (checked: boolean) => {
@@ -213,6 +222,24 @@ const Settings = () => {
             />
           </div>
         </Card>
+
+        {/* Azkar Progress Section */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-primary" />
+              আযকার অগ্রগতি
+            </h3>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={() => navigate('/azkar')}
+            >
+              আযকার পড়ুন
+            </Button>
+          </div>
+          <AzkarStatsCard stats={azkarStats} />
+        </div>
 
         <Card className="p-4 space-y-3">
           <button 
