@@ -2,7 +2,7 @@ import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RotateCcw, Plus, BarChart3, Award, CheckCircle } from "lucide-react";
+import { RotateCcw, Plus, BarChart3, Award, CheckCircle, Settings2, Volume2, VolumeX, Vibrate } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   Select,
@@ -22,7 +22,18 @@ import {
   getNewlyAchievedMilestones,
   getTodayTasbihRecord,
 } from "@/utils/tasbihTracker";
+import {
+  loadTasbihSettings,
+  saveTasbihSettings,
+  getVibrationPattern,
+  playTasbihSound,
+  playCompletionSound,
+  TasbihSettings as TasbihSettingsType,
+} from "@/utils/tasbihSettings";
 import { useToast } from "@/hooks/use-toast";
+import { Slider } from "@/components/ui/slider";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const dhikrTypes = [
   { value: "subhanallah", arabic: "سُبْحَانَ اللهِ", bangla: "সুবহানাল্লাহ", meaning: "আল্লাহ পবিত্র" },
@@ -41,6 +52,7 @@ const Tasbih = () => {
   const [monthlyStats, setMonthlyStats] = useState(getMonthlyTasbihStats());
   const [milestones, setMilestones] = useState(loadMilestones());
   const [todayTotal, setTodayTotal] = useState(0);
+  const [settings, setSettings] = useState<TasbihSettingsType>(loadTasbihSettings());
   
   const currentDhikr = dhikrTypes.find(d => d.value === dhikrType) || dhikrTypes[0];
 
@@ -49,6 +61,12 @@ const Tasbih = () => {
     const todayRecord = getTodayTasbihRecord();
     setTodayTotal(todayRecord.totalCount);
   }, []);
+
+  const updateSettings = (newSettings: Partial<TasbihSettingsType>) => {
+    const updated = { ...settings, ...newSettings };
+    setSettings(updated);
+    saveTasbihSettings(updated);
+  };
 
   const refreshStats = () => {
     setStats(calculateTasbihStats());
@@ -67,7 +85,9 @@ const Tasbih = () => {
       // Completed target - save session and celebrate!
       saveSession(dhikrType, newCount, target, true);
       
-      if (navigator.vibrate) {
+      // Play completion sound and vibration
+      playCompletionSound(settings);
+      if (settings.vibrationEnabled && navigator.vibrate) {
         navigator.vibrate([100, 50, 100, 50, 100]);
       }
       
@@ -92,9 +112,11 @@ const Tasbih = () => {
       return;
     }
     
-    // Haptic feedback on mobile
-    if (navigator.vibrate) {
-      navigator.vibrate(10);
+    // Play sound and haptic feedback
+    playTasbihSound(settings);
+    if (settings.vibrationEnabled && navigator.vibrate) {
+      const pattern = getVibrationPattern(settings);
+      navigator.vibrate(pattern);
     }
   };
 
@@ -125,7 +147,7 @@ const Tasbih = () => {
 
       <main className="max-w-lg mx-auto px-4 py-3">
         <Tabs defaultValue="counter" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 h-11 bg-card/50 backdrop-blur-sm border border-border/50">
+          <TabsList className="grid w-full grid-cols-4 h-11 bg-card/50 backdrop-blur-sm border border-border/50">
             <TabsTrigger value="counter" className="data-[state=active]:bg-primary/10 data-[state=active]:shadow-sm">
               <Plus className="h-4 w-4 mr-1" />
               <span className="hidden sm:inline">গণনা</span>
@@ -137,6 +159,10 @@ const Tasbih = () => {
             <TabsTrigger value="achievements" className="data-[state=active]:bg-primary/10 data-[state=active]:shadow-sm">
               <Award className="h-4 w-4 mr-1" />
               <span className="hidden sm:inline">অর্জন</span>
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="data-[state=active]:bg-primary/10 data-[state=active]:shadow-sm">
+              <Settings2 className="h-4 w-4 mr-1" />
+              <span className="hidden sm:inline">সেটিংস</span>
             </TabsTrigger>
           </TabsList>
 
@@ -309,6 +335,91 @@ const Tasbih = () => {
 
           <TabsContent value="achievements" className="space-y-3 mt-3">
             <TasbihMilestones milestones={milestones} />
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-3 mt-3">
+            {/* Sound Settings */}
+            <Card className="p-4 bg-card/50 backdrop-blur-sm border-border/50">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {settings.soundEnabled ? (
+                      <Volume2 className="h-5 w-5 text-primary" />
+                    ) : (
+                      <VolumeX className="h-5 w-5 text-muted-foreground" />
+                    )}
+                    <Label>সাউন্ড ইফেক্ট</Label>
+                  </div>
+                  <Switch
+                    checked={settings.soundEnabled}
+                    onCheckedChange={(checked) => updateSettings({ soundEnabled: checked })}
+                  />
+                </div>
+                
+                {settings.soundEnabled && (
+                  <div className="space-y-2">
+                    <Label className="text-sm">ভলিউম: {Math.round(settings.soundVolume * 100)}%</Label>
+                    <Slider
+                      value={[settings.soundVolume * 100]}
+                      onValueChange={([value]) => updateSettings({ soundVolume: value / 100 })}
+                      max={100}
+                      step={1}
+                      className="w-full"
+                    />
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {/* Vibration Settings */}
+            <Card className="p-4 bg-card/50 backdrop-blur-sm border-border/50">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Vibrate className="h-5 w-5 text-primary" />
+                    <Label>ভাইব্রেশন</Label>
+                  </div>
+                  <Switch
+                    checked={settings.vibrationEnabled}
+                    onCheckedChange={(checked) => updateSettings({ vibrationEnabled: checked })}
+                  />
+                </div>
+                
+                {settings.vibrationEnabled && (
+                  <div className="space-y-2">
+                    <Label className="text-sm">প্যাটার্ন</Label>
+                    <Select
+                      value={settings.vibrationPattern}
+                      onValueChange={(value: any) => updateSettings({ vibrationPattern: value })}
+                    >
+                      <SelectTrigger className="h-9 bg-card/50 backdrop-blur-sm border-border/50">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="short">সংক্ষিপ্ত (50ms)</SelectItem>
+                        <SelectItem value="medium">মাঝারি (100ms)</SelectItem>
+                        <SelectItem value="long">দীর্ঘ (200ms)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {/* Test Button */}
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                playTasbihSound(settings);
+                if (settings.vibrationEnabled && navigator.vibrate) {
+                  const pattern = getVibrationPattern(settings);
+                  navigator.vibrate(pattern);
+                }
+              }}
+            >
+              🎵 টেস্ট করুন
+            </Button>
           </TabsContent>
         </Tabs>
       </main>

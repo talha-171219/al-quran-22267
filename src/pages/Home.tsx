@@ -14,6 +14,7 @@ import {
   MessageCircle,
   CheckSquare,
   Star,
+  Library,
 } from "lucide-react";
 
 const features = [
@@ -46,6 +47,11 @@ const features = [
     icon: BookText,
     title: "Tafsir",
     path: "/tafsir",
+  },
+  {
+    icon: Library,
+    title: "Islamic Books",
+    path: "/books",
   },
   {
     icon: Calendar,
