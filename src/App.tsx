@@ -6,6 +6,7 @@ import { ThemeProvider } from "next-themes";
 import { useEffect } from "react";
 import { surahPreloader } from "@/utils/surahPreloader";
 import { hadithPreloader } from "@/utils/hadithPreloader";
+import { UpdateNotification } from "@/components/pwa/UpdateNotification";
 import Home from "./pages/Home";
 import Surahs from "./pages/Surahs";
 import SurahDetail from "./pages/SurahDetail";
@@ -33,15 +34,20 @@ const queryClient = new QueryClient();
 
 const App = () => {
   useEffect(() => {
-    // Start preloading all surahs and hadiths in the background for offline reading
-    surahPreloader.checkAndResume();
-    hadithPreloader.checkAndResume();
+    // Start preloading all surahs and hadiths immediately on app launch
+    const startPreloading = async () => {
+      await surahPreloader.startPreloading();
+      await hadithPreloader.startPreloading();
+    };
+    
+    startPreloading();
   }, []);
 
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
+          <UpdateNotification />
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/surahs" element={<Surahs />} />

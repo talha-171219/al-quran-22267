@@ -1,4 +1,5 @@
-const CACHE_NAME = 'al-quran-v2';
+const CACHE_VERSION = Date.now(); // Auto-updated on each build
+const CACHE_NAME = `al-quran-v${CACHE_VERSION}`;
 const APP_SHELL = [
   '/',
   '/index.html',
@@ -10,7 +11,14 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
   );
-  self.skipWaiting();
+  // Don't skip waiting - let the new SW wait until user updates
+});
+
+// Listen for skip waiting message
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 // Activate and remove old caches
