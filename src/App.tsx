@@ -9,6 +9,8 @@ import { hadithPreloader } from "@/utils/hadithPreloader";
 import { versionManager } from "@/utils/versionManager";
 import { UpdateNotification } from "@/components/pwa/UpdateNotification";
 import { InstallPromptModal } from "@/components/pwa/InstallPromptModal";
+import { AudioProvider } from "@/contexts/AudioContext";
+import { MiniPlayer } from "@/components/audio/MiniPlayer";
 import { toast } from "sonner";
 import Home from "./pages/Home";
 import Surahs from "./pages/Surahs";
@@ -78,10 +80,12 @@ const App = () => {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <UpdateNotification />
-        <InstallPromptModal />
-        <Routes>
+        <AudioProvider>
+          <BrowserRouter>
+            <UpdateNotification />
+            <InstallPromptModal />
+            <MiniPlayer />
+            <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/surahs" element={<Surahs />} />
             <Route path="/surah/:id" element={<SurahDetail />} />
@@ -104,10 +108,11 @@ const App = () => {
             <Route path="/ai" element={<IslamicAI />} />
             <Route path="/install" element={<InstallApp />} />
             <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Toaster />
-          <Sonner />
-        </BrowserRouter>
+            </Routes>
+            <Toaster />
+            <Sonner />
+          </BrowserRouter>
+        </AudioProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );
