@@ -6,7 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Sunrise, Sunset, Sparkles, Search, Volume2, CheckCircle } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
+import { Sunrise, Sunset, Sparkles, Search, Volume2, CheckCircle, Settings, Vibrate } from "lucide-react";
 import { azkarCategories } from "@/data/azkar";
 import { toBengaliNumerals } from "@/utils/bengaliUtils";
 import { 
@@ -16,19 +19,39 @@ import {
   isCategoryCompleted,
   markCategoryCompleted
 } from "@/utils/azkarTracker";
+import { 
+  loadAzkarSettings, 
+  saveAzkarSettings, 
+  playAzkarSound, 
+  playCompletionSound,
+  getVibrationPattern 
+} from "@/utils/azkarSettings";
 import { toast } from "sonner";
 
 const Azkar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("morning");
   const [refreshKey, setRefreshKey] = useState(0); // Force re-render
+  const [settings, setSettings] = useState(loadAzkarSettings());
 
   const handleCount = (categoryId: string, dhikrIndex: number, maxCount: number) => {
     const currentCount = getTodayDhikrCount(categoryId, dhikrIndex);
     
     if (currentCount < maxCount) {
       updateDhikrCount(categoryId, dhikrIndex, currentCount + 1, maxCount);
+      
+      // Play sound and vibrate
+      playAzkarSound(settings);
+      if (settings.vibrationEnabled && 'vibrate' in navigator) {
+        navigator.vibrate(getVibrationPattern(settings));
+      }
+      
       setRefreshKey(prev => prev + 1); // Trigger re-render
+      
+      // Check if this dhikr is now complete
+      if (currentCount + 1 >= maxCount) {
+        playCompletionSound(settings);
+      }
       
       // Check if all dhikrs in category are completed
       const category = azkarCategories.find(c => c.id === categoryId);
@@ -97,7 +120,7 @@ const Azkar = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4">
+          <TabsList className="grid w-full grid-cols-4 mb-4">
             <TabsTrigger value="morning" className="relative">
               সকাল
               {isCategoryCompleted("morning", azkarCategories.find(c => c.id === "morning")?.dhikrs.length || 0) && (
@@ -116,7 +139,101 @@ const Azkar = () => {
                 <CheckCircle className="absolute -top-1 -right-1 h-4 w-4 text-green-600" />
               )}
             </TabsTrigger>
+            <TabsTrigger value="settings">
+              <Settings className="h-4 w-4" />
+            </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="settings" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  সেটিংস
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Sound Settings */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-base">সাউন্ড ইফেক্ট</Label>
+                      <p className="text-sm text-muted-foreground">প্রতিটি গণনায় টোন বাজান</p>
+                    </div>
+                    <Switch
+                      checked={settings.soundEnabled}
+                      onCheckedChange={(checked) => {
+                        const newSettings = { ...settings, soundEnabled: checked };
+                        setSettings(newSettings);
+                        saveAzkarSettings(newSettings);
+                      }}
+                    />
+                  </div>
+                  
+                  {settings.soundEnabled && (
+                    <div className="space-y-2">
+                      <Label>ভলিউম</Label>
+                      <Slider
+                        value={[settings.soundVolume * 100]}
+                        onValueChange={([value]) => {
+                          const newSettings = { ...settings, soundVolume: value / 100 };
+                          setSettings(newSettings);
+                          saveAzkarSettings(newSettings);
+                        }}
+                        max={100}
+                        step={1}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Vibration Settings */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label className="text-base flex items-center gap-2">
+                        <Vibrate className="h-4 w-4" />
+                        ভাইব্রেশন
+                      </Label>
+                      <p className="text-sm text-muted-foreground">প্রতিটি গণনায় ভাইব্রেট করুন</p>
+                    </div>
+                    <Switch
+                      checked={settings.vibrationEnabled}
+                      onCheckedChange={(checked) => {
+                        const newSettings = { ...settings, vibrationEnabled: checked };
+                        setSettings(newSettings);
+                        saveAzkarSettings(newSettings);
+                      }}
+                    />
+                  </div>
+
+                  {settings.vibrationEnabled && (
+                    <div className="space-y-2">
+                      <Label>ভাইব্রেশন প্যাটার্ন</Label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {(['short', 'medium', 'long'] as const).map((pattern) => (
+                          <Button
+                            key={pattern}
+                            variant={settings.vibrationPattern === pattern ? "default" : "outline"}
+                            onClick={() => {
+                              const newSettings = { ...settings, vibrationPattern: pattern };
+                              setSettings(newSettings);
+                              saveAzkarSettings(newSettings);
+                              if ('vibrate' in navigator) {
+                                navigator.vibrate(getVibrationPattern(newSettings));
+                              }
+                            }}
+                          >
+                            {pattern === 'short' ? 'ছোট' : pattern === 'medium' ? 'মাঝারি' : 'দীর্ঘ'}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {filteredCategories.map((category) => (
             <TabsContent key={category.id} value={category.id} className="space-y-4">
