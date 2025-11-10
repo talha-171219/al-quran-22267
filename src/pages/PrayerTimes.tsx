@@ -4,8 +4,11 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Sunrise, Sunset, Sun, Moon, MapPin, Bell, Volume2, X, Settings } from "lucide-react";
+import { Sunrise, Sunset, Sun, Moon, MapPin, Bell, Volume2, Calendar as CalendarIcon, ChevronDown, X } from "lucide-react";
 import { toast } from "sonner";
+import { PrayerCalendar } from "@/components/prayer/PrayerCalendar";
+import { toBengaliNumerals, formatCountdownToBengali, formatBengaliDate } from "@/utils/bengaliUtils";
+import { getUpcomingEvents } from "@/data/islamicEvents";
 import {
   Dialog,
   DialogContent,
@@ -43,6 +46,10 @@ const PrayerTimes = () => {
     Maghrib: true,
     Isha: true,
   });
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [showEvents, setShowEvents] = useState(false);
+  const [battery, setBattery] = useState("--");
 
   const prayerIcons = {
     Fajr: Sunrise,
@@ -93,6 +100,17 @@ const PrayerTimes = () => {
   }, []);
 
   useEffect(() => {
+    // Get battery status
+    if ('getBattery' in navigator) {
+      (navigator as any).getBattery().then((battery: any) => {
+        const updateBattery = () => {
+          setBattery(Math.round(battery.level * 100).toString());
+        };
+        updateBattery();
+        battery.addEventListener('levelchange', updateBattery);
+      });
+    }
+
     const interval = setInterval(() => {
       const now = new Date();
       setCurrentTime(
@@ -152,7 +170,7 @@ const PrayerTimes = () => {
       const hours = Math.floor(diff / 60);
       const minutes = diff % 60;
       const seconds = 60 - now.getSeconds();
-      setCountdown(`${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`);
+      setCountdown(formatCountdownToBengali(hours, minutes, seconds));
     };
 
     updatePrayerStatus();
@@ -259,69 +277,127 @@ const PrayerTimes = () => {
     toast.success("অ্যাপ ব্যাকগ্রাউন্ড সক্রিয় করা হয়েছে");
   };
 
-  const today = new Date().toLocaleDateString("bn-BD", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const today = formatBengaliDate(new Date());
+  const upcomingEvents = getUpcomingEvents(3);
+
+  const toggleNotification = (prayer: keyof typeof notificationSettings) => {
+    setNotificationSettings(prev => ({
+      ...prev,
+      [prayer]: !prev[prayer]
+    }));
+    toast.success(`${prayerNamesBn[prayer]} এর জন্য ${!notificationSettings[prayer] ? 'সক্রিয়' : 'নিষ্ক্রিয়'} করা হয়েছে`);
+  };
 
   return (
     <div className="min-h-screen bg-background pb-20">
       <TopBar title="নামাজের সময়" showBack />
 
       <main className="max-w-lg mx-auto px-4 py-6 space-y-4">
-        {/* Header Card */}
+        {/* Enhanced Header Card with Status */}
         <Card className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground">
-          <div className="absolute top-0 right-0 opacity-20">
-            <svg width="200" height="200" viewBox="0 0 200 200">
+          <div className="absolute inset-0 opacity-10">
+            <svg viewBox="0 0 800 400" className="w-full h-full">
               <path
-                d="M100,20 L110,40 L110,100 L90,100 L90,40 Z M100,20 L100,10 L105,10 L105,18 L95,18 L95,10 L100,10 Z"
+                d="M400,50 L450,100 L450,200 L350,200 L350,100 Z M400,50 L400,20 L420,20 L420,40 L380,40 L380,20 L400,20 Z M340,200 L330,210 L340,220 L460,220 L470,210 L460,200 Z"
                 fill="currentColor"
               />
-              <circle cx="100" cy="12" r="4" fill="currentColor" />
+              <circle cx="400" cy="25" r="8" fill="currentColor" />
+              <rect x="320" y="220" width="160" height="30" rx="5" fill="currentColor" />
             </svg>
           </div>
 
           <CardContent className="pt-6 relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                <h3 className="font-semibold">{location || "Bogra"}</h3>
-              </div>
-              <div className="flex items-center gap-4 text-sm">
-                <span>{currentTime}</span>
-                <span>🔋 63%</span>
+            <div className="flex items-center justify-between mb-6">
+              <Button variant="ghost" size="sm" className="text-primary-foreground/90 hover:bg-white/10 gap-2">
+                <MapPin className="h-4 w-4" />
+                <span className="font-medium">{location || "বগুড়া, রাজশাহী"}</span>
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+              <div className="flex items-center gap-4 text-sm font-medium">
+                <span className="text-3xl">{toBengaliNumerals(currentTime)}</span>
+                <span className="opacity-90">🔋 {toBengaliNumerals(battery)}%</span>
               </div>
             </div>
 
-            <div className="text-center space-y-2">
-              <h2 className="text-xl opacity-90">{currentPrayer ? prayerNamesBn[currentPrayer] : ""}</h2>
-              <p className="text-6xl font-bold">
-                {currentPrayer && prayerTimes ? prayerTimes[currentPrayer as keyof PrayerTimes]?.replace(/:\d{2}$/, "") : ""}
-                <span className="text-2xl ml-2">PM</span>
+            <div className="text-center space-y-3 py-4">
+              <div className="flex items-center justify-center gap-3">
+                <h2 className="text-3xl font-bold">{currentPrayer ? prayerNamesBn[currentPrayer] : ""}</h2>
+                <div className="h-2 w-2 bg-white rounded-full animate-pulse"></div>
+              </div>
+              <p className="text-6xl font-bold tracking-tight">
+                {currentPrayer && prayerTimes ? toBengaliNumerals(prayerTimes[currentPrayer as keyof PrayerTimes]?.replace(/:\d{2}$/, "")) : ""}
               </p>
-              <p className="text-lg opacity-90">পরবর্তী নামাজ {countdown} এ</p>
+              <p className="text-lg opacity-90 font-medium">
+                পরবর্তী নামাজ শুরু হবে: {countdown}
+              </p>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-white/20 text-center">
+              <p className="text-sm opacity-90">{today}</p>
+              <p className="text-base font-semibold mt-1">{hijriDate}</p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Islamic Date Card */}
-        <Card className="bg-card/50 backdrop-blur border-2 border-primary/10">
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">{today}</p>
-                <p className="text-lg font-semibold font-arabic">{hijriDate}</p>
+        {/* Quick Actions */}
+        <div className="grid grid-cols-2 gap-3">
+          <Button
+            variant="outline"
+            className="h-auto py-4 flex flex-col items-center gap-2"
+            onClick={() => setShowCalendar(!showCalendar)}
+          >
+            <CalendarIcon className="h-5 w-5" />
+            <span className="text-sm font-medium">মাসিক ক্যালেন্ডার</span>
+          </Button>
+          <Button
+            variant="outline"
+            className="h-auto py-4 flex flex-col items-center gap-2"
+            onClick={() => setShowEvents(!showEvents)}
+          >
+            <Bell className="h-5 w-5" />
+            <span className="text-sm font-medium">ইসলামিক দিবস</span>
+          </Button>
+        </div>
+
+        {/* Calendar View */}
+        {showCalendar && (
+          <PrayerCalendar
+            selectedDate={selectedDate}
+            onDateSelect={(date) => {
+              setSelectedDate(date);
+              toast.success(`${formatBengaliDate(date)} এর নামাজের সময় দেখানো হচ্ছে`);
+            }}
+          />
+        )}
+
+        {/* Islamic Events */}
+        {showEvents && (
+          <Card>
+            <CardContent className="pt-6 space-y-3">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-semibold text-lg">আসন্ন ইসলামিক দিবস</h3>
               </div>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="icon">
-                  <Settings className="h-5 w-5" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+              {upcomingEvents.map((event, index) => (
+                <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                  <div>
+                    <p className="font-medium">{event.nameBn}</p>
+                    <p className="text-sm text-muted-foreground">{event.hijriDate}</p>
+                  </div>
+                  <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                    event.type === 'eid' ? 'bg-accent text-accent-foreground' :
+                    event.type === 'friday' ? 'bg-primary/20 text-primary' :
+                    'bg-secondary/20 text-secondary-foreground'
+                  }`}>
+                    {event.type === 'eid' ? 'ঈদ' : event.type === 'friday' ? 'জুম্মা' : 'বিশেষ'}
+                  </div>
+                </div>
+              ))}
+              <Button variant="ghost" className="w-full mt-2">
+                সব দিন দেখুন
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Prayer Times List */}
         {prayerTimes && (
@@ -337,12 +413,12 @@ const PrayerTimes = () => {
                   key={name}
                   className={`transition-all ${
                     isActive
-                      ? "bg-primary/10 border-2 border-primary"
+                      ? "bg-primary/10 border-2 border-primary shadow-lg"
                       : "bg-card hover:bg-muted/50"
                   }`}
                 >
                   <CardContent className="py-4">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-4">
                         <div
                           className={`p-3 rounded-full ${
@@ -351,22 +427,52 @@ const PrayerTimes = () => {
                         >
                           <Icon className="h-5 w-5" />
                         </div>
-                        <span className="font-medium text-lg">
-                          {prayerNamesBn[name]}
-                        </span>
+                        <div>
+                          <span className="font-semibold text-lg block">
+                            {prayerNamesBn[name]}
+                          </span>
+                          {isActive && (
+                            <span className="text-xs text-primary font-medium">চলমান</span>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-xl font-mono font-bold">{time}</span>
-                        {name !== "Sunrise" && (
-                          <div className="flex items-center gap-2">
-                            <Volume2 className={`h-4 w-4 ${notificationSettings[name as keyof typeof notificationSettings] ? 'text-primary' : 'text-muted-foreground'}`} />
-                            <div className={`w-6 h-6 rounded border-2 ${isActive ? 'border-primary bg-primary' : 'border-muted'} flex items-center justify-center`}>
-                              {isActive && <div className="w-3 h-3 bg-primary-foreground rounded-sm" />}
-                            </div>
-                          </div>
+                      <div className="text-right">
+                        <span className="text-2xl font-bold block">{toBengaliNumerals(time)}</span>
+                        {name === nextPrayer && !isActive && countdown && (
+                          <span className="text-xs text-muted-foreground">বাকি: {countdown}</span>
                         )}
                       </div>
                     </div>
+                    {name !== "Sunrise" && (
+                      <div className="flex items-center gap-2 pt-3 border-t">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex-1 gap-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toast.success(`${prayerNamesBn[name]} এর জন্য অ্যালার্ম সেট করা হয়েছে`);
+                          }}
+                        >
+                          <Bell className="h-4 w-4" />
+                          <span className="text-xs">অ্যালার্ম সেট</span>
+                        </Button>
+                        <Button
+                          variant={notificationSettings[name as keyof typeof notificationSettings] ? "default" : "outline"}
+                          size="sm"
+                          className="flex-1 gap-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleNotification(name as keyof typeof notificationSettings);
+                          }}
+                        >
+                          <Volume2 className="h-4 w-4" />
+                          <span className="text-xs">
+                            {notificationSettings[name as keyof typeof notificationSettings] ? 'আজান চালু' : 'আজান বন্ধ'}
+                          </span>
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               );
