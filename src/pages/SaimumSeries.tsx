@@ -98,6 +98,70 @@ const SaimumSeries = () => {
       author: "আবুল আসাদ",
       pdfUrl: "/books/saimum/saimum-10.pdf",
       description: "সাইমুম সিরিজ - ১০"
+    },
+    {
+      id: 11,
+      title: "Andaman Shodojontro",
+      titleBn: "আন্দামান ষড়যন্ত্র",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-11.pdf",
+      description: "সাইমুম সিরিজ - ১১"
+    },
+    {
+      id: 12,
+      title: "Kongor Kalo Buke",
+      titleBn: "কঙ্গোর কালো বুকে",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-12.pdf",
+      description: "সাইমুম সিরিজ - ১২"
+    },
+    {
+      id: 13,
+      title: "Kokshaser Pahare",
+      titleBn: "ককেশাসের পাহাড়ে",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-13.pdf",
+      description: "সাইমুম সিরিজ - ১৩"
+    },
+    {
+      id: 14,
+      title: "Ekti Dwiper Sandhane",
+      titleBn: "একটি দ্বীপের সন্ধানে",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-14.pdf",
+      description: "সাইমুম সিরিজ - ১৪"
+    },
+    {
+      id: 15,
+      title: "Ek New World",
+      titleBn: "এক নিউ ওয়ার্ল্ড",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-15.pdf",
+      description: "সাইমুম সিরিজ - ১৫"
+    },
+    {
+      id: 16,
+      title: "Americar Ek Ondhokarey",
+      titleBn: "আমেরিকার এক অন্ধকারে",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-16.pdf",
+      description: "সাইমুম সিরিজ - ১৬"
+    },
+    {
+      id: 17,
+      title: "Armenia Simante",
+      titleBn: "আর্মেনিয়া সীমান্তে",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-17.pdf",
+      description: "সাইমুম সিরিজ - ১৭"
+    },
+    {
+      id: 18,
+      title: "Kalapanir Andamane",
+      titleBn: "কালাপানির আন্দামানে",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-18.pdf",
+      description: "সাইমুম সিরিজ - ১৮"
     }
   ];
 
