@@ -360,12 +360,26 @@ const IslamicAI = () => {
               <DialogHeader>
                 <DialogTitle>AI সেটিংস</DialogTitle>
                 <DialogDescription>
-                  আপনার নিজের Gemini API key ব্যবহার করুন অথবা Lovable AI ব্যবহার করুন (ফ্রি)
+                  By default, Lovable AI (free) ব্যবহার হচ্ছে। চাইলে আপনার নিজের Gemini API key ব্যবহার করতে পারেন।
                 </DialogDescription>
               </DialogHeader>
               <div className="space-y-4 py-4">
+                <div className="space-y-3 p-3 bg-primary/5 rounded-lg border border-primary/20">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium">
+                      {useCustomKey ? "Custom Gemini API" : "Lovable AI (ফ্রি)"}
+                    </span>
+                  </div>
+                  {!useCustomKey && (
+                    <p className="text-xs text-muted-foreground">
+                      Lovable AI ব্যবহার করে আপনি ফ্রিতে AI চ্যাট করতে পারবেন। No API key needed!
+                    </p>
+                  )}
+                </div>
+                
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="custom-key">কাস্টম Gemini API Key</Label>
+                  <Label htmlFor="custom-key">কাস্টম Gemini API Key ব্যবহার করুন</Label>
                   <Switch
                     id="custom-key"
                     checked={useCustomKey}
@@ -416,11 +430,15 @@ const IslamicAI = () => {
               <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center">
                 <Sparkles className="h-10 w-10 text-primary" />
               </div>
-              <div>
+              <div className="space-y-3">
                 <h2 className="text-2xl font-bold mb-2">ইসলামিক AI সহায়ক</h2>
                 <p className="text-muted-foreground max-w-md">
                   ইসলাম সম্পর্কিত যেকোনো প্রশ্ন করুন। উত্তর কুরআন ও হাদিসের আলোকে দেওয়া হবে।
                 </p>
+                <div className="flex items-center gap-2 text-sm text-primary">
+                  <Sparkles className="h-4 w-4" />
+                  <span>Powered by Lovable AI</span>
+                </div>
               </div>
               <div className="grid gap-2 w-full max-w-md">
                 {[
