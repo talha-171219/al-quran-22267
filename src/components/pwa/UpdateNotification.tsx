@@ -33,10 +33,6 @@ export const UpdateNotification = () => {
         
         if (reg.waiting) {
           setShowUpdate(true);
-          toast.info("নতুন আপডেট উপলব্ধ!", {
-            description: "অ্যাপ আপডেট করতে ক্লিক করুন",
-            duration: 10000,
-          });
         }
 
         // Listen for updates
@@ -46,10 +42,6 @@ export const UpdateNotification = () => {
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                 setShowUpdate(true);
-                toast.info("নতুন আপডেট উপলব্ধ!", {
-                  description: "অ্যাপ আপডেট করতে ক্লিক করুন",
-                  duration: 10000,
-                });
               }
             });
           }
@@ -69,13 +61,9 @@ export const UpdateNotification = () => {
   }, []);
 
   const handleUpdate = () => {
-    setShowUpdate(false);
     if (registration?.waiting) {
       // Tell the service worker to skip waiting
       registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-      toast.loading("আপডেট হচ্ছে...", {
-        description: "অনুগ্রহ করে অপেক্ষা করুন",
-      });
     }
   };
 
@@ -109,13 +97,6 @@ export const UpdateNotification = () => {
           >
             <RefreshCw className="mr-2 h-4 w-4 group-hover:rotate-180 transition-transform duration-500" />
             এখনই আপডেট করুন
-          </Button>
-          <Button 
-            variant="ghost" 
-            onClick={() => setShowUpdate(false)}
-            className="w-full"
-          >
-            পরে আপডেট করব
           </Button>
         </div>
       </div>
