@@ -36,6 +36,7 @@ import HadithChapter from "./pages/HadithChapter";
 import HadithDetailPage from "./pages/HadithDetailPage";
 import HadithBookmarks from "./pages/HadithBookmarks";
 import HadithSearch from "./pages/HadithSearch";
+import DatePrayerTimes from "./pages/DatePrayerTimes";
 
 const queryClient = new QueryClient();
 
@@ -104,6 +105,7 @@ const App = () => {
           <Route path="/hadith/bookmarks" element={<HadithBookmarks />} />
             <Route path="/zakat" element={<Zakat />} />
             <Route path="/calendar" element={<PrayerTimes />} />
+            <Route path="/calendar/date/:date" element={<DatePrayerTimes />} />
             <Route path="/tasbih" element={<Tasbih />} />
             <Route path="/tafsir" element={<Tafsir />} />
             <Route path="/qibla" element={<Qibla />} />

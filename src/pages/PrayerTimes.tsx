@@ -678,20 +678,10 @@ const PrayerTimes = () => {
 
         {/* Calendar View */}
         {showCalendar && (
-          <div className="space-y-3">
-            {loadingDate && (
-              <Card className="border-primary/50 bg-primary/5">
-                <CardContent className="py-3 flex items-center justify-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                  <span className="text-sm font-medium">নামাজের সময় লোড হচ্ছে...</span>
-                </CardContent>
-              </Card>
-            )}
-            <PrayerCalendar
-              selectedDate={selectedDate}
-              onDateSelect={handleDateSelect}
-            />
-          </div>
+          <PrayerCalendar
+            selectedDate={selectedDate}
+            navigateToPage={true}
+          />
         )}
 
         {/* Islamic Events */}

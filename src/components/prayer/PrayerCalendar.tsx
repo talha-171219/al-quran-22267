@@ -1,16 +1,31 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { toBengaliNumerals, getBengaliMonthName } from "@/utils/bengaliUtils";
+import { formatDateKey } from "@/utils/prayerTimesCache";
 
 interface PrayerCalendarProps {
-  onDateSelect: (date: Date) => void;
+  onDateSelect?: (date: Date) => void;
   selectedDate: Date;
+  navigateToPage?: boolean;
 }
 
-export const PrayerCalendar = ({ onDateSelect, selectedDate }: PrayerCalendarProps) => {
+export const PrayerCalendar = ({ onDateSelect, selectedDate, navigateToPage = true }: PrayerCalendarProps) => {
+  const navigate = useNavigate();
   const [currentMonth, setCurrentMonth] = useState(new Date());
+
+  const handleDateClick = (date: Date) => {
+    if (navigateToPage) {
+      // Navigate to dedicated page
+      const dateStr = formatDateKey(date);
+      navigate(`/calendar/date/${dateStr}`);
+    } else if (onDateSelect) {
+      // Use callback for inline display
+      onDateSelect(date);
+    }
+  };
 
   const daysInMonth = new Date(
     currentMonth.getFullYear(),
@@ -74,7 +89,7 @@ export const PrayerCalendar = ({ onDateSelect, selectedDate }: PrayerCalendarPro
             return (
               <button
                 key={i}
-                onClick={() => onDateSelect(date)}
+                onClick={() => handleDateClick(date)}
                 className={`
                   aspect-square rounded-lg text-sm font-medium transition-all duration-200
                   ${isToday ? 'bg-primary text-primary-foreground shadow-lg scale-105' : ''}
@@ -83,6 +98,7 @@ export const PrayerCalendar = ({ onDateSelect, selectedDate }: PrayerCalendarPro
                   ${!isToday && !isSelected && !isFriday ? 'hover:bg-muted hover:scale-105' : ''}
                   flex items-center justify-center
                   hover-scale
+                  cursor-pointer
                 `}
               >
                 {toBengaliNumerals(i + 1)}
