@@ -11,14 +11,17 @@ export const InstallPWAButton = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Check if already installed
     const installed = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
-    setIsInstalled(installed);
+    const isIOSInstalled = (window.navigator as any).standalone === true;
+    setIsInstalled(installed || isIOSInstalled);
 
     const onBeforeInstall = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
       setCanInstall(true);
     };
+    
     const onInstalled = () => {
       setIsInstalled(true);
       setCanInstall(false);
@@ -28,6 +31,14 @@ export const InstallPWAButton = () => {
 
     window.addEventListener("beforeinstallprompt", onBeforeInstall);
     window.addEventListener("appinstalled", onInstalled);
+    
+    // Check after a short delay if prompt is available
+    setTimeout(() => {
+      if (!deferredPrompt && !installed && !isIOSInstalled) {
+        setCanInstall(true);
+      }
+    }, 1000);
+
     return () => {
       window.removeEventListener("beforeinstallprompt", onBeforeInstall);
       window.removeEventListener("appinstalled", onInstalled);
@@ -51,7 +62,7 @@ export const InstallPWAButton = () => {
 
   if (isInstalled) return null;
 
-  // Show when we can install or as a shortcut to the guide
+  // Always show the button, it will navigate to install guide if prompt not available
   return (
     <Button
       variant="ghost"

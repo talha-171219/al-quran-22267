@@ -25,7 +25,8 @@ export default defineConfig(({ mode }) => ({
         display: "standalone",
         scope: "/",
         start_url: "/",
-        orientation: "portrait",
+        orientation: "any",
+        prefer_related_applications: false,
         icons: [
           {
             src: "/icon-192.jpg",
