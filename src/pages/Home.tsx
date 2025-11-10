@@ -33,6 +33,11 @@ const features = [
     path: "/dua",
   },
   {
+    icon: Star,
+    title: "Azkar",
+    path: "/azkar",
+  },
+  {
     icon: BookText,
     title: "Hadith",
     path: "/hadith",
@@ -41,6 +46,16 @@ const features = [
     icon: BookText,
     title: "Tafsir",
     path: "/tafsir",
+  },
+  {
+    icon: Calendar,
+    title: "Islamic Calendar",
+    path: "/calendar",
+  },
+  {
+    icon: CheckSquare,
+    title: "Prayer Tracker",
+    path: "/prayer-tracker",
   },
   {
     icon: Calculator,
@@ -53,11 +68,6 @@ const features = [
     path: "/ai",
   },
   {
-    icon: Calendar,
-    title: "Islamic Calendar",
-    path: "/calendar",
-  },
-  {
     icon: Sparkles,
     title: "Digital Tasbih",
     path: "/tasbih",
@@ -66,16 +76,6 @@ const features = [
     icon: Compass,
     title: "Qibla Finder",
     path: "/qibla",
-  },
-  {
-    icon: CheckSquare,
-    title: "Prayer Tracker",
-    path: "/prayer-tracker",
-  },
-  {
-    icon: Star,
-    title: "Azkar",
-    path: "/azkar",
   },
 ];
 
