@@ -193,19 +193,19 @@ const Tasbih = () => {
         </Card>
 
         {/* Counter Card */}
-        <Card className="p-8 bg-gradient-to-br from-background to-muted/20">
-          <div className="text-center space-y-6">
-            <div className="space-y-3 pb-4 border-b border-border">
-              <p className="font-arabic text-5xl text-primary leading-relaxed drop-shadow-lg">
+        <Card className="p-4 bg-gradient-to-br from-background to-muted/20">
+          <div className="text-center space-y-4">
+            <div className="space-y-2 pb-3 border-b border-border">
+              <p className="font-arabic text-4xl text-primary leading-relaxed drop-shadow-lg">
                 {currentDhikr.arabic}
               </p>
-              <p className="text-xl font-semibold">{currentDhikr.bangla}</p>
-              <p className="text-sm text-muted-foreground italic">{currentDhikr.meaning}</p>
+              <p className="text-lg font-semibold">{currentDhikr.bangla}</p>
+              <p className="text-xs text-muted-foreground italic">{currentDhikr.meaning}</p>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-2">
               <div className="relative inline-block">
-                <div className="text-7xl font-bold text-primary animate-scale-in">
+                <div className="text-6xl font-bold text-primary animate-scale-in">
                   {count}
                 </div>
                 {count === target && (
@@ -236,7 +236,7 @@ const Tasbih = () => {
               )}
             </div>
 
-            <div className="relative w-60 h-60 mx-auto my-6">
+            <div className="relative w-52 h-52 mx-auto my-4">
               {/* Progress Ring - Background */}
               <svg className="absolute inset-0 -rotate-90 w-full h-full pointer-events-none">
                 <circle
@@ -269,7 +269,7 @@ const Tasbih = () => {
                 onClick={increment}
                 className="relative w-full h-full rounded-full bg-gradient-to-br from-primary via-primary/90 to-primary/80 text-primary-foreground shadow-2xl active:scale-95 transition-all duration-200 flex items-center justify-center touch-manipulation group hover:shadow-primary/50 z-10"
               >
-                <Plus className="h-24 w-24 group-active:scale-90 transition-transform" />
+                <Plus className="h-20 w-20 group-active:scale-90 transition-transform" />
               </button>
             </div>
 
