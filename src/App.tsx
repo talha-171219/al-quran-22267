@@ -21,7 +21,7 @@ import Quran from "./pages/Quran";
 import Audio from "./pages/Audio";
 import Dua from "./pages/Dua";
 import Zakat from "./pages/Zakat";
-import Calendar from "./pages/Calendar";
+import PrayerTimes from "./pages/PrayerTimes";
 import Tasbih from "./pages/Tasbih";
 import Tafsir from "./pages/Tafsir";
 import Qibla from "./pages/Qibla";
@@ -101,7 +101,7 @@ const App = () => {
           <Route path="/hadith/detail/:bookId/:chapterId/:hadithId" element={<HadithDetailPage />} />
           <Route path="/hadith/bookmarks" element={<HadithBookmarks />} />
             <Route path="/zakat" element={<Zakat />} />
-            <Route path="/calendar" element={<Calendar />} />
+            <Route path="/calendar" element={<PrayerTimes />} />
             <Route path="/tasbih" element={<Tasbih />} />
             <Route path="/tafsir" element={<Tafsir />} />
             <Route path="/qibla" element={<Qibla />} />

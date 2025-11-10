@@ -1,6 +1,7 @@
 import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { FeatureCard } from "@/components/features/FeatureCard";
+import { PrayerHeader } from "@/components/prayer/PrayerHeader";
 import {
   BookOpen,
   Mic,
@@ -80,12 +81,16 @@ const features = [
 const Home = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
-      <TopBar title="Al-Quran" showSearch />
-      
-      <main className="max-w-lg mx-auto px-4 py-6 space-y-4">
-        {features.map((feature, index) => (
-          <FeatureCard key={index} {...feature} />
-        ))}
+      <TopBar title="আল কুরআন" />
+
+      <main className="max-w-lg mx-auto px-4 py-6 space-y-6">
+        <PrayerHeader />
+        
+        <div className="grid grid-cols-2 gap-4">
+          {features.map((feature, index) => (
+            <FeatureCard key={index} {...feature} />
+          ))}
+        </div>
       </main>
 
       <BottomNav />
