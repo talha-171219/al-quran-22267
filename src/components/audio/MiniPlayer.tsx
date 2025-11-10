@@ -15,8 +15,8 @@ export const MiniPlayer = () => {
     return null;
   }
 
-  // Only show when there's a surah selected
-  if (!currentSurah) {
+  // Only show when there's a surah selected and audio is playing
+  if (!currentSurah || !isPlaying) {
     return null;
   }
 
