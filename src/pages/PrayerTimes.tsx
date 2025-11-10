@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { PrayerCalendar } from "@/components/prayer/PrayerCalendar";
 import { AdhanPlayer } from "@/components/prayer/AdhanPlayer";
 import { toBengaliNumerals, formatCountdownToBengali, formatBengaliDate } from "@/utils/bengaliUtils";
+import { convertTo12Hour, formatCurrentTime12Hour } from "@/utils/timeUtils";
 import { getUpcomingEvents } from "@/data/islamicEvents";
 import {
   Dialog,
@@ -139,14 +140,7 @@ const PrayerTimes = () => {
 
     const interval = setInterval(() => {
       const now = new Date();
-      setCurrentTime(
-        now.toLocaleTimeString("en-US", {
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: false,
-        })
-      );
+      setCurrentTime(formatCurrentTime12Hour(now));
     }, 1000);
 
     return () => clearInterval(interval);
@@ -348,7 +342,7 @@ const PrayerTimes = () => {
                 <span className="text-xs font-medium">{location || "বগুড়া"}</span>
               </Button>
               <div className="flex items-center gap-3 text-xs font-medium">
-                <span className="text-lg">{toBengaliNumerals(currentTime)}</span>
+                <span className="text-base">{currentTime}</span>
                 <span className="opacity-90 text-xs">🔋 {toBengaliNumerals(battery)}%</span>
               </div>
             </div>
@@ -359,7 +353,10 @@ const PrayerTimes = () => {
                 <div className="h-1.5 w-1.5 bg-white rounded-full animate-pulse"></div>
               </div>
               <p className="text-4xl font-bold tracking-tight">
-                {currentPrayer && prayerTimes ? toBengaliNumerals(prayerTimes[currentPrayer as keyof PrayerTimes]?.replace(/:\d{2}$/, "")) : ""}
+                {currentPrayer && prayerTimes ? (() => {
+                  const { time, periodBn } = convertTo12Hour(prayerTimes[currentPrayer as keyof PrayerTimes]);
+                  return `${time} ${periodBn}`;
+                })() : ""}
               </p>
               <p className="text-sm opacity-90 font-medium">
                 পরবর্তী: {countdown}
@@ -482,7 +479,10 @@ const PrayerTimes = () => {
                         </div>
                       </div>
                       <div className="text-right">
-                        <span className="text-2xl font-bold block">{toBengaliNumerals(time)}</span>
+                        <div className="flex items-baseline gap-1 justify-end">
+                          <span className="text-2xl font-bold">{convertTo12Hour(time).time}</span>
+                          <span className="text-xs font-medium opacity-80">{convertTo12Hour(time).periodBn}</span>
+                        </div>
                         {name === nextPrayer && !isActive && countdown && (
                           <span className="text-xs text-muted-foreground">বাকি: {countdown}</span>
                         )}
