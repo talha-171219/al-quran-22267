@@ -21,12 +21,14 @@ import { toast } from "sonner";
 const Azkar = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("morning");
+  const [refreshKey, setRefreshKey] = useState(0); // Force re-render
 
   const handleCount = (categoryId: string, dhikrIndex: number, maxCount: number) => {
     const currentCount = getTodayDhikrCount(categoryId, dhikrIndex);
     
     if (currentCount < maxCount) {
       updateDhikrCount(categoryId, dhikrIndex, currentCount + 1, maxCount);
+      setRefreshKey(prev => prev + 1); // Trigger re-render
       
       // Check if all dhikrs in category are completed
       const category = azkarCategories.find(c => c.id === categoryId);
@@ -39,6 +41,7 @@ const Azkar = () => {
 
   const handleReset = (categoryId: string, dhikrIndex: number) => {
     resetDhikrCount(categoryId, dhikrIndex);
+    setRefreshKey(prev => prev + 1); // Trigger re-render
   };
 
   const playAudio = (text: string) => {
