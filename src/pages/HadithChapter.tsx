@@ -29,7 +29,9 @@ const HadithChapter = () => {
   const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
   const [userId, setUserId] = useState<string | null>(null);
   const [hadiths, setHadiths] = useState<any[]>([]);
+  const [allHadiths, setAllHadiths] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isSearching, setIsSearching] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -152,9 +154,48 @@ const HadithChapter = () => {
     };
   }, [loadMore, hasMore, loadingMore, hadiths.length, page]);
 
+  // Load all hadiths when searching
+  useEffect(() => {
+    if (!searchQuery.trim() || !bookId || !chapterId) {
+      setAllHadiths([]);
+      return;
+    }
+
+    const loadAllHadiths = async () => {
+      setIsSearching(true);
+      try {
+        const getChapterHadiths = bookId === "bukhari" ? getBukhariChapterHadiths : 
+                                   bookId === "tirmidhi" ? getTirmidhiChapterHadiths :
+                                   getMuslimChapterHadiths;
+        
+        // Load all hadiths without pagination
+        let allFetchedHadiths: any[] = [];
+        let currentPage = 1;
+        let more = true;
+        
+        while (more) {
+          const { hadiths: pageHadiths, hasMore } = await getChapterHadiths(chapterId, currentPage, 50);
+          allFetchedHadiths = [...allFetchedHadiths, ...pageHadiths];
+          more = hasMore;
+          currentPage++;
+        }
+        
+        setAllHadiths(allFetchedHadiths);
+      } catch (error) {
+        console.error("Search load error:", error);
+        toast.error("সার্চ করতে সমস্যা হয়েছে");
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    loadAllHadiths();
+  }, [searchQuery, bookId, chapterId]);
+
   // Filter hadiths by search
+  const searchDataSource = searchQuery.trim() ? allHadiths : hadiths;
   const filteredHadiths = searchQuery.trim()
-    ? hadiths.filter((h) =>
+    ? searchDataSource.filter((h) =>
         h.bangla.toLowerCase().includes(searchQuery.toLowerCase()) ||
         h.arabic.toLowerCase().includes(searchQuery.toLowerCase()) ||
         h.hadithNumber.includes(searchQuery)
@@ -331,6 +372,20 @@ const HadithChapter = () => {
             </button>
           )}
         </div>
+
+        {/* Searching indicator */}
+        {isSearching && (
+          <Card className="border-2 border-primary/20">
+            <CardContent className="pt-6 pb-6">
+              <div className="flex items-center justify-center gap-3">
+                <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                <div className="h-2 w-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                <div className="h-2 w-2 bg-primary rounded-full animate-bounce"></div>
+                <span className="text-sm font-medium text-primary ml-2">সব হাদিস লোড করা হচ্ছে...</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Hadiths List */}
         <div className="space-y-4">
