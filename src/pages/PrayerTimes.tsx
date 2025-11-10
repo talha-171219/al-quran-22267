@@ -1,16 +1,28 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { Sunrise, Sunset, Sun, Moon, MapPin, Bell, Volume2, Calendar as CalendarIcon, ChevronDown, X } from "lucide-react";
+import { Sunrise, Sunset, Sun, Moon, MapPin, Bell, Volume2, Calendar as CalendarIcon, ChevronDown, X, AlarmClock } from "lucide-react";
 import { toast } from "sonner";
 import { PrayerCalendar } from "@/components/prayer/PrayerCalendar";
 import { AdhanPlayer } from "@/components/prayer/AdhanPlayer";
 import { toBengaliNumerals, formatCountdownToBengali, formatBengaliDate } from "@/utils/bengaliUtils";
 import { convertTo12Hour, formatCurrentTime12Hour } from "@/utils/timeUtils";
 import { getUpcomingEvents } from "@/data/islamicEvents";
+import { getDefaultAdhanStyle } from "@/data/adhanAudio";
+import {
+  scheduleNotification,
+  scheduleAdhan,
+  getLocationName,
+  saveAlarmSettings,
+  loadAlarmSettings,
+  saveAdhanSettings,
+  loadAdhanSettings,
+  requestNotificationPermission,
+  playAdhan,
+} from "@/utils/prayerNotifications";
 import {
   Dialog,
   DialogContent,
@@ -41,13 +53,9 @@ const PrayerTimes = () => {
   const [locationPermission, setLocationPermission] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState(false);
   const [backgroundEnabled, setBackgroundEnabled] = useState(false);
-  const [notificationSettings, setNotificationSettings] = useState({
-    Fajr: true,
-    Dhuhr: true,
-    Asr: true,
-    Maghrib: true,
-    Isha: true,
-  });
+  const [alarmSettings, setAlarmSettings] = useState<{ [key: string]: boolean }>({});
+  const [adhanSettings, setAdhanSettings] = useState<{ [key: string]: boolean }>({});
+  const adhanTimeouts = useRef<{ [key: string]: NodeJS.Timeout | null }>({});
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
   const [showEvents, setShowEvents] = useState(false);
@@ -74,7 +82,11 @@ const PrayerTimes = () => {
   };
 
   useEffect(() => {
-    // Check permissions on load
+    // Load saved settings
+    setAlarmSettings(loadAlarmSettings());
+    setAdhanSettings(loadAdhanSettings());
+
+    // Check permissions on load and request immediately
     const checkPermissions = async () => {
       if ('permissions' in navigator) {
         try {
@@ -109,7 +121,7 @@ const PrayerTimes = () => {
       const oneHour = 60 * 60 * 1000;
       
       if (now - cacheTime > oneHour) {
-        // Refresh if more than 1 hour old
+        // Request location permission immediately for accurate location
         if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(
             (position) => {
@@ -117,14 +129,35 @@ const PrayerTimes = () => {
             },
             () => {
               // Silently fail, use cached data
+              toast.info("সংরক্ষিত তথ্য থেকে দেখানো হচ্ছে");
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0
             }
           );
         }
       }
     } else {
+      // No cached data, must request permission
       setShowPermissionDialog(true);
     }
+
+    return () => {
+      // Clean up adhan timeouts
+      Object.values(adhanTimeouts.current).forEach(timeout => {
+        if (timeout) clearTimeout(timeout);
+      });
+    };
   }, []);
+
+  // Schedule prayers when settings or prayer times change
+  useEffect(() => {
+    if (prayerTimes && Object.keys(alarmSettings).length > 0) {
+      scheduleAllPrayers(prayerTimes);
+    }
+  }, [prayerTimes, alarmSettings, adhanSettings]);
 
   useEffect(() => {
     // Get battery status
@@ -253,18 +286,22 @@ const PrayerTimes = () => {
         setPrayerTimes(data.data.timings);
         const hijri = `${data.data.date.hijri.month.en} ${data.data.date.hijri.day}, ${data.data.date.hijri.year} AH`;
         setHijriDate(hijri);
-        setLocation(data.data.meta.timezone.split("/")[1] || "Unknown");
+        
+        // Get actual city name using reverse geocoding
+        const cityName = await getLocationName(lat, lon);
+        setLocation(cityName);
 
         localStorage.setItem(
           "prayerTimes",
           JSON.stringify({
             timings: data.data.timings,
             hijriDate: hijri,
-            location: data.data.meta.timezone.split("/")[1],
+            location: cityName,
+            timestamp: Date.now(),
           })
         );
 
-        toast.success("নামাজের সময় লোড হয়েছে");
+        toast.success(`নামাজের সময় লোড হয়েছে - ${cityName}`);
       }
     } catch (error) {
       toast.error("নামাজের সময় লোড করতে ব্যর্থ");
@@ -290,6 +327,7 @@ const PrayerTimes = () => {
             timings: data.data.timings,
             hijriDate: hijri,
             location: city,
+            timestamp: Date.now(),
           })
         );
 
@@ -298,6 +336,45 @@ const PrayerTimes = () => {
     } catch (error) {
       toast.error("নামাজের সময় লোড করতে ব্যর্থ");
     }
+  };
+
+  const scheduleAllPrayers = (timings: PrayerTimes) => {
+    // Clear existing timeouts
+    Object.values(adhanTimeouts.current).forEach(timeout => {
+      if (timeout) clearTimeout(timeout);
+    });
+
+    // Schedule alarms and adhan for enabled prayers
+    const prayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+    prayers.forEach(prayer => {
+      const time = timings[prayer as keyof PrayerTimes];
+      
+      // Schedule alarm if enabled
+      if (alarmSettings[prayer]) {
+        scheduleNotification(prayer, time, prayerNamesBn[prayer]);
+      }
+
+      // Schedule adhan if enabled
+      if (adhanSettings[prayer]) {
+        const timeoutId = scheduleAdhan(prayer, time, () => {
+          const defaultStyle = getDefaultAdhanStyle();
+          playAdhan(defaultStyle.audioUrl);
+          
+          // Show notification
+          if (Notification.permission === 'granted') {
+            new Notification(`${prayerNamesBn[prayer]} এর সময়`, {
+              body: 'আযান চলছে...',
+              icon: '/icon-192.png',
+              tag: `adhan-${prayer}`,
+            });
+          }
+        });
+        
+        if (timeoutId) {
+          adhanTimeouts.current[prayer] = timeoutId;
+        }
+      }
+    });
   };
 
   const enableBackground = () => {
@@ -309,12 +386,57 @@ const PrayerTimes = () => {
   const today = formatBengaliDate(new Date());
   const upcomingEvents = getUpcomingEvents(3);
 
-  const toggleNotification = (prayer: keyof typeof notificationSettings) => {
-    setNotificationSettings(prev => ({
-      ...prev,
-      [prayer]: !prev[prayer]
-    }));
-    toast.success(`${prayerNamesBn[prayer]} এর জন্য ${!notificationSettings[prayer] ? 'সক্রিয়' : 'নিষ্ক্রিয়'} করা হয়েছে`);
+  const toggleAlarm = async (prayer: string) => {
+    // Request notification permission if not granted
+    if (!notificationPermission) {
+      const granted = await requestNotificationPermission();
+      if (!granted) {
+        toast.error("নোটিফিকেশন চালু করতে সেটিংসে যান");
+        return;
+      }
+      setNotificationPermission(true);
+    }
+
+    const newSettings = {
+      ...alarmSettings,
+      [prayer]: !alarmSettings[prayer],
+    };
+    setAlarmSettings(newSettings);
+    saveAlarmSettings(newSettings);
+
+    if (prayerTimes && newSettings[prayer]) {
+      const time = prayerTimes[prayer as keyof PrayerTimes];
+      scheduleNotification(prayer, time, prayerNamesBn[prayer]);
+      toast.success(`${prayerNamesBn[prayer]} এর অ্যালার্ম সেট করা হয়েছে`);
+    } else {
+      toast.success(`${prayerNamesBn[prayer]} এর অ্যালার্ম বন্ধ করা হয়েছে`);
+    }
+  };
+
+  const toggleAdhan = async (prayer: string) => {
+    // Request notification permission if not granted (for adhan notification)
+    if (!notificationPermission) {
+      const granted = await requestNotificationPermission();
+      if (!granted) {
+        toast.error("নোটিফিকেশন চালু করতে সেটিংসে যান");
+        return;
+      }
+      setNotificationPermission(true);
+    }
+
+    const newSettings = {
+      ...adhanSettings,
+      [prayer]: !adhanSettings[prayer],
+    };
+    setAdhanSettings(newSettings);
+    saveAdhanSettings(newSettings);
+
+    if (prayerTimes) {
+      scheduleAllPrayers(prayerTimes);
+      toast.success(
+        `${prayerNamesBn[prayer]} এর আযান ${newSettings[prayer] ? 'চালু' : 'বন্ধ'} করা হয়েছে`
+      );
+    }
   };
 
   return (
@@ -369,6 +491,74 @@ const PrayerTimes = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Permission Banners */}
+        {!notificationPermission && prayerTimes && (
+          <Card className="border-orange-500/50 bg-orange-50 dark:bg-orange-950/20">
+            <CardContent className="py-3 flex items-center gap-3">
+              <Bell className="h-5 w-5 text-orange-500" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">নোটিফিকেশন চালু করুন</p>
+                <p className="text-xs text-muted-foreground">
+                  নামাজের সময় জানান পেতে সেটিংসে যান
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={async () => {
+                  const granted = await requestNotificationPermission();
+                  if (granted) {
+                    setNotificationPermission(true);
+                    toast.success("নোটিফিকেশন চালু হয়েছে");
+                  } else {
+                    toast.error("নোটিফিকেশন অনুমতি প্রয়োজন");
+                  }
+                }}
+              >
+                চালু করুন
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {!locationPermission && prayerTimes && (
+          <Card className="border-blue-500/50 bg-blue-50 dark:bg-blue-950/20">
+            <CardContent className="py-3 flex items-center gap-3">
+              <MapPin className="h-5 w-5 text-blue-500" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">লোকেশন অনুরোধ দিন</p>
+                <p className="text-xs text-muted-foreground">
+                  সঠিক সময় পেতে লোকেশন চালু করুন
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => {
+                  if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                      (position) => {
+                        setLocationPermission(true);
+                        getPrayerTimes(position.coords.latitude, position.coords.longitude);
+                      },
+                      () => {
+                        toast.error("লোকেশন অনুমতি প্রয়োজন");
+                      },
+                      {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                      }
+                    );
+                  }
+                }}
+              >
+                চালু করুন
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Quick Actions */}
         <div className="grid grid-cols-3 gap-2">
@@ -461,7 +651,7 @@ const PrayerTimes = () => {
                 >
                   <CardContent className="py-4">
                     <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-3">
                         <div
                           className={`p-3 rounded-full ${
                             isActive ? "bg-primary text-primary-foreground" : "bg-muted"
@@ -491,29 +681,31 @@ const PrayerTimes = () => {
                     {name !== "Sunrise" && (
                       <div className="flex items-center gap-2 pt-3 border-t">
                         <Button
-                          variant="outline"
+                          variant={alarmSettings[name] ? "default" : "outline"}
                           size="sm"
                           className="flex-1 gap-2"
                           onClick={(e) => {
                             e.stopPropagation();
-                            toast.success(`${prayerNamesBn[name]} এর জন্য অ্যালার্ম সেট করা হয়েছে`);
+                            toggleAlarm(name);
                           }}
                         >
-                          <Bell className="h-4 w-4" />
-                          <span className="text-xs">অ্যালার্ম সেট</span>
+                          <AlarmClock className="h-4 w-4" />
+                          <span className="text-xs">
+                            {alarmSettings[name] ? 'অ্যালার্ম চালু' : 'অ্যালার্ম সেট'}
+                          </span>
                         </Button>
                         <Button
-                          variant={notificationSettings[name as keyof typeof notificationSettings] ? "default" : "outline"}
+                          variant={adhanSettings[name] ? "default" : "outline"}
                           size="sm"
                           className="flex-1 gap-2"
                           onClick={(e) => {
                             e.stopPropagation();
-                            toggleNotification(name as keyof typeof notificationSettings);
+                            toggleAdhan(name);
                           }}
                         >
                           <Volume2 className="h-4 w-4" />
                           <span className="text-xs">
-                            {notificationSettings[name as keyof typeof notificationSettings] ? 'আজান চালু' : 'আজান বন্ধ'}
+                            {adhanSettings[name] ? 'আজান চালু' : 'আজান বন্ধ'}
                           </span>
                         </Button>
                       </div>
