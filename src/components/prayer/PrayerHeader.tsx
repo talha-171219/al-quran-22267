@@ -5,6 +5,7 @@ import { MapPin, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import { convertTo12Hour, formatCurrentTime12Hour } from "@/utils/timeUtils";
 import { toBengaliNumerals } from "@/utils/bengaliUtils";
+import { getLocationName } from "@/utils/prayerNotifications";
 import mosqueImage from "@/assets/mosque-sunset.jpg";
 
 interface PrayerTimes {
@@ -76,14 +77,18 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
         setPrayerTimes(timings);
         const hijri = `${data.data.date.hijri.month.en} ${data.data.date.hijri.day}, ${data.data.date.hijri.year} AH`;
         setHijriDate(hijri);
-        setLocation(data.data.meta.timezone.split('/')[1] || "Unknown");
+        
+        // Get actual city name using reverse geocoding
+        const cityName = await getLocationName(lat, lon);
+        setLocation(cityName);
 
         localStorage.setItem(
           "prayerTimes",
           JSON.stringify({
             timings,
             hijriDate: hijri,
-            location: data.data.meta.timezone.split('/')[1],
+            location: cityName,
+            timestamp: Date.now(),
           })
         );
       }
@@ -112,6 +117,7 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
             timings,
             hijriDate: hijri,
             location: city,
+            timestamp: Date.now(),
           })
         );
       }

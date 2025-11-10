@@ -12,6 +12,7 @@ import { toBengaliNumerals, formatCountdownToBengali, formatBengaliDate } from "
 import { convertTo12Hour, formatCurrentTime12Hour } from "@/utils/timeUtils";
 import { getUpcomingEvents } from "@/data/islamicEvents";
 import { getDefaultAdhanStyle } from "@/data/adhanAudio";
+import { usePermissions } from "@/contexts/PermissionsContext";
 import {
   scheduleNotification,
   scheduleAdhan,
@@ -41,6 +42,7 @@ interface PrayerTimes {
 }
 
 const PrayerTimes = () => {
+  const { locationPermission, notificationPermission, requestLocationPermission, requestNotificationPermission } = usePermissions();
   const [prayerTimes, setPrayerTimes] = useState<PrayerTimes | null>(null);
   const [hijriDate, setHijriDate] = useState("");
   const [location, setLocation] = useState<string>("");
@@ -50,8 +52,6 @@ const PrayerTimes = () => {
   const [currentPrayer, setCurrentPrayer] = useState("");
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
   const [showAthanDialog, setShowAthanDialog] = useState(false);
-  const [locationPermission, setLocationPermission] = useState(false);
-  const [notificationPermission, setNotificationPermission] = useState(false);
   const [backgroundEnabled, setBackgroundEnabled] = useState(false);
   const [alarmSettings, setAlarmSettings] = useState<{ [key: string]: boolean }>({});
   const [adhanSettings, setAdhanSettings] = useState<{ [key: string]: boolean }>({});
@@ -86,28 +86,6 @@ const PrayerTimes = () => {
     setAlarmSettings(loadAlarmSettings());
     setAdhanSettings(loadAdhanSettings());
 
-    // Check permissions on load and request immediately
-    const checkPermissions = async () => {
-      if ('permissions' in navigator) {
-        try {
-          const locPerm = await navigator.permissions.query({ name: 'geolocation' as PermissionName });
-          setLocationPermission(locPerm.state === 'granted');
-          
-          if ('Notification' in window) {
-            setNotificationPermission(Notification.permission === 'granted');
-          }
-        } catch (error) {
-          console.error('Permission check error:', error);
-        }
-      }
-
-      // Check audio permission
-      const audioAllowed = localStorage.getItem("audioPermission");
-      setAudioPermission(audioAllowed === "granted");
-    };
-
-    checkPermissions();
-
     const cached = localStorage.getItem("prayerTimes");
     if (cached) {
       const data = JSON.parse(cached);
@@ -139,9 +117,6 @@ const PrayerTimes = () => {
           );
         }
       }
-    } else {
-      // No cached data, must request permission
-      setShowPermissionDialog(true);
     }
 
     return () => {
@@ -236,10 +211,11 @@ const PrayerTimes = () => {
     setShowPermissionDialog(false);
     
     // Request location
+    await requestLocationPermission();
+    
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          setLocationPermission(true);
           getPrayerTimes(position.coords.latitude, position.coords.longitude);
           toast.success("লোকেশন অনুমতি প্রদান করা হয়েছে");
         },
@@ -255,17 +231,6 @@ const PrayerTimes = () => {
           maximumAge: 0
         }
       );
-    }
-
-    // Request notifications
-    if ('Notification' in window && Notification.permission !== 'granted') {
-      const permission = await Notification.requestPermission();
-      setNotificationPermission(permission === 'granted');
-      if (permission === 'granted') {
-        toast.success("নোটিফিকেশন অনুমতি প্রদান করা হয়েছে");
-      }
-    } else if (Notification.permission === 'granted') {
-      setNotificationPermission(true);
     }
 
     // Request audio permission (implicit)
@@ -394,7 +359,6 @@ const PrayerTimes = () => {
         toast.error("নোটিফিকেশন চালু করতে সেটিংসে যান");
         return;
       }
-      setNotificationPermission(true);
     }
 
     const newSettings = {
@@ -421,7 +385,6 @@ const PrayerTimes = () => {
         toast.error("নোটিফিকেশন চালু করতে সেটিংসে যান");
         return;
       }
-      setNotificationPermission(true);
     }
 
     const newSettings = {
@@ -509,7 +472,6 @@ const PrayerTimes = () => {
                 onClick={async () => {
                   const granted = await requestNotificationPermission();
                   if (granted) {
-                    setNotificationPermission(true);
                     toast.success("নোটিফিকেশন চালু হয়েছে");
                   } else {
                     toast.error("নোটিফিকেশন অনুমতি প্রয়োজন");
@@ -539,7 +501,6 @@ const PrayerTimes = () => {
                   if (navigator.geolocation) {
                     navigator.geolocation.getCurrentPosition(
                       (position) => {
-                        setLocationPermission(true);
                         getPrayerTimes(position.coords.latitude, position.coords.longitude);
                       },
                       () => {
