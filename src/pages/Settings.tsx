@@ -60,27 +60,30 @@ const Settings = () => {
 
     if (checked) {
       try {
+        // Request permission - this will show browser's native popup
         const permission = await Notification.requestPermission();
+        
         if (permission === 'granted') {
           setNotificationEnabled(true);
-          toast.success('নোটিফিকেশন চালু হয়েছে');
+          toast.success('নোটিফিকেশন চালু হয়েছে ✓');
           
-          // Request persistent notification permission for background
-          if ('serviceWorker' in navigator && 'permissions' in navigator) {
-            try {
-              const result = await navigator.permissions.query({ name: 'notifications' as PermissionName });
-              console.log('Notification permission:', result.state);
-            } catch (err) {
-              console.log('Permission query not supported');
-            }
-          }
+          // Show a test notification
+          new Notification('নোটিফিকেশন চালু হয়েছে', {
+            body: 'আপনি এখন নামাজের সময় জানান পাবেন',
+            icon: '/icon-192.png',
+            badge: '/icon-192.png',
+          });
+          
+        } else if (permission === 'denied') {
+          toast.error('নোটিফিকেশন অনুমতি প্রত্যাখ্যান করা হয়েছে। ব্রাউজার সেটিংস থেকে চালু করুন।');
+          setNotificationEnabled(false);
         } else {
           toast.error('নোটিফিকেশন অনুমতি দেওয়া হয়নি');
           setNotificationEnabled(false);
         }
       } catch (error) {
         console.error('Notification permission error:', error);
-        toast.error('নোটিফিকেশন চালু করতে ব্যর্থ');
+        toast.error('নোটিফিকেশন চালু করতে সমস্যা হয়েছে');
         setNotificationEnabled(false);
       }
     } else {

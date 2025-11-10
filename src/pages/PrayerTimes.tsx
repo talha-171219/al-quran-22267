@@ -488,13 +488,27 @@ const PrayerTimes = () => {
                 size="sm"
                 variant="outline"
                 onClick={async () => {
-                  const granted = await requestNotificationPermission();
-                  if (granted) {
-                    toast.success("নোটিফিকেশন চালু হয়েছে");
-                    // Force a re-check of permissions
-                    window.location.reload();
-                  } else {
-                    toast.error("নোটিফিকেশন অনুমতি প্রয়োজন");
+                  try {
+                    if (!('Notification' in window)) {
+                      toast.error('আপনার ব্রাউজার নোটিফিকেশন সাপোর্ট করে না');
+                      return;
+                    }
+
+                    // Request permission - this will show browser's native popup
+                    const permission = await Notification.requestPermission();
+                    
+                    if (permission === 'granted') {
+                      toast.success("নোটিফিকেশন চালু হয়েছে ✓");
+                      // Reload to update permission state
+                      setTimeout(() => window.location.reload(), 500);
+                    } else if (permission === 'denied') {
+                      toast.error("নোটিফিকেশন অনুমতি প্রত্যাখ্যান করা হয়েছে। ব্রাউজার সেটিংস থেকে চালু করুন।");
+                    } else {
+                      toast.error("নোটিফিকেশন অনুমতি দেওয়া হয়নি");
+                    }
+                  } catch (error) {
+                    console.error('Notification permission error:', error);
+                    toast.error("নোটিফিকেশন চালু করতে সমস্যা হয়েছে");
                   }
                 }}
               >
