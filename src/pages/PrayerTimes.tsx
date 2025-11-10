@@ -455,7 +455,25 @@ const PrayerTimes = () => {
           </CardContent>
         </Card>
 
-        {/* Permission Banners */}
+        {/* Permission and Status Banners */}
+        {notificationPermission && prayerTimes && (Object.values(alarmSettings).some(v => v) || Object.values(adhanSettings).some(v => v)) && (
+          <Card className="border-green-500/50 bg-green-50 dark:bg-green-950/20">
+            <CardContent className="py-3 flex items-center gap-3">
+              <Bell className="h-5 w-5 text-green-500" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-green-700 dark:text-green-400">নোটিফিকেশন চালু আছে</p>
+                <p className="text-xs text-muted-foreground">
+                  {Object.entries(alarmSettings).filter(([_, v]) => v).map(([k]) => prayerNamesBn[k]).join(", ")} এর অ্যালার্ম সেট করা আছে
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-xs font-medium text-green-600 dark:text-green-400">সক্রিয়</span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {!notificationPermission && prayerTimes && (
           <Card className="border-orange-500/50 bg-orange-50 dark:bg-orange-950/20">
             <CardContent className="py-3 flex items-center gap-3">
@@ -463,7 +481,7 @@ const PrayerTimes = () => {
               <div className="flex-1">
                 <p className="text-sm font-medium">নোটিফিকেশন চালু করুন</p>
                 <p className="text-xs text-muted-foreground">
-                  নামাজের সময় জানান পেতে সেটিংসে যান
+                  নামাজের সময় জানান পেতে
                 </p>
               </div>
               <Button
@@ -621,9 +639,21 @@ const PrayerTimes = () => {
                           <Icon className="h-5 w-5" />
                         </div>
                         <div>
-                          <span className="font-semibold text-lg block">
-                            {prayerNamesBn[name]}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-lg">
+                              {prayerNamesBn[name]}
+                            </span>
+                            {alarmSettings[name] && (
+                              <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-primary/20">
+                                <AlarmClock className="h-3 w-3 text-primary" />
+                              </div>
+                            )}
+                            {adhanSettings[name] && (
+                              <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-primary/20">
+                                <Volume2 className="h-3 w-3 text-primary" />
+                              </div>
+                            )}
+                          </div>
                           {isActive && (
                             <span className="text-xs text-primary font-medium">চলমান</span>
                           )}
@@ -666,7 +696,7 @@ const PrayerTimes = () => {
                         >
                           <Volume2 className="h-4 w-4" />
                           <span className="text-xs">
-                            {adhanSettings[name] ? 'আজান চালু' : 'আজান বন্ধ'}
+                            {adhanSettings[name] ? 'আযান চালু' : 'আযান সেট'}
                           </span>
                         </Button>
                       </div>

@@ -14,6 +14,32 @@ self.addEventListener('install', (event) => {
   // Don't skip waiting - let the new SW wait until user updates
 });
 
+// Handle push notifications for prayer times
+self.addEventListener('push', (event) => {
+  if (event.data) {
+    const data = event.data.json();
+    const options = {
+      body: data.body || 'নামাজের সময় হয়ে গেছে',
+      icon: '/icon-192.png',
+      badge: '/icon-192.png',
+      vibrate: [200, 100, 200],
+      data: data.data || {},
+      requireInteraction: true,
+    };
+    event.waitUntil(
+      self.registration.showNotification(data.title || 'নামাজের সময়', options)
+    );
+  }
+});
+
+// Handle notification clicks
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(
+    clients.openWindow('/')
+  );
+});
+
 // Listen for skip waiting message
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
