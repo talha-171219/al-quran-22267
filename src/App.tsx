@@ -27,6 +27,8 @@ import Tafsir from "./pages/Tafsir";
 import Qibla from "./pages/Qibla";
 import IslamicAI from "./pages/IslamicAI";
 import InstallApp from "./pages/InstallApp";
+import PrayerTracker from "./pages/PrayerTracker";
+import Azkar from "./pages/Azkar";
 import NotFound from "./pages/NotFound";
 import Hadith from "./pages/Hadith";
 import HadithBook from "./pages/HadithBook";
@@ -107,6 +109,8 @@ const App = () => {
             <Route path="/qibla" element={<Qibla />} />
             <Route path="/ai" element={<IslamicAI />} />
             <Route path="/install" element={<InstallApp />} />
+            <Route path="/prayer-tracker" element={<PrayerTracker />} />
+            <Route path="/azkar" element={<Azkar />} />
             <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />

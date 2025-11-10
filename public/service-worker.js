@@ -3,7 +3,11 @@ const CACHE_NAME = `al-quran-v${CACHE_VERSION}`;
 const APP_SHELL = [
   '/',
   '/index.html',
-  '/manifest.json'
+  '/manifest.json',
+  '/azan1.mp3',
+  '/alarm-clock-short-6402.mp3',
+  '/icon-192.png',
+  '/icon-512.png'
 ];
 
 // Install service worker and precache app shell
@@ -67,8 +71,22 @@ self.addEventListener('fetch', (event) => {
   // Only handle GET
   if (req.method !== 'GET') return;
 
-  // Skip audio - handled via IndexedDB
-  if (url.pathname.endsWith('.mp3')) return;
+  // Cache audio files (adhan & alarm) aggressively
+  if (url.pathname.endsWith('.mp3')) {
+    event.respondWith(
+      caches.match(req).then((cached) => {
+        if (cached) return cached;
+        return fetch(req).then((res) => {
+          if (res && res.status === 200) {
+            const copy = res.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, copy));
+          }
+          return res;
+        });
+      })
+    );
+    return;
+  }
 
   // Navigate requests: network-first, fallback to cached app shell
   if (req.mode === 'navigate') {
