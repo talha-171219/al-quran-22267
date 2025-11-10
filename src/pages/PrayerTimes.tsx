@@ -39,7 +39,6 @@ import {
   updateAdhanSettings as updateBgAdhanSettings,
 } from "@/utils/backgroundPrayerTimer";
 import {
-  loadPrayerCalculationSettings,
   buildPrayerTimesApiUrl,
   buildPrayerTimesByCityApiUrl,
 } from "@/utils/prayerSettings";

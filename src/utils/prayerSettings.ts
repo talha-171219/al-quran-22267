@@ -54,21 +54,8 @@ export const BANGLADESH_DEFAULT_SETTINGS: PrayerCalculationSettings = {
   },
 };
 
-// Save prayer calculation settings
-export const savePrayerCalculationSettings = (settings: PrayerCalculationSettings) => {
-  localStorage.setItem('prayerCalculationSettings', JSON.stringify(settings));
-};
-
-// Load prayer calculation settings
-export const loadPrayerCalculationSettings = (): PrayerCalculationSettings => {
-  const saved = localStorage.getItem('prayerCalculationSettings');
-  if (saved) {
-    try {
-      return JSON.parse(saved);
-    } catch {
-      return BANGLADESH_DEFAULT_SETTINGS;
-    }
-  }
+// Always use Bangladesh default settings (fully automatic)
+export const getPrayerCalculationSettings = (): PrayerCalculationSettings => {
   return BANGLADESH_DEFAULT_SETTINGS;
 };
 
@@ -77,35 +64,28 @@ export const buildTuneParameter = (offsets: PrayerCalculationSettings['tuneOffse
   return `${offsets.Fajr},${offsets.Sunrise},${offsets.Dhuhr},${offsets.Asr},${offsets.Maghrib},${offsets.Isha},${offsets.Imsak}`;
 };
 
-// Build full API URL with settings
+// Build full API URL with automatic Bangladesh settings
 export const buildPrayerTimesApiUrl = (
   lat: number,
   lon: number,
-  timestamp: number,
-  settings?: PrayerCalculationSettings
+  timestamp: number
 ): string => {
-  const config = settings || loadPrayerCalculationSettings();
+  const config = BANGLADESH_DEFAULT_SETTINGS;
   const tuneParam = buildTuneParameter(config.tuneOffsets);
   
   return `https://api.aladhan.com/v1/timings/${timestamp}?latitude=${lat}&longitude=${lon}&method=${config.method}&tune=${tuneParam}`;
 };
 
-// Build API URL for city-based lookup
+// Build API URL for city-based lookup with automatic Bangladesh settings
 export const buildPrayerTimesByCityApiUrl = (
   city: string,
   country: string,
-  date: string,
-  settings?: PrayerCalculationSettings
+  date: string
 ): string => {
-  const config = settings || loadPrayerCalculationSettings();
+  const config = BANGLADESH_DEFAULT_SETTINGS;
   const tuneParam = buildTuneParameter(config.tuneOffsets);
   
   return `https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=${config.method}&tune=${tuneParam}&date=${date}`;
-};
-
-// Reset to default Bangladesh settings
-export const resetToDefaultSettings = () => {
-  savePrayerCalculationSettings(BANGLADESH_DEFAULT_SETTINGS);
 };
 
 // Common Bangladesh cities with coordinates

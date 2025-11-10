@@ -14,36 +14,16 @@ import {
   Info,
   Share2,
   Bell,
-  Settings as SettingsIcon,
-  RotateCcw,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
 import { useState, useEffect } from "react";
-import {
-  loadPrayerCalculationSettings,
-  savePrayerCalculationSettings,
-  resetToDefaultSettings,
-  CALCULATION_METHODS,
-  type PrayerCalculationSettings,
-} from "@/utils/prayerSettings";
-import { PrayerTimeComparison } from "@/components/prayer/PrayerTimeComparison";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 
 const Settings = () => {
   const { theme, setTheme } = useTheme();
   const [autoPlay, setAutoPlay] = useState(false);
   const [offlineMode, setOfflineMode] = useState(false);
   const [notificationEnabled, setNotificationEnabled] = useState(false);
-  const [prayerSettings, setPrayerSettings] = useState<PrayerCalculationSettings>(loadPrayerCalculationSettings());
-  const [showComparison, setShowComparison] = useState(false);
 
   useEffect(() => {
     const savedAutoPlay = localStorage.getItem('autoPlay') === 'true';
@@ -55,9 +35,6 @@ const Settings = () => {
     if ('Notification' in window) {
       setNotificationEnabled(Notification.permission === 'granted');
     }
-
-    // Load prayer settings
-    setPrayerSettings(loadPrayerCalculationSettings());
   }, []);
 
   const handleThemeToggle = (checked: boolean) => {
@@ -138,37 +115,6 @@ const Settings = () => {
 
   const handleAbout = () => {
     toast.info('আল-কুরআন অ্যাপ v1.0.0 - বাংলা কুরআন পাঠের জন্য সম্পূর্ণ সমাধান');
-  };
-
-  const handleMethodChange = (value: string) => {
-    const methodId = parseInt(value);
-    const newSettings = { ...prayerSettings, method: methodId };
-    setPrayerSettings(newSettings);
-    savePrayerCalculationSettings(newSettings);
-    toast.success('নামাজের হিসাব পদ্ধতি পরিবর্তিত হয়েছে');
-  };
-
-  const handleTuneChange = (prayer: keyof PrayerCalculationSettings['tuneOffsets'], value: number) => {
-    const newSettings = {
-      ...prayerSettings,
-      tuneOffsets: {
-        ...prayerSettings.tuneOffsets,
-        [prayer]: value,
-      },
-    };
-    setPrayerSettings(newSettings);
-    savePrayerCalculationSettings(newSettings);
-  };
-
-  const handleResetSettings = () => {
-    resetToDefaultSettings();
-    setPrayerSettings(loadPrayerCalculationSettings());
-    toast.success('ডিফল্ট সেটিংস পুনরুদ্ধার করা হয়েছে');
-  };
-
-  const getMethodName = (methodId: number) => {
-    const method = Object.values(CALCULATION_METHODS).find(m => m.id === methodId);
-    return method?.nameBn || 'অজানা';
   };
 
   return (
@@ -265,127 +211,6 @@ const Settings = () => {
               checked={offlineMode}
               onCheckedChange={handleOfflineToggle}
             />
-          </div>
-        </Card>
-
-        {/* Prayer Calculation Settings */}
-        <Card className="p-4 space-y-4">
-          <div className="flex items-center justify-between border-b pb-3">
-            <div className="flex items-center gap-3">
-              <SettingsIcon className="h-5 w-5 text-primary" />
-              <div>
-                <h3 className="font-semibold">নামাজের সময় গণনা</h3>
-                <p className="text-xs text-muted-foreground">বাংলাদেশের জন্য কাস্টমাইজ করুন</p>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleResetSettings}
-              className="gap-2"
-            >
-              <RotateCcw className="h-4 w-4" />
-              রিসেট
-            </Button>
-          </div>
-
-          {/* Calculation Method */}
-          <div className="space-y-2">
-            <Label className="font-medium">গণনা পদ্ধতি</Label>
-            <Select value={prayerSettings.method.toString()} onValueChange={handleMethodChange}>
-              <SelectTrigger>
-                <SelectValue placeholder="পদ্ধতি নির্বাচন করুন" />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.values(CALCULATION_METHODS).map((method) => (
-                  <SelectItem key={method.id} value={method.id.toString()}>
-                    {method.nameBn}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-muted-foreground">
-              বর্তমান: {getMethodName(prayerSettings.method)}
-            </p>
-          </div>
-
-          {/* Time Adjustments */}
-          <div className="space-y-3 pt-2">
-            <Label className="font-medium">সময় সমন্বয় (মিনিট)</Label>
-            <p className="text-xs text-muted-foreground mb-3">
-              প্রতিটি নামাজের সময় ম্যানুয়ালি সমন্বয় করুন
-            </p>
-            
-            {Object.entries(prayerSettings.tuneOffsets).map(([prayer, offset]) => {
-              const prayerNamesBn: { [key: string]: string } = {
-                Fajr: "ফজর",
-                Sunrise: "সূর্যোদয়",
-                Dhuhr: "যুহর",
-                Asr: "আসর",
-                Maghrib: "মাগরিব",
-                Isha: "এশা",
-                Imsak: "ইমসাক",
-              };
-              
-              return (
-                <div key={prayer} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
-                  <span className="text-sm font-medium">{prayerNamesBn[prayer]}</span>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleTuneChange(prayer as keyof PrayerCalculationSettings['tuneOffsets'], Math.max(-5, offset - 1))}
-                      disabled={offset <= -5}
-                      className="h-7 w-7 p-0"
-                    >
-                      -
-                    </Button>
-                    <span className="text-sm font-bold min-w-[40px] text-center">
-                      {offset > 0 ? '+' : ''}{offset}
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleTuneChange(prayer as keyof PrayerCalculationSettings['tuneOffsets'], Math.min(5, offset + 1))}
-                      disabled={offset >= 5}
-                      className="h-7 w-7 p-0"
-                    >
-                      +
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          <div className="pt-3">
-            <Dialog open={showComparison} onOpenChange={setShowComparison}>
-              <DialogTrigger asChild>
-                <Button variant="outline" className="w-full gap-2">
-                  <Info className="h-4 w-4" />
-                  WeMuslim এর সাথে তুলনা করুন
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>নামাজের সময় যাচাই</DialogTitle>
-                  <DialogDescription>
-                    বর্তমান সেটিংস দিয়ে নামাজের সময় দেখুন এবং WeMuslim এর সাথে মিলিয়ে দেখুন
-                  </DialogDescription>
-                </DialogHeader>
-                <PrayerTimeComparison />
-              </DialogContent>
-            </Dialog>
-          </div>
-
-          <div className="pt-3 border-t">
-            <div className="flex items-start gap-2 p-3 bg-primary/5 rounded-lg">
-              <Info className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-              <div className="text-xs text-muted-foreground">
-                <p className="font-medium text-foreground mb-1">বিশেষ দ্রষ্টব্য:</p>
-                <p>এই সেটিংস বাংলাদেশের অফিসিয়াল নামাজের সময়সূচীর সাথে মিলিয়ে সেট করা হয়েছে। পরিবর্তন করলে WeMuslim বা Islamic Foundation এর সাথে সময় নাও মিলতে পারে।</p>
-              </div>
-            </div>
           </div>
         </Card>
 
