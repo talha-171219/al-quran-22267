@@ -222,8 +222,13 @@ export async function getChapterHadiths(
   const cachedHadiths = await hadithCache.getChapter('muslim', chapterNumber);
   
   if (cachedHadiths && cachedHadiths.length > 0) {
+    // Remove duplicates based on hadith number
+    const uniqueHadiths = Array.from(
+      new Map(cachedHadiths.map(h => [h.hadithNumber, h])).values()
+    );
+    
     // Sort by hadith number to ensure sequential display
-    const sortedHadiths = [...cachedHadiths].sort((a, b) => 
+    const sortedHadiths = uniqueHadiths.sort((a, b) => 
       parseInt(a.hadithNumber) - parseInt(b.hadithNumber)
     );
     
@@ -257,9 +262,16 @@ export async function getChapterHadiths(
     chapterHadiths = chapterCache.get(chapterNumber)!;
   } else {
     const arabicHadiths = await fetchArabicHadiths();
-    chapterHadiths = arabicHadiths.filter(
+    const filteredHadiths = arabicHadiths.filter(
       (h) => h.chapter.chapterNumber === chapterNumber
     );
+    
+    // Remove duplicates based on hadith number
+    const uniqueHadiths = Array.from(
+      new Map(filteredHadiths.map(h => [h.hadithNumber, h])).values()
+    );
+    
+    chapterHadiths = uniqueHadiths;
     chapterCache.set(chapterNumber, chapterHadiths);
   }
   
