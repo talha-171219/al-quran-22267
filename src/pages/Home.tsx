@@ -50,7 +50,7 @@ const features = [
   {
     icon: Calendar,
     title: "Islamic Calendar",
-    path: "/islamic-calendar",
+    path: "/calendar",
   },
   {
     icon: CheckSquare,
