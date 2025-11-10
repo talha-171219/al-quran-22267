@@ -39,6 +39,11 @@ import {
   updateAdhanSettings as updateBgAdhanSettings,
 } from "@/utils/backgroundPrayerTimer";
 import {
+  loadPrayerCalculationSettings,
+  buildPrayerTimesApiUrl,
+  buildPrayerTimesByCityApiUrl,
+} from "@/utils/prayerSettings";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -287,9 +292,9 @@ const PrayerTimes = () => {
         return;
       }
 
-      const response = await fetch(
-        `https://api.aladhan.com/v1/timings/${timestamp}?latitude=${lat}&longitude=${lon}&method=2`
-      );
+      // Build API URL with Bangladesh settings
+      const apiUrl = buildPrayerTimesApiUrl(lat, lon, timestamp);
+      const response = await fetch(apiUrl);
       const data = await response.json();
 
       if (data.code === 200) {
@@ -336,9 +341,11 @@ const PrayerTimes = () => {
 
   const getPrayerTimesByCity = async (city: string, country: string) => {
     try {
-      const response = await fetch(
-        `https://api.aladhan.com/v1/timingsByCity?city=${city}&country=${country}&method=2`
-      );
+      const today = new Date();
+      const dateStr = `${String(today.getDate()).padStart(2, '0')}-${String(today.getMonth() + 1).padStart(2, '0')}-${today.getFullYear()}`;
+      
+      const apiUrl = buildPrayerTimesByCityApiUrl(city, country, dateStr);
+      const response = await fetch(apiUrl);
       const data = await response.json();
 
       if (data.code === 200) {

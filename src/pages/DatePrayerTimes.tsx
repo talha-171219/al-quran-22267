@@ -14,6 +14,7 @@ import {
   isCacheValid,
 } from "@/utils/prayerTimesCache";
 import { getLocationName } from "@/utils/prayerNotifications";
+import { buildPrayerTimesApiUrl, buildPrayerTimesByCityApiUrl } from "@/utils/prayerSettings";
 
 interface PrayerTimes {
   Fajr: string;
@@ -85,10 +86,10 @@ const DatePrayerTimes = () => {
             );
           },
           async () => {
-            // Fallback to Bogra
-            const response = await fetch(
-              `https://api.aladhan.com/v1/timingsByCity?city=Bogra&country=Bangladesh&method=2&date=${formatDateForAPI(targetDate)}`
-            );
+            // Fallback to Bogra with Bangladesh settings
+            const dateStr = `${String(targetDate.getDate()).padStart(2, '0')}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${targetDate.getFullYear()}`;
+            const apiUrl = buildPrayerTimesByCityApiUrl("Bogra", "Bangladesh", dateStr);
+            const response = await fetch(apiUrl);
             const data = await response.json();
 
             if (data.code === 200) {
@@ -133,9 +134,8 @@ const DatePrayerTimes = () => {
       const timestamp = Math.floor(targetDate.getTime() / 1000);
       const dateKey = formatDateKey(targetDate);
 
-      const response = await fetch(
-        `https://api.aladhan.com/v1/timings/${timestamp}?latitude=${lat}&longitude=${lon}&method=2`
-      );
+      const apiUrl = buildPrayerTimesApiUrl(lat, lon, timestamp);
+      const response = await fetch(apiUrl);
       const data = await response.json();
 
       if (data.code === 200) {
