@@ -322,6 +322,86 @@ const SaimumSeries = () => {
       author: "আবুল আসাদ",
       pdfUrl: "/books/saimum/saimum-38.pdf",
       description: "সাইমুম সিরিজ - ৩৮"
+    },
+    {
+      id: 39,
+      title: "Rhine Theke Arendsi",
+      titleBn: "রাইন থেকে অ্যারেন্ডসী",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-39.pdf",
+      description: "সাইমুম সিরিজ - ৩৯"
+    },
+    {
+      id: 40,
+      title: "Roktakto Pamir",
+      titleBn: "রক্তাক্ত পামির",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-40.pdf",
+      description: "সাইমুম সিরিজ - ৪০"
+    },
+    {
+      id: 41,
+      title: "Rokto Sagor Periye",
+      titleBn: "রক্ত সাগর পেরিয়ে",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-41.pdf",
+      description: "সাইমুম সিরিজ - ৪১"
+    },
+    {
+      id: 42,
+      title: "Missisipir Tire",
+      titleBn: "মিসিসিপির তীরে",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-42.pdf",
+      description: "সাইমুম সিরিজ - ৪২"
+    },
+    {
+      id: 43,
+      title: "Mindanaor Bondi",
+      titleBn: "মিন্দানাওয়ের বন্দী",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-43.pdf",
+      description: "সাইমুম সিরিজ - ৪৩"
+    },
+    {
+      id: 44,
+      title: "Mount Araroter Arale",
+      titleBn: "মাউন্ট আরারাতের আড়ালে",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-44.pdf",
+      description: "সাইমুম সিরিজ - ৪৪"
+    },
+    {
+      id: 45,
+      title: "Moddho Eshiyay Kalo Megh",
+      titleBn: "মধ্য এশিয়ায় কালো মেঘ",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-45.pdf",
+      description: "সাইমুম সিরিজ - ৪৫"
+    },
+    {
+      id: 46,
+      title: "Black Crosser Mukhomukhi",
+      titleBn: "ব্ল্যাক ক্রসের মুখোমুখি",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-46.pdf",
+      description: "সাইমুম সিরিজ - ৪৬"
+    },
+    {
+      id: 47,
+      title: "Black Crosser Koble",
+      titleBn: "ব্ল্যাক ক্রসের কবলে",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-47.pdf",
+      description: "সাইমুম সিরিজ - ৪৭"
+    },
+    {
+      id: 48,
+      title: "Black Eagler Shontras",
+      titleBn: "ব্লাক ঈগলের সন্ত্রাস",
+      author: "আবুল আসাদ",
+      pdfUrl: "/books/saimum/saimum-48.pdf",
+      description: "সাইমুম সিরিজ - ৪৮"
     }
   ];
 
