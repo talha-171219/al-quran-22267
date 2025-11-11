@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -24,6 +24,22 @@ export const PDFViewer = ({ pdfUrl, title, onClose, onPrevious, onNext, hasPrevi
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [pageInput, setPageInput] = useState<string>("1");
   const [loading, setLoading] = useState<boolean>(true);
+  const [pageWidth, setPageWidth] = useState<number>(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const updateWidth = () => {
+      if (containerRef.current) {
+        const containerWidth = containerRef.current.offsetWidth;
+        // Set width with some padding for better display
+        setPageWidth(Math.min(containerWidth - 32, 800));
+      }
+    };
+
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
@@ -138,30 +154,30 @@ export const PDFViewer = ({ pdfUrl, title, onClose, onPrevious, onNext, hasPrevi
       </div>
 
       {/* PDF Content */}
-      <div className="flex-1 overflow-auto bg-muted/30 p-4 relative">
+      <div ref={containerRef} className="flex-1 overflow-auto bg-muted/30 p-4 relative">
         {/* Previous Page Button */}
         <Button
           variant="default"
           size="icon"
-          className="fixed left-4 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full shadow-lg"
+          className="fixed left-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 sm:h-12 sm:w-12 sm:left-4 rounded-full shadow-lg"
           onClick={() => changePage(-1)}
           disabled={pageNumber <= 1 || loading}
         >
-          <ChevronLeft className="h-6 w-6" />
+          <ChevronLeft className="h-5 w-5 sm:h-6 sm:w-6" />
         </Button>
 
         {/* Next Page Button */}
         <Button
           variant="default"
           size="icon"
-          className="fixed right-4 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full shadow-lg"
+          className="fixed right-2 top-1/2 -translate-y-1/2 z-10 h-10 w-10 sm:h-12 sm:w-12 sm:right-4 rounded-full shadow-lg"
           onClick={() => changePage(1)}
           disabled={pageNumber >= numPages || loading}
         >
-          <ChevronRight className="h-6 w-6" />
+          <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
         </Button>
 
-        <div className="max-w-4xl mx-auto">
+        <div className="w-full mx-auto flex justify-center">
           {loading && (
             <Card className="p-8 flex flex-col items-center justify-center gap-4">
               <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -179,13 +195,15 @@ export const PDFViewer = ({ pdfUrl, title, onClose, onPrevious, onNext, hasPrevi
             loading=""
             className="flex justify-center"
           >
-            <Page
-              pageNumber={pageNumber}
-              scale={1.0}
-              renderTextLayer={true}
-              renderAnnotationLayer={true}
-              className="shadow-lg"
-            />
+            {pageWidth > 0 && (
+              <Page
+                pageNumber={pageNumber}
+                width={pageWidth}
+                renderTextLayer={true}
+                renderAnnotationLayer={true}
+                className="shadow-lg"
+              />
+            )}
           </Document>
         </div>
       </div>
