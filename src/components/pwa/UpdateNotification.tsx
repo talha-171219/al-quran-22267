@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Sparkles, CheckCircle2 } from "lucide-react";
+import { RefreshCw, Sparkles, CheckCircle2, Gift, Zap, Bug } from "lucide-react";
 import { toast } from "sonner";
 import { versionManager, CURRENT_BUILD_ID } from "@/utils/versionManager";
+import { getReleaseNotes } from "@/data/changelog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 const UPDATE_DISMISSED_KEY = 'update-dismissed-version';
 const LAST_UPDATE_TIMESTAMP_KEY = 'last-update-timestamp';
@@ -14,6 +16,7 @@ export const UpdateNotification = () => {
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [newVersion, setNewVersion] = useState<string>('');
   const [oldVersion, setOldVersion] = useState<string>('');
+  const [releaseNotes, setReleaseNotes] = useState<ReturnType<typeof getReleaseNotes>>(undefined);
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -91,6 +94,10 @@ export const UpdateNotification = () => {
             setOldVersion(currentVer);
             setNewVersion(codeVersion);
             
+            // Load release notes
+            const notes = getReleaseNotes(codeVersion);
+            setReleaseNotes(notes);
+            
             setShowUpdate(true);
             toast.info(`নতুন আপডেট উপলব্ধ! (v${codeVersion})`, {
               description: 'আপডেট বাটনে ক্লিক করুন',
@@ -118,6 +125,10 @@ export const UpdateNotification = () => {
                   
                   setOldVersion(currentVer);
                   setNewVersion(codeVersion);
+                  
+                  // Load release notes
+                  const notes = getReleaseNotes(codeVersion);
+                  setReleaseNotes(notes);
                   
                   setShowUpdate(true);
                   setRegistration(reg);
@@ -190,6 +201,10 @@ export const UpdateNotification = () => {
                   
                   setOldVersion(currentVer);
                   setNewVersion(codeVersion);
+                  
+                  // Load release notes
+                  const notes = getReleaseNotes(codeVersion);
+                  setReleaseNotes(notes);
                   
                   setShowUpdate(true);
                   setRegistration(reg);
@@ -351,7 +366,7 @@ export const UpdateNotification = () => {
                 <h3 className="text-xl font-bold text-foreground">
                   আপডেট উপলব্ধ
                 </h3>
-                <div className="space-y-1">
+                <div className="space-y-3">
                   <p className="text-muted-foreground text-sm leading-relaxed">
                     অ্যাপের একটি নতুন সংস্করণ প্রস্তুত। সর্বশেষ বৈশিষ্ট্য এবং উন্নতি পেতে এখনই আপডেট করুন।
                   </p>
@@ -369,6 +384,64 @@ export const UpdateNotification = () => {
                 </div>
               </div>
             </div>
+            
+            {/* Release Notes Section */}
+            {releaseNotes && (
+              <div className="border-t border-border pt-4">
+                <h4 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  নতুন কি আছে?
+                </h4>
+                <ScrollArea className="max-h-48 pr-4">
+                  <div className="space-y-3">
+                    {releaseNotes.features && releaseNotes.features.length > 0 && (
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-1.5 text-xs font-medium text-primary">
+                          <Gift className="h-3.5 w-3.5" />
+                          নতুন ফিচার
+                        </div>
+                        {releaseNotes.features.map((feature, idx) => (
+                          <div key={idx} className="flex items-start gap-2 text-sm text-muted-foreground ml-5">
+                            <span className="text-primary mt-1">•</span>
+                            <span>{feature}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {releaseNotes.improvements && releaseNotes.improvements.length > 0 && (
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-1.5 text-xs font-medium text-blue-500">
+                          <Zap className="h-3.5 w-3.5" />
+                          উন্নতি
+                        </div>
+                        {releaseNotes.improvements.map((improvement, idx) => (
+                          <div key={idx} className="flex items-start gap-2 text-sm text-muted-foreground ml-5">
+                            <span className="text-blue-500 mt-1">•</span>
+                            <span>{improvement}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {releaseNotes.bugFixes && releaseNotes.bugFixes.length > 0 && (
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-1.5 text-xs font-medium text-green-500">
+                          <Bug className="h-3.5 w-3.5" />
+                          Bug Fix
+                        </div>
+                        {releaseNotes.bugFixes.map((fix, idx) => (
+                          <div key={idx} className="flex items-start gap-2 text-sm text-muted-foreground ml-5">
+                            <span className="text-green-500 mt-1">•</span>
+                            <span>{fix}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </ScrollArea>
+              </div>
+            )}
             
             <div className="flex flex-col gap-2 pt-2">
               <Button 
