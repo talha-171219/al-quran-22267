@@ -56,7 +56,7 @@ export const UpdateNotification = () => {
         localStorage.removeItem(UPDATE_DISMISSED_KEY);
       };
 
-      // Function to check for waiting service worker
+      // Function to check for waiting service worker OR version mismatch
       const checkForWaitingWorker = async () => {
         const reg = await navigator.serviceWorker.getRegistration();
         if (reg) {
@@ -70,10 +70,6 @@ export const UpdateNotification = () => {
           
           // Check if update is available using build ID comparison
           const updateAvailable = await versionManager.isUpdateAvailable();
-          if (!updateAvailable) {
-            console.log('⏭️ No update available');
-            return false;
-          }
           
           // Get version info
           const stored = await versionManager.getStoredVersion();
@@ -86,9 +82,10 @@ export const UpdateNotification = () => {
             return false;
           }
           
-          // Check if there's a waiting worker (update available)
-          if (reg.waiting) {
-            console.log(`✅ Update available: ${currentVer} → ${codeVersion}`);
+          // CRITICAL: Show update notification if version/build mismatch detected
+          // Even if there's no waiting service worker yet
+          if (updateAvailable) {
+            console.log(`✅ Update detected: ${currentVer} → ${codeVersion}`);
             updateShown = true;
             clearDismissed(); // Clear any old dismissed version
             
@@ -104,6 +101,14 @@ export const UpdateNotification = () => {
               description: 'আপডেট বাটনে ক্লিক করুন',
               duration: Infinity,
             });
+            return true;
+          } else {
+            console.log('⏭️ No update available');
+          }
+          
+          // Check if there's a waiting worker (update available)
+          if (reg.waiting) {
+            console.log(`✅ Waiting service worker found`);
             return true;
           }
           
