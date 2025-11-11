@@ -20,13 +20,16 @@ export const WelcomeCard = ({ onComplete }: WelcomeCardProps) => {
       if (isUpdate) {
         setWelcomeType("update");
         setAutoNavigate(false);
-      } else if (hasSeenWelcome === "true") {
-        setWelcomeType("refresh");
-        setAutoNavigate(true);
-      } else {
+      } else if (!hasSeenWelcome) {
+        // Only show on first visit
         setWelcomeType("first");
         setAutoNavigate(false);
         localStorage.setItem("hasSeenWelcome", "true");
+      } else {
+        // Don't show welcome on normal refresh
+        if (onComplete) onComplete();
+        window.location.href = "/";
+        return;
       }
     };
 
@@ -55,32 +58,24 @@ export const WelcomeCard = ({ onComplete }: WelcomeCardProps) => {
   };
 
   const getWelcomeContent = () => {
-    switch (welcomeType) {
-      case "update":
-        return {
-          title: "Welcome to New DeenSphereX",
-          subtitle: "Experience upgraded features and deeper guidance.",
-          message: "May this version bring more light to your journey.",
-          verse: "\"Indeed, in the remembrance of Allah do hearts find rest.\" — Surah Ar-Ra'd 13:28",
-          showButton: true,
-        };
-      case "refresh":
-        return {
-          title: "Welcome Back to DeenSphereX",
-          subtitle: "Reconnecting your journey of Faith and Knowledge...",
-          message: "",
-          verse: "\"Indeed, in the remembrance of Allah do hearts find rest.\" — Surah Ar-Ra'd 13:28",
-          showButton: false,
-        };
-      default:
-        return {
-          title: "Welcome to DeenSphereX",
-          subtitle: "Your journey of Faith, Knowledge, and Light begins here.",
-          message: "Explore Quran, Hadith, Duas, and more — all in one Islamic world.",
-          verse: "\"Indeed, in the remembrance of Allah do hearts find rest.\" — Surah Ar-Ra'd 13:28",
-          showButton: true,
-        };
+    if (welcomeType === "update") {
+      return {
+        title: "Welcome to New DeenSphereX",
+        subtitle: "Experience upgraded features and deeper guidance.",
+        message: "May this version bring more light to your journey.",
+        verse: "\"Indeed, in the remembrance of Allah do hearts find rest.\" — Surah Ar-Ra'd 13:28",
+        showButton: true,
+      };
     }
+    
+    // Default: first time
+    return {
+      title: "Welcome to DeenSphereX",
+      subtitle: "Your journey of Faith, Knowledge, and Light begins here.",
+      message: "Explore Quran, Hadith, Duas, and more — all in one Islamic world.",
+      verse: "\"Indeed, in the remembrance of Allah do hearts find rest.\" — Surah Ar-Ra'd 13:28",
+      showButton: true,
+    };
   };
 
   const content = getWelcomeContent();

@@ -10,6 +10,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { MapPin, Bell, Download, X } from "lucide-react";
 import { WelcomeCard } from "@/components/onboarding/WelcomeCard";
+import { versionManager } from "@/utils/versionManager";
 
 interface PermissionsContextType {
   locationPermission: boolean;
@@ -80,11 +81,20 @@ export const PermissionsProvider: React.FC<{ children: React.ReactNode }> = ({ c
       setTimeout(() => {
         setShowPermissionDialog(true);
       }, 1000);
-    } else if (!isInstalled) {
-      // If permissions done but not installed, show welcome directly
-      setTimeout(() => {
-        setShowWelcome(true);
-      }, 500);
+    } else {
+      // Permissions already done, check for updates or first visit
+      const checkWelcome = async () => {
+        const isUpdate = await versionManager.isUpdateAvailable();
+        const hasSeenWelcome = localStorage.getItem("hasSeenWelcome");
+        
+        if (isUpdate || !hasSeenWelcome) {
+          // Show welcome for updates or first visit
+          setTimeout(() => {
+            setShowWelcome(true);
+          }, 500);
+        }
+      };
+      checkWelcome();
     }
 
     return () => {
