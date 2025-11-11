@@ -7,8 +7,8 @@ const BUILD_ID_KEY = 'app-build-id';
 // This ensures each new deployment is detected as an update
 const BUILD_ID = Date.now().toString();
 
-// Semantic version display format (3.0, 3.1, 3.2, etc.)
-const BASE_VERSION = '3.0';
+// Semantic version display format (3.1, 3.2, 3.3, etc.)
+const BASE_VERSION = '3.1';
 
 export interface VersionInfo {
   version: string;

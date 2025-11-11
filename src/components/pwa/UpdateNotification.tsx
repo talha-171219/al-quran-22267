@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { versionManager, CURRENT_BUILD_ID } from "@/utils/versionManager";
 
 const UPDATE_DISMISSED_KEY = 'update-dismissed-version';
+const LAST_UPDATE_TIMESTAMP_KEY = 'last-update-timestamp';
 
 export const UpdateNotification = () => {
   const [showUpdate, setShowUpdate] = useState(false);
@@ -31,6 +32,14 @@ export const UpdateNotification = () => {
       };
       loadVersionInfo();
 
+      // Check if we just completed an update (within last 30 seconds)
+      const justUpdated = (): boolean => {
+        const lastUpdate = localStorage.getItem(LAST_UPDATE_TIMESTAMP_KEY);
+        if (!lastUpdate) return false;
+        const timeSinceUpdate = Date.now() - parseInt(lastUpdate);
+        return timeSinceUpdate < 30000; // 30 seconds
+      };
+
       // Check if user dismissed this build's update
       const isDismissed = (buildId: string): boolean => {
         const dismissed = localStorage.getItem(UPDATE_DISMISSED_KEY);
@@ -47,6 +56,12 @@ export const UpdateNotification = () => {
         const reg = await navigator.serviceWorker.getRegistration();
         if (reg) {
           setRegistration(reg);
+          
+          // CRITICAL: Don't show update if we just completed an update
+          if (justUpdated()) {
+            console.log('⏭️ Update just completed, skipping update check');
+            return false;
+          }
           
           // Check if user already dismissed this build OR we already showed update
           if (isDismissed(CURRENT_BUILD_ID) || updateShown) {
@@ -143,10 +158,12 @@ export const UpdateNotification = () => {
               // 1. Worker is installed and there's an active controller
               // 2. We haven't shown it yet this session
               // 3. User hasn't dismissed it
+              // 4. We didn't just complete an update
               if (newWorker.state === 'installed' && 
                   navigator.serviceWorker.controller && 
                   !updateShown && 
-                  !isDismissed(CURRENT_BUILD_ID)) {
+                  !isDismissed(CURRENT_BUILD_ID) &&
+                  !justUpdated()) {
                 console.log('✅ Update ready - showing notification to user');
                 updateShown = true;
                 clearDismissed();
@@ -206,6 +223,10 @@ export const UpdateNotification = () => {
     // Clear dismissed flag
     localStorage.removeItem(UPDATE_DISMISSED_KEY);
     
+    // CRITICAL: Store timestamp of this update to prevent showing update again immediately after reload
+    localStorage.setItem(LAST_UPDATE_TIMESTAMP_KEY, Date.now().toString());
+    console.log('⏱️ Update timestamp stored');
+    
     // CRITICAL: Mark that this update is user-initiated BEFORE anything else
     if ((window as any).__userInitiatedUpdate) {
       (window as any).__userInitiatedUpdate();
@@ -225,8 +246,7 @@ export const UpdateNotification = () => {
       console.log(`✅ Version updated to ${newVersion}`);
       setNewVersion(newVersion);
       
-      // CRITICAL: Store the current build ID to mark this update as installed
-      // This prevents the update message from showing again after reload
+      // Store the new build ID (will be used after reload)
       localStorage.setItem('app-build-id', CURRENT_BUILD_ID);
       console.log(`✅ Build ID ${CURRENT_BUILD_ID} marked as installed`);
     } catch (error) {
