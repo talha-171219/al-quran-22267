@@ -43,19 +43,21 @@ class VersionManager {
 
   async clearAllCaches(): Promise<void> {
     try {
-      // Clear IndexedDB databases
-      const databases = ['quran-verse-cache', 'hadith-cache'];
+      console.log('Clearing dynamic caches only (keeping static content)...');
       
-      for (const dbName of databases) {
-        await new Promise<void>((resolve, reject) => {
+      // Clear only dynamic IndexedDB databases (prayer times, azkar progress)
+      const dynamicDatabases = ['azkar-tracker', 'prayer-tracker', 'tasbih-tracker'];
+      
+      for (const dbName of dynamicDatabases) {
+        await new Promise<void>((resolve) => {
           const request = indexedDB.deleteDatabase(dbName);
           request.onsuccess = () => {
-            console.log(`Cleared ${dbName}`);
+            console.log(`Cleared dynamic IndexedDB: ${dbName}`);
             resolve();
           };
           request.onerror = () => {
             console.warn(`Failed to clear ${dbName}`);
-            resolve(); // Continue even if one fails
+            resolve();
           };
           request.onblocked = () => {
             console.warn(`${dbName} deletion blocked`);
@@ -64,27 +66,35 @@ class VersionManager {
         });
       }
 
-      // Clear localStorage items related to preloading
+      // Clear only dynamic localStorage items (keep static content and user preferences)
       const keysToRemove = [
-        'surah-preload-status',
-        'hadith-preload-status',
+        'prayerTimesCache',
+        'lastPrayerTimesUpdate'
       ];
       
       keysToRemove.forEach(key => {
         localStorage.removeItem(key);
+        console.log(`Cleared dynamic localStorage: ${key}`);
       });
 
-      // Clear all caches except the service worker cache
+      // Clear only dynamic browser caches (keep static PDFs, audio, API data)
       if ('caches' in window) {
         const cacheNames = await caches.keys();
+        // Only clear dynamic caches, keep static-v1, audio-v1, api-v1
+        const cachesToClear = cacheNames.filter(name => 
+          name.startsWith('al-quran-dynamic-') || 
+          (name.startsWith('workbox-') && !name.includes('audio') && !name.includes('static'))
+        );
+        
         await Promise.all(
-          cacheNames
-            .filter(name => !name.includes('workbox')) // Keep service worker cache
-            .map(name => caches.delete(name))
+          cachesToClear.map(cacheName => {
+            console.log(`Clearing cache: ${cacheName}`);
+            return caches.delete(cacheName);
+          })
         );
       }
 
-      console.log('All caches cleared successfully');
+      console.log('Dynamic caches cleared, static content preserved');
     } catch (error) {
       console.error('Error clearing caches:', error);
     }
