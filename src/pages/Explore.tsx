@@ -1,53 +1,48 @@
 import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Card } from "@/components/ui/card";
+import { Plane, Wheat, Star, Volume2, Image, Store } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { HajjIcon } from "@/components/icons/HajjIcon";
-import { FastingIcon } from "@/components/icons/FastingIcon";
-import { NamesIcon } from "@/components/icons/NamesIcon";
-import { ShahadaIcon } from "@/components/icons/ShahadaIcon";
-import { GalleryIcon } from "@/components/icons/GalleryIcon";
-import { StoreIcon } from "@/components/icons/StoreIcon";
 
 const exploreFeatures = [
   {
-    icon: HajjIcon,
+    icon: Plane,
     title: "Hajj",
     titleBengali: "হজ্জ",
     path: "/hajj",
     gradient: "from-emerald-500 to-teal-600",
   },
   {
-    icon: FastingIcon,
+    icon: Wheat,
     title: "Fasting",
     titleBengali: "রোজা",
     path: "/fasting",
     gradient: "from-orange-500 to-amber-600",
   },
   {
-    icon: NamesIcon,
+    icon: Star,
     title: "99 Names",
     titleBengali: "আল্লাহর ৯৯ নাম",
     path: "/99-names",
     gradient: "from-purple-500 to-pink-600",
   },
   {
-    icon: ShahadaIcon,
+    icon: Volume2,
     title: "Shahada",
     titleBengali: "শাহাদা",
     path: "/shahada",
     gradient: "from-blue-500 to-cyan-600",
   },
   {
-    icon: GalleryIcon,
+    icon: Image,
     title: "Gallery",
     titleBengali: "গ্যালারি",
     path: "/gallery",
     gradient: "from-rose-500 to-red-600",
   },
   {
-    icon: StoreIcon,
+    icon: Store,
     title: "Store",
     titleBengali: "স্টোর",
     path: "/store",
