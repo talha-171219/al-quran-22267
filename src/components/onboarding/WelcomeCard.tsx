@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { versionManager } from "@/utils/versionManager";
 
 interface WelcomeCardProps {
@@ -9,7 +8,6 @@ interface WelcomeCardProps {
 }
 
 export const WelcomeCard = ({ onComplete }: WelcomeCardProps) => {
-  const navigate = useNavigate();
   const [isVisible, setIsVisible] = useState(false);
   const [welcomeType, setWelcomeType] = useState<"first" | "update" | "refresh">("first");
   const [autoNavigate, setAutoNavigate] = useState(false);
@@ -51,7 +49,8 @@ export const WelcomeCard = ({ onComplete }: WelcomeCardProps) => {
     setIsVisible(false);
     setTimeout(() => {
       if (onComplete) onComplete();
-      navigate("/");
+      // Navigate to home page without using react-router
+      window.location.href = "/";
     }, 300);
   };
 
