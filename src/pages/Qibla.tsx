@@ -160,19 +160,28 @@ const Qibla = () => {
     const now = Date.now();
     
     // Vibrate when becoming aligned (and not already aligned)
-    if (isAligned && !wasAligned.current && now - lastVibrateTime.current > 1000) {
+    if (isAligned && !wasAligned.current && now - lastVibrateTime.current > 2000) {
       if ('vibrate' in navigator) {
-        // Triple pulse pattern for success
-        navigator.vibrate([100, 50, 100, 50, 100]);
+        // Strong triple pulse pattern for perfect alignment
+        navigator.vibrate([200, 100, 200, 100, 200]);
         lastVibrateTime.current = now;
-        toast.success("মক্কার দিকে সারিবদ্ধ! 🕋", {
+        toast.success("✓ কিবলা দিক সঠিক!", {
+          description: "মক্কার দিকে মুখ করছেন",
           duration: 2000
         });
       }
     }
     
+    // Gentle vibration when getting close (within 10 degrees)
+    if (!isAligned && Math.abs(rotationNeeded) < 10 && Math.abs(rotationNeeded) > 3 && now - lastVibrateTime.current > 3000) {
+      if ('vibrate' in navigator) {
+        navigator.vibrate(50);
+        lastVibrateTime.current = now;
+      }
+    }
+    
     wasAligned.current = isAligned;
-  }, [isAligned, permissionGranted, qiblaDirection]);
+  }, [isAligned, permissionGranted, qiblaDirection, rotationNeeded]);
 
   const getInstructionText = () => {
     if (!permissionGranted) {
@@ -340,7 +349,7 @@ const Qibla = () => {
                   >
                     {/* Needle */}
                     <div className="absolute flex flex-col items-center">
-                      {/* North pointer (Red) */}
+                      {/* North pointer (Red) - Always points to magnetic north */}
                       <div 
                         className="w-3 h-20 rounded-t-full"
                         style={{
@@ -366,59 +375,72 @@ const Qibla = () => {
                     </div>
                   </div>
                   
-                  {/* Qibla Direction Indicator - Fixed position showing Qibla */}
+                  {/* Qibla Direction Indicator - Always points to Qibla */}
                   {qiblaDirection !== null && (
                     <div 
-                      className="absolute inset-0 flex items-center justify-center transition-transform duration-200 ease-out pointer-events-none"
-                      style={{ transform: `rotate(${qiblaDirection}deg)`, zIndex: 5 }}
+                      className="absolute inset-0 flex items-center justify-center transition-transform duration-200 ease-out"
+                      style={{ transform: `rotate(${qiblaDirection - heading}deg)`, zIndex: 15 }}
                     >
                       <div className="absolute flex flex-col items-center">
-                        {/* Qibla direction line */}
+                        {/* Qibla direction pointer */}
                         <div 
-                          className="w-1 h-24 rounded-t-full opacity-50"
+                          className={`w-2 h-24 rounded-t-full transition-all duration-300 ${
+                            isAligned ? 'opacity-100 scale-110' : 'opacity-70'
+                          }`}
                           style={{
-                            background: 'linear-gradient(to bottom, hsl(var(--primary)), transparent)',
+                            background: isAligned 
+                              ? 'linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--primary-light)))' 
+                              : 'linear-gradient(to bottom, hsl(var(--primary) / 0.7), transparent)',
+                            boxShadow: isAligned ? '0 0 20px hsla(var(--primary) / 0.8)' : 'none'
                           }}
                         />
+                        
+                        {/* Kaaba Icon at Qibla direction */}
+                        <div 
+                          className="absolute -top-2 left-1/2 -translate-x-1/2"
+                        >
+                          <div 
+                            className={`p-2 rounded-lg transition-all duration-300 ${
+                              isAligned 
+                                ? 'bg-primary scale-125 shadow-xl shadow-primary/50' 
+                                : 'bg-primary/80 shadow-lg'
+                            }`}
+                          >
+                            <svg 
+                              className="w-5 h-5 text-white" 
+                              fill="currentColor" 
+                              viewBox="0 0 24 24"
+                            >
+                              <path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.18l6 3.75v7.5l-6 3.75-6-3.75v-7.5l6-3.75z"/>
+                              <rect x="8" y="10" width="8" height="8" rx="1"/>
+                            </svg>
+                            {isAligned && (
+                              <>
+                                <div className="absolute inset-0 rounded-lg bg-primary animate-ping opacity-75" />
+                                <div className="absolute -inset-1 rounded-lg bg-primary/30 blur-md animate-pulse" />
+                              </>
+                            )}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   )}
                   
-                  {/* Kaaba Icon - Fixed at top, showing Qibla direction */}
-                  <div 
-                    className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"
-                    style={{ 
-                      transform: `translateX(-50%) translateY(-8px)`,
-                      zIndex: 30
-                    }}
-                  >
-                    <div 
-                      className={`p-2.5 rounded-lg transition-all duration-300 ${
-                        isAligned 
-                          ? 'bg-primary scale-110 shadow-lg shadow-primary/50' 
-                          : 'bg-muted border-2 border-border'
-                      }`}
-                    >
-                      <svg 
-                        className={`w-6 h-6 ${isAligned ? 'text-white' : 'text-primary'}`} 
-                        fill="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.18l6 3.75v7.5l-6 3.75-6-3.75v-7.5l6-3.75z"/>
-                        <rect x="8" y="10" width="8" height="8" rx="1"/>
-                      </svg>
-                      {isAligned && (
-                        <div className="absolute inset-0 rounded-lg bg-primary animate-ping opacity-75" />
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Current heading indicator */}
-                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-card/90 backdrop-blur-sm px-3 py-1 rounded-full border border-border shadow-lg" style={{ zIndex: 25 }}>
+                  {/* Current heading indicator - shows device direction */}
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-card/95 backdrop-blur-sm px-3 py-1.5 rounded-full border-2 border-border shadow-lg" style={{ zIndex: 25 }}>
                     <p className="text-xs font-bold text-foreground">
                       {Math.round(heading)}° {getCardinalDirection(heading)}
                     </p>
                   </div>
+                  
+                  {/* Qibla direction display - shows where Qibla is */}
+                  {qiblaDirection !== null && (
+                    <div className="absolute top-2 left-1/2 -translate-x-1/2 bg-primary/95 backdrop-blur-sm px-3 py-1.5 rounded-full border-2 border-primary-light shadow-lg" style={{ zIndex: 25 }}>
+                      <p className="text-xs font-bold text-white flex items-center gap-1">
+                        🕋 {Math.round(qiblaDirection)}°
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
