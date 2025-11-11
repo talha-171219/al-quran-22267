@@ -16,6 +16,8 @@ import {
   Bell,
   TrendingUp,
   Package,
+  RefreshCw,
+  CheckCircle2,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
@@ -23,7 +25,7 @@ import { useState, useEffect } from "react";
 import { AzkarStatsCard } from "@/components/azkar/AzkarStats";
 import { calculateAzkarStats } from "@/utils/azkarTracker";
 import { useNavigate } from "react-router-dom";
-import { APP_VERSION } from "@/utils/versionManager";
+import { versionManager } from "@/utils/versionManager";
 
 const Settings = () => {
   const { theme, setTheme } = useTheme();
@@ -32,6 +34,8 @@ const Settings = () => {
   const [offlineMode, setOfflineMode] = useState(false);
   const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [azkarStats, setAzkarStats] = useState(calculateAzkarStats());
+  const [currentVersion, setCurrentVersion] = useState('');
+  const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
 
   useEffect(() => {
     const savedAutoPlay = localStorage.getItem('autoPlay') === 'true';
@@ -46,6 +50,13 @@ const Settings = () => {
 
     // Refresh azkar stats
     setAzkarStats(calculateAzkarStats());
+    
+    // Load current version
+    const loadVersion = async () => {
+      const version = versionManager.getCurrentVersion();
+      setCurrentVersion(version);
+    };
+    loadVersion();
   }, []);
 
   const handleThemeToggle = (checked: boolean) => {
@@ -125,7 +136,57 @@ const Settings = () => {
   };
 
   const handleAbout = () => {
-    toast.info(`আল-কুরআন অ্যাপ v${APP_VERSION} - বাংলা কুরআন পাঠের জন্য সম্পূর্ণ সমাধান`);
+    toast.info(`আল-কুরআন অ্যাপ v${currentVersion} - বাংলা কুরআন পাঠের জন্য সম্পূর্ণ সমাধান`);
+  };
+
+  const handleCheckForUpdates = async () => {
+    setIsCheckingUpdate(true);
+    toast.info('আপডেট চেক করা হচ্ছে...');
+    
+    try {
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.getRegistration();
+        
+        if (registration) {
+          // Force update check
+          await registration.update();
+          
+          // Wait a bit for the update to be processed
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          // Check if update is available
+          const updateAvailable = await versionManager.isUpdateAvailable();
+          
+          if (updateAvailable) {
+            if (registration.waiting) {
+              toast.success('নতুন আপডেট পাওয়া গেছে! 🎉', {
+                description: 'আপডেট বাটনে ক্লিক করুন',
+                duration: 5000,
+              });
+            } else {
+              toast.info('আপডেট ডাউনলোড হচ্ছে...', {
+                description: 'কিছুক্ষণ পর আবার চেক করুন',
+                duration: 3000,
+              });
+            }
+          } else {
+            toast.success('আপনি সর্বশেষ সংস্করণ ব্যবহার করছেন ✓', {
+              description: `v${currentVersion}`,
+              duration: 3000,
+            });
+          }
+        } else {
+          toast.error('Service Worker খুঁজে পাওয়া যায়নি');
+        }
+      } else {
+        toast.error('আপনার ব্রাউজার আপডেট চেক সাপোর্ট করে না');
+      }
+    } catch (error) {
+      console.error('Update check error:', error);
+      toast.error('আপডেট চেক করতে সমস্যা হয়েছে');
+    } finally {
+      setIsCheckingUpdate(false);
+    }
   };
 
   return (
@@ -244,12 +305,34 @@ const Settings = () => {
         </div>
 
         <Card className="p-4 space-y-3">
-          <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
-            <Package className="h-5 w-5 text-primary" />
-            <div className="flex-1">
-              <div className="font-medium">অ্যাপ ভার্সন</div>
-              <div className="text-sm text-muted-foreground">v{APP_VERSION}</div>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+              <Package className="h-5 w-5 text-primary" />
+              <div className="flex-1">
+                <div className="font-medium">বর্তমান সংস্করণ</div>
+                <div className="text-sm text-muted-foreground">v{currentVersion}</div>
+              </div>
+              <CheckCircle2 className="h-5 w-5 text-primary" />
             </div>
+            
+            <Button 
+              onClick={handleCheckForUpdates}
+              disabled={isCheckingUpdate}
+              className="w-full"
+              variant="outline"
+            >
+              {isCheckingUpdate ? (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                  চেক করা হচ্ছে...
+                </>
+              ) : (
+                <>
+                  <RefreshCw className="mr-2 h-4 w-4" />
+                  আপডেট চেক করুন
+                </>
+              )}
+            </Button>
           </div>
 
           <button 
@@ -271,7 +354,7 @@ const Settings = () => {
 
         <div className="text-center space-y-1 pt-4">
           <div className="text-xs text-muted-foreground">
-            আল-কুরআন অ্যাপ v{APP_VERSION}
+            আল-কুরআন অ্যাপ v{currentVersion}
           </div>
           <div className="text-xs text-muted-foreground">
             Developed by Monirul Hasan Talha
