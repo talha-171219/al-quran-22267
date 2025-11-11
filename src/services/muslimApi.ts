@@ -218,16 +218,15 @@ export async function getChapterHadiths(
   page: number = 1,
   pageSize: number = 10
 ): Promise<{ hadiths: CombinedHadith[]; totalCount: number; hasMore: boolean }> {
-  // Try cache first
+  // ALWAYS try IndexedDB cache first for instant loading
   const cachedHadiths = await hadithCache.getChapter('muslim', chapterNumber);
   
   if (cachedHadiths && cachedHadiths.length > 0) {
-    // Remove duplicates based on hadith number
+    // Cache hit - return immediately without any API calls
     const uniqueHadiths = Array.from(
       new Map(cachedHadiths.map(h => [h.hadithNumber, h])).values()
     );
     
-    // Sort by hadith number to ensure sequential display
     const sortedHadiths = uniqueHadiths.sort((a, b) => 
       parseInt(a.hadithNumber) - parseInt(b.hadithNumber)
     );
@@ -252,10 +251,12 @@ export async function getChapterHadiths(
       reference: h.reference,
     }));
     
+    console.log(`✅ মুসলিম অধ্যায় ${chapterNumber} ক্যাশ থেকে লোড হয়েছে`);
     return { hadiths: combined, totalCount, hasMore };
   }
 
-  // Fallback to API
+  // Cache miss - fetch from API and save to cache
+  console.log(`📥 মুসলিম অধ্যায় ${chapterNumber} API থেকে ডাউনলোড হচ্ছে...`);
   let chapterHadiths: ArabicHadith[];
   
   if (chapterCache.has(chapterNumber)) {
@@ -302,6 +303,29 @@ export async function getChapterHadiths(
       reference: `সহীহ মুসলিম ${arabic.hadithNumber}`,
     };
   });
+  
+  // Save all chapter hadiths to cache for future use
+  const allChapterHadiths: CachedHadith[] = chapterHadiths.map((arabic, index) => {
+    const bangla = banglaData[arabic.hadithNumber];
+    return {
+      id: arabic.hadithNumber,
+      hadithNumber: arabic.hadithNumber,
+      chapterHadithNumber: (index + 1).toString(),
+      arabic: arabic.arabicText,
+      bangla: bangla || 'অনুবাদ শীঘ্রই যুক্ত হবে',
+      bookId: 'muslim',
+      bookNumber: arabic.book.bookNumber,
+      bookName: 'সহীহ মুসলিম',
+      chapterNumber: arabic.chapter.chapterNumber,
+      chapterArabic: arabic.chapter.chapterArabic,
+      chapterEnglish: arabic.chapter.chapterEnglish,
+      reference: `সহীহ মুসলিম ${arabic.hadithNumber}`,
+    };
+  });
+  
+  // Save to IndexedDB cache
+  await hadithCache.saveChapter('muslim', chapterNumber, allChapterHadiths);
+  console.log(`💾 মুসলিম অধ্যায় ${chapterNumber} ক্যাশে সংরক্ষিত হয়েছে`);
   
   return { hadiths: combined, totalCount, hasMore };
 }

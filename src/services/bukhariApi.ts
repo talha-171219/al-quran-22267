@@ -224,10 +224,11 @@ export async function getChapterHadiths(
   page: number = 1,
   pageSize: number = 20
 ): Promise<{ hadiths: CombinedHadith[]; totalCount: number; hasMore: boolean }> {
-  // Try cache first
+  // ALWAYS try IndexedDB cache first for instant loading
   const cachedHadiths = await hadithCache.getChapter('bukhari', chapterNumber);
   
   if (cachedHadiths && cachedHadiths.length > 0) {
+    // Cache hit - return immediately without any API calls
     const totalCount = cachedHadiths.length;
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
@@ -247,10 +248,12 @@ export async function getChapterHadiths(
       reference: h.reference,
     }));
     
+    console.log(`✅ বুখারী অধ্যায় ${chapterNumber} ক্যাশ থেকে লোড হয়েছে`);
     return { hadiths: combined, totalCount, hasMore };
   }
 
-  // Fallback to API
+  // Cache miss - fetch from API and save to cache
+  console.log(`📥 বুখারী অধ্যায় ${chapterNumber} API থেকে ডাউনলোড হচ্ছে...`);
   let chapterHadiths: ArabicHadith[];
   
   if (chapterCache.has(chapterNumber)) {
@@ -286,6 +289,28 @@ export async function getChapterHadiths(
       reference: `সহীহ বুখারী ${arabic.hadithNumber}`,
     };
   });
+  
+  // Save all chapter hadiths to cache for future use
+  const allChapterHadiths: CachedHadith[] = chapterHadiths.map((arabic) => {
+    const bangla = banglaData[arabic.hadithNumber];
+    return {
+      id: arabic.hadithNumber,
+      hadithNumber: arabic.hadithNumber,
+      arabic: arabic.arabicText,
+      bangla: bangla || 'অনুবাদ শীঘ্রই যুক্ত হবে',
+      bookId: 'bukhari',
+      bookNumber: arabic.book.bookNumber,
+      bookName: 'সহীহ বুখারী',
+      chapterNumber: arabic.chapter.chapterNumber,
+      chapterArabic: arabic.chapter.chapterArabic,
+      chapterEnglish: arabic.chapter.chapterEnglish,
+      reference: `সহীহ বুখারী ${arabic.hadithNumber}`,
+    };
+  });
+  
+  // Save to IndexedDB cache
+  await hadithCache.saveChapter('bukhari', chapterNumber, allChapterHadiths);
+  console.log(`💾 বুখারী অধ্যায় ${chapterNumber} ক্যাশে সংরক্ষিত হয়েছে`);
   
   return { hadiths: combined, totalCount, hasMore };
 }
