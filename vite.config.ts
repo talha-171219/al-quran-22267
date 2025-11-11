@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["icon-192.jpg", "icon-512.jpg", "icon-192.png", "icon-512.png"],
+      includeAssets: ["icon-192.jpg", "icon-512.jpg", "icon-192.png", "icon-512.png", "azan1.mp3", "alarm-clock-short-6402.mp3"],
       manifest: {
         name: "Al-Quran - Islamic Companion",
         short_name: "Al-Quran",
@@ -46,7 +46,11 @@ export default defineConfig(({ mode }) => ({
       },
       workbox: {
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MB limit
-        globPatterns: ["**/*.{js,css,html,ico,png,jpg,jpeg,svg,woff,woff2}"],
+        globPatterns: ["**/*.{js,css,html,ico,png,jpg,jpeg,svg,woff,woff2,mp3}"],
+        // Ensure offline support for navigation requests
+        navigateFallback: "index.html",
+        navigateFallbackDenylist: [/^\/api/, /^\/auth/],
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\.alquran\.cloud\/.*/i,
@@ -54,8 +58,38 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: "quran-api-cache",
               expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              },
+              networkTimeoutSeconds: 10
+            }
+          },
+          {
+            urlPattern: /^https:\/\/api\.aladhan\.com\/.*/i,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "prayer-times-cache",
+              expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 days
+                maxAgeSeconds: 60 * 60 * 24 // 1 day
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              },
+              networkTimeoutSeconds: 5
+            }
+          },
+          {
+            urlPattern: /^https:\/\/raw\.githubusercontent\.com\/.*hadith-api.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "hadith-api-cache",
+              expiration: {
+                maxEntries: 500,
+                maxAgeSeconds: 60 * 60 * 24 * 90 // 90 days - hadiths never change
               },
               cacheableResponse: {
                 statuses: [0, 200]
@@ -63,13 +97,42 @@ export default defineConfig(({ mode }) => ({
             }
           },
           {
-            urlPattern: /^https:\/\/.*\.(mp3)$/i,
+            urlPattern: /^https:\/\/nominatim\.openstreetmap\.org\/.*/i,
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "location-cache",
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              },
+              networkTimeoutSeconds: 5
+            }
+          },
+          {
+            urlPattern: /\.mp3$/,
             handler: "CacheFirst",
             options: {
               cacheName: "audio-cache",
               expiration: {
                 maxEntries: 200,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+                maxAgeSeconds: 60 * 60 * 24 * 90 // 90 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            urlPattern: /\.pdf$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "books-cache",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year - books never change
               },
               cacheableResponse: {
                 statuses: [0, 200]

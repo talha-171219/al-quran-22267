@@ -9,23 +9,8 @@ if (!rootElement) {
   throw new Error("Root element not found");
 }
 
-// Register service worker for offline capability
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(registration => {
-        console.log('✅ Service Worker registered successfully:', registration.scope);
-        
-        // Check for updates periodically
-        setInterval(() => {
-          registration.update();
-        }, 1000 * 60 * 60); // Check every hour
-      })
-      .catch(error => {
-        console.error('❌ Service Worker registration failed:', error);
-      });
-  });
-}
+// VitePWA auto-registers service worker - no manual registration needed
+// The service worker handles offline caching automatically
 
 createRoot(rootElement).render(
   <PermissionsProvider>

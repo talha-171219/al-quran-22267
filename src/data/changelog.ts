@@ -15,10 +15,19 @@ export const changelog: ReleaseNote[] = [
       'নতুন version management system',
       'স্বয়ংক্রিয় update notification',
       'Update changelog display',
+      'হাদিস persistent caching - refresh এ instant load',
+      '✅ সম্পূর্ণ offline mode support',
     ],
     improvements: [
-      'User progress data সংরক্ষণ উন্নত করা হয়েছে',
-      'Offline functionality আরও ভালো করা হয়েছে',
+      'হাদিস IndexedDB cache থেকে তাৎক্ষণিক load',
+      'Offline mode ERR_FAILED issue সমাধান',
+      'Service Worker optimization',
+      'Network error handling উন্নত',
+    ],
+    bugFixes: [
+      'Page refresh এ hadith reload issue ঠিক',
+      'Offline navigation issue সমাধান',
+      'Service worker conflict সমাধান',
     ],
   },
   {
