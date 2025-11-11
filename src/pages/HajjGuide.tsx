@@ -80,7 +80,7 @@ const HajjGuide = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <TopBar title="হজ গাইড" showBack />
+      <TopBar title="হজ্জ গাইড" showBack backPath="/explore" />
 
       {/* Hero Banner */}
       <div className="relative h-64 overflow-hidden">

@@ -6,12 +6,13 @@ import { InstallPWAButton } from "@/components/pwa/InstallPWAButton";
 interface TopBarProps {
   title: string;
   showBack?: boolean;
+  backPath?: string; // Optional explicit back path
   showSearch?: boolean;
   onSearch?: () => void;
   action?: React.ReactNode;
 }
 
-export const TopBar = ({ title, showBack, showSearch, onSearch, action }: TopBarProps) => {
+export const TopBar = ({ title, showBack, backPath, showSearch, onSearch, action }: TopBarProps) => {
   const navigate = useNavigate();
 
   return (
@@ -22,7 +23,7 @@ export const TopBar = ({ title, showBack, showSearch, onSearch, action }: TopBar
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate(-1)}
+              onClick={() => backPath ? navigate(backPath) : navigate(-1)}
               className="text-primary-foreground hover:bg-white/10"
             >
               <ArrowLeft className="h-5 w-5" />

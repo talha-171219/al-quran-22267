@@ -41,7 +41,7 @@ const NinetyNineNames = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <TopBar title="আল্লাহর ৯৯ নাম" showBack />
+      <TopBar title="আল্লাহর ৯৯ নাম" showBack backPath="/explore" />
 
       <main className="max-w-lg mx-auto px-4 py-6">
         {/* Header Image */}

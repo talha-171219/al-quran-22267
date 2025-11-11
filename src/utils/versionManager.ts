@@ -8,7 +8,7 @@ const BUILD_ID_KEY = 'app-build-id';
 const BUILD_ID = Date.now().toString();
 
 // Semantic version display format (3.1, 3.2, 3.3, etc.)
-const BASE_VERSION = '3.4';
+const BASE_VERSION = '3.5';
 
 export interface VersionInfo {
   version: string;

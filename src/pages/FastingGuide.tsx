@@ -62,7 +62,7 @@ const FastingGuide = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <TopBar title="রোযা গাইড" showBack />
+      <TopBar title="রোযা গাইড" showBack backPath="/explore" />
 
       {/* Banner */}
       <div className="relative h-48 overflow-hidden">
