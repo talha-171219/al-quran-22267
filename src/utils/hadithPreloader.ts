@@ -56,14 +56,15 @@ class HadithPreloader {
   async startPreloading(): Promise<void> {
     if (this.isPreloading) return;
 
-    this.isPreloading = true;
     const status = await this.getStatus();
     
+    // Skip if already completed - hadiths are cached
     if (status.isComplete) {
-      this.isPreloading = false;
+      console.log('✅ হাদিস ইতিমধ্যে ডাউনলোড হয়েছে, ক্যাশ থেকে লোড হচ্ছে');
       return;
     }
 
+    this.isPreloading = true;
     console.log(`📥 হাদিস ডাউনলোড শুরু হচ্ছে...`);
 
     // Download Bukhari chapters
@@ -181,7 +182,10 @@ class HadithPreloader {
   async checkAndResume(): Promise<void> {
     const status = await this.getStatus();
     if (!status.isComplete) {
+      console.log('📋 হাদিস ডাউনলোড আবার শুরু হচ্ছে...');
       setTimeout(() => this.startPreloading(), 1000);
+    } else {
+      console.log('✅ সব হাদিস ক্যাশে সংরক্ষিত আছে');
     }
   }
 }

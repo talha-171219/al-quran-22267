@@ -30,13 +30,15 @@ class SurahPreloader {
     if (this.isPreloading) return;
     if (!navigator.onLine) return;
 
-    this.isPreloading = true;
     const status = await this.getStatus();
     
+    // Skip if already completed - surahs are cached
     if (status.isComplete) {
-      this.isPreloading = false;
+      console.log('✅ সূরা ইতিমধ্যে ডাউনলোড হয়েছে, ক্যাশ থেকে লোড হচ্ছে');
       return;
     }
+
+    this.isPreloading = true;
 
     const remaining = surahList
       .map(s => s.number)
@@ -116,8 +118,10 @@ class SurahPreloader {
   async checkAndResume(): Promise<void> {
     const status = await this.getStatus();
     if (!status.isComplete && navigator.onLine) {
-      // Resume preloading in the background
+      console.log('📋 সূরা ডাউনলোড আবার শুরু হচ্ছে...');
       setTimeout(() => this.startPreloading(), 2000);
+    } else if (status.isComplete) {
+      console.log('✅ সব সূরা ক্যাশে সংরক্ষিত আছে');
     }
   }
 }

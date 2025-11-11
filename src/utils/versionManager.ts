@@ -78,28 +78,16 @@ class VersionManager {
 
   async clearAllCaches(): Promise<void> {
     try {
-      console.log('Clearing dynamic caches only (keeping static content)...');
+      console.log('Clearing dynamic caches only (keeping user progress and static content)...');
       
-      // Clear only dynamic IndexedDB databases (prayer times, azkar progress)
-      const dynamicDatabases = ['azkar-tracker', 'prayer-tracker', 'tasbih-tracker'];
+      // DO NOT clear user progress databases - these must persist across updates:
+      // - azkar-tracker: User's azkar completion progress
+      // - prayer-tracker: User's prayer tracking history
+      // - tasbih-tracker: User's tasbih counts
+      // - hadith-cache: Downloaded hadiths for offline reading
       
-      for (const dbName of dynamicDatabases) {
-        await new Promise<void>((resolve) => {
-          const request = indexedDB.deleteDatabase(dbName);
-          request.onsuccess = () => {
-            console.log(`Cleared dynamic IndexedDB: ${dbName}`);
-            resolve();
-          };
-          request.onerror = () => {
-            console.warn(`Failed to clear ${dbName}`);
-            resolve();
-          };
-          request.onblocked = () => {
-            console.warn(`${dbName} deletion blocked`);
-            resolve();
-          };
-        });
-      }
+      // No databases to clear - user data must be preserved
+      console.log('Preserving all user progress and cached content');
 
       // Clear only dynamic localStorage items (keep static content and user preferences)
       const keysToRemove = [
