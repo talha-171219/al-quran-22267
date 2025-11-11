@@ -150,10 +150,14 @@ const Qibla = () => {
     };
   }, []);
 
-  // Calculate relative direction from device heading to Qibla
-  const relativeDirection = qiblaDirection !== null ? (qiblaDirection - heading + 360) % 360 : 0;
-  const isAligned = Math.abs(relativeDirection) < 5 || Math.abs(relativeDirection) > 355;
-  const rotationNeeded = relativeDirection > 180 ? -(360 - relativeDirection) : relativeDirection;
+  // Calculate offset between device heading and Qibla bearing
+  const offset = qiblaDirection !== null ? ((qiblaDirection - heading + 360) % 360) : 0;
+  
+  // Determine if user is facing Qibla (within ±5 degrees)
+  const isAligned = offset < 5 || offset > 355;
+  
+  // Calculate how much to turn (positive = turn right, negative = turn left)
+  const rotationNeeded = offset > 180 ? offset - 360 : offset;
   
   // Haptic vibration feedback when aligned
   useEffect(() => {
@@ -285,7 +289,7 @@ const Qibla = () => {
           <div className="flex flex-col items-center space-y-4 sm:space-y-6">
             {/* Compass Container */}
             <div className="relative w-72 h-72 sm:w-80 sm:h-80 mx-auto">
-              {/* Compass outer ring with gradient */}
+            {/* Compass outer ring - rotates with device heading */}
               <div 
                 className="absolute inset-0 rounded-full transition-transform duration-300 ease-out"
                 style={{
@@ -351,12 +355,12 @@ const Qibla = () => {
                 </div>
               </div>
 
-              {/* Qibla Needle - Fixed in world space, points to Qibla */}
+              {/* Qibla Needle - Always points toward Mecca */}
               {qiblaDirection !== null && (
                 <div 
                   className="absolute inset-0 flex items-center justify-center transition-transform duration-300 ease-out"
                   style={{ 
-                    transform: `rotate(${relativeDirection}deg)`,
+                    transform: `rotate(${offset}deg)`,
                     zIndex: 20 
                   }}
                 >
