@@ -64,6 +64,31 @@ class VersionManager {
     }
   }
 
+  async initializeVersion(): Promise<void> {
+    const stored = await this.getStoredVersion();
+    const storedBuildId = await this.getStoredBuildId();
+    
+    // If no version stored OR version is below base version (migration case)
+    if (!stored || this.isVersionLower(stored.version, this.baseVersion)) {
+      await this.setVersion(this.baseVersion, 'Initial version');
+      localStorage.setItem(BUILD_ID_KEY, this.buildId);
+      console.log(`✅ Initialized app version: ${this.baseVersion}`);
+    } else if (!storedBuildId) {
+      // Version exists but no build ID - store current build ID
+      localStorage.setItem(BUILD_ID_KEY, this.buildId);
+      console.log(`✅ Stored build ID for existing version: ${stored.version}`);
+    }
+  }
+
+  private isVersionLower(version1: string, version2: string): boolean {
+    const [major1, minor1] = version1.split('.').map(Number);
+    const [major2, minor2] = version2.split('.').map(Number);
+    
+    if (major1 < major2) return true;
+    if (major1 === major2 && minor1 < minor2) return true;
+    return false;
+  }
+
   async setVersion(version: string, description?: string): Promise<void> {
     const versionInfo: VersionInfo = {
       version,

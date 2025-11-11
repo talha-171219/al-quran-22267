@@ -20,17 +20,19 @@ export const UpdateNotification = () => {
       let userInitiatedUpdate = false;
       let updateShown = false; // Track if we've shown update notification this session
 
-      // Get version info
-      const loadVersionInfo = async () => {
+      // Initialize version system first
+      const initializeApp = async () => {
+        await versionManager.initializeVersion();
+        
+        // Get version info
         const stored = await versionManager.getStoredVersion();
-        const storedBuildId = await versionManager.getStoredBuildId();
-        setOldVersion(stored?.version || '3.0');
+        setOldVersion(stored?.version || '3.1');
         
         // Calculate what the new version will be if user updates
-        const [major, minor] = (stored?.version || '3.0').split('.').map(Number);
+        const [major, minor] = (stored?.version || '3.1').split('.').map(Number);
         setNewVersion(`${major}.${minor + 1}`);
       };
-      loadVersionInfo();
+      initializeApp();
 
       // Check if we just completed an update (within last 30 seconds)
       const justUpdated = (): boolean => {
