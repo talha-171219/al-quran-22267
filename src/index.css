@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Arabic font import - must be at the top */
+@import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&display=swap');
+
 /* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
 All colors MUST be HSL.
 */
@@ -135,6 +138,3 @@ html {
 .animate-pulse {
   will-change: transform;
 }
-
-/* Arabic font import */
-@import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&display=swap');
