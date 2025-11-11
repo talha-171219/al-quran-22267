@@ -1,10 +1,10 @@
-import { Home, BookOpen, Bookmark, Settings, Sparkles } from "lucide-react";
+import { Home, Compass, Bookmark, Settings, Sparkles } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { icon: Home, label: "Home", path: "/" },
-  { icon: BookOpen, label: "Surahs", path: "/surahs" },
+  { icon: Compass, label: "Explore", path: "/explore" },
   { icon: Sparkles, label: "AI", path: "/ai" },
   { icon: Bookmark, label: "Bookmarks", path: "/bookmarks" },
   { icon: Settings, label: "Settings", path: "/settings" },

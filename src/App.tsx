@@ -42,6 +42,13 @@ import DatePrayerTimes from "./pages/DatePrayerTimes";
 import IslamicBooks from "./pages/IslamicBooks";
 import ArifAzadBooks from "./pages/ArifAzadBooks";
 import SaimumSeries from "./pages/SaimumSeries";
+import Explore from "./pages/Explore";
+import Hajj from "./pages/Hajj";
+import Fasting from "./pages/Fasting";
+import NinetyNineNames from "./pages/NinetyNineNames";
+import Shahada from "./pages/Shahada";
+import Gallery from "./pages/Gallery";
+import StorePage from "./pages/StorePage";
 
 const queryClient = new QueryClient();
 
@@ -116,6 +123,13 @@ const App = () => {
             <Route path="/install" element={<InstallApp />} />
             <Route path="/prayer-tracker" element={<PrayerTracker />} />
             <Route path="/azkar" element={<Azkar />} />
+            <Route path="/explore" element={<Explore />} />
+            <Route path="/hajj" element={<Hajj />} />
+            <Route path="/fasting" element={<Fasting />} />
+            <Route path="/99-names" element={<NinetyNineNames />} />
+            <Route path="/shahada" element={<Shahada />} />
+            <Route path="/gallery" element={<Gallery />} />
+            <Route path="/store" element={<StorePage />} />
             <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
