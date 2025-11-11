@@ -68,16 +68,17 @@ export const UpdateNotification = () => {
             return false;
           }
           
-          // Get version info first
+          // Check if update is available using build ID comparison
+          const updateAvailable = await versionManager.isUpdateAvailable();
+          if (!updateAvailable) {
+            console.log('⏭️ No update available');
+            return false;
+          }
+          
+          // Get version info
           const stored = await versionManager.getStoredVersion();
           const currentVer = stored?.version || '3.1';
           const codeVersion = versionManager.getCurrentVersion();
-          
-          // CRITICAL: Don't show update if stored version = code version (same version)
-          if (currentVer === codeVersion) {
-            console.log(`⏭️ Already on latest version ${codeVersion}, no update needed`);
-            return false;
-          }
           
           // Check if user already dismissed this version OR we already showed update
           if (isDismissed(codeVersion) || updateShown) {
@@ -112,13 +113,16 @@ export const UpdateNotification = () => {
             const newWorker = reg.installing;
             const handleStateChange = async () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller && !updateShown) {
+                // Check if update is available
+                const updateAvailable = await versionManager.isUpdateAvailable();
+                
                 // Get version info
                 const stored = await versionManager.getStoredVersion();
                 const currentVer = stored?.version || '3.1';
                 const codeVersion = versionManager.getCurrentVersion();
                 
-                // Only show if versions are different
-                if (currentVer !== codeVersion) {
+                // Only show if update is available (build ID or version different)
+                if (updateAvailable) {
                   console.log(`✅ Update ready: ${currentVer} → ${codeVersion}`);
                   updateShown = true;
                   clearDismissed();
@@ -137,7 +141,7 @@ export const UpdateNotification = () => {
                     duration: Infinity,
                   });
                 } else {
-                  console.log(`⏭️ Same version ${codeVersion}, skipping update`);
+                  console.log(`⏭️ No update available, skipping`);
                 }
               }
             };
@@ -182,19 +186,22 @@ export const UpdateNotification = () => {
               // 1. Worker is installed and there's an active controller
               // 2. We haven't shown it yet this session
               // 3. We didn't just complete an update
-              // 4. Versions are different (actual update available)
+              // 4. Update is available (build ID or version different)
               if (newWorker.state === 'installed' && 
                   navigator.serviceWorker.controller && 
                   !updateShown && 
                   !justUpdated()) {
+                
+                // Check if update is available
+                const updateAvailable = await versionManager.isUpdateAvailable();
                 
                 // Get version info
                 const stored = await versionManager.getStoredVersion();
                 const currentVer = stored?.version || '3.1';
                 const codeVersion = versionManager.getCurrentVersion();
                 
-                // Only show if versions are different AND user hasn't dismissed this version
-                if (currentVer !== codeVersion && !isDismissed(codeVersion)) {
+                // Only show if update is available AND user hasn't dismissed this version
+                if (updateAvailable && !isDismissed(codeVersion)) {
                   console.log(`✅ Update ready: ${currentVer} → ${codeVersion}`);
                   updateShown = true;
                   clearDismissed();
@@ -213,7 +220,7 @@ export const UpdateNotification = () => {
                     duration: Infinity,
                   });
                 } else {
-                  console.log(`⏭️ Same version ${codeVersion} or dismissed, skipping`);
+                  console.log(`⏭️ No update available or dismissed, skipping`);
                 }
               }
             };

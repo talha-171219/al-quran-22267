@@ -68,16 +68,17 @@ class VersionManager {
     const stored = await this.getStoredVersion();
     const storedBuildId = await this.getStoredBuildId();
     
-    // If no version stored OR version is below base version (migration case)
-    if (!stored || this.isVersionLower(stored.version, this.baseVersion)) {
+    // ONLY initialize version if there's NO stored version at all (first time user)
+    if (!stored) {
       await this.setVersion(this.baseVersion, 'Initial version');
       localStorage.setItem(BUILD_ID_KEY, this.buildId);
       console.log(`✅ Initialized app version: ${this.baseVersion}`);
     } else if (!storedBuildId) {
-      // Version exists but no build ID - store current build ID
+      // Version exists but no build ID - store current build ID (for old users)
       localStorage.setItem(BUILD_ID_KEY, this.buildId);
       console.log(`✅ Stored build ID for existing version: ${stored.version}`);
     }
+    // DO NOT auto-update version here - let UpdateNotification handle it after user clicks Update
   }
 
   private isVersionLower(version1: string, version2: string): boolean {
@@ -113,15 +114,22 @@ class VersionManager {
 
   async isUpdateAvailable(): Promise<boolean> {
     const stored = await this.getStoredVersion();
-    const storedVersion = stored?.version || null;
+    const storedBuildId = await this.getStoredBuildId();
     
-    // If no stored version OR stored version is different from BASE_VERSION
-    if (!storedVersion || storedVersion !== this.baseVersion) {
-      console.log(`Update available: ${storedVersion || 'none'} → ${this.baseVersion}`);
+    // Check 1: Build ID comparison (most reliable - detects every new deployment)
+    if (storedBuildId !== this.buildId) {
+      console.log(`🆕 New build detected: ${storedBuildId} → ${this.buildId}`);
       return true;
     }
     
-    console.log(`✅ Already on latest version: ${this.baseVersion}`);
+    // Check 2: Version comparison (fallback for when build ID isn't available)
+    const storedVersion = stored?.version || null;
+    if (!storedVersion || storedVersion !== this.baseVersion) {
+      console.log(`📦 Version update available: ${storedVersion || 'none'} → ${this.baseVersion}`);
+      return true;
+    }
+    
+    console.log(`✅ Already on latest version: ${this.baseVersion} (Build: ${this.buildId})`);
     return false;
   }
 
