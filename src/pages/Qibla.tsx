@@ -14,6 +14,8 @@ const Qibla = () => {
   const [distance, setDistance] = useState<number | null>(null);
   const [permissionGranted, setPermissionGranted] = useState(false);
   const [showCalibration, setShowCalibration] = useState(false);
+  const [accuracy, setAccuracy] = useState<number | null>(null);
+  const [compassCalibrated, setCompassCalibrated] = useState(false);
   const lastVibrateTime = useRef<number>(0);
   const wasAligned = useRef<boolean>(false);
 
@@ -53,36 +55,103 @@ const Qibla = () => {
       return;
     }
 
+    toast.loading("লোকেশন খুঁজছি...", { id: "location" });
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const { latitude, longitude } = position.coords;
+        const { latitude, longitude, accuracy: posAccuracy } = position.coords;
         setLocation({ lat: latitude, lon: longitude });
+        setAccuracy(posAccuracy);
         const direction = calculateQibla(latitude, longitude);
         setQiblaDirection(direction);
         setPermissionGranted(true);
-        toast.success("কিবলা নির্দেশনা খুঁজে পাওয়া গেছে");
+        toast.success("কিবলা নির্দেশনা খুঁজে পাওয়া গেছে", { id: "location" });
       },
-      () => {
-        toast.error("লোকেশন অনুমতি প্রয়োজন");
+      (error) => {
+        console.error("Location error:", error);
+        toast.error("লোকেশন অনুমতি প্রয়োজন", { id: "location" });
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
       }
     );
   };
 
   useEffect(() => {
-    if ('DeviceOrientationEvent' in window) {
-      const handleOrientation = (event: DeviceOrientationEvent) => {
-        if (event.alpha !== null) {
-          setHeading(360 - event.alpha);
+    let compassHandler: ((event: DeviceOrientationEvent) => void) | null = null;
+
+    const requestPermissionAndSetup = async () => {
+      // For iOS 13+ devices, need to request permission
+      if (typeof (DeviceOrientationEvent as any).requestPermission === 'function') {
+        try {
+          const permission = await (DeviceOrientationEvent as any).requestPermission();
+          if (permission === 'granted') {
+            setCompassCalibrated(true);
+          }
+        } catch (error) {
+          console.error('Device orientation permission denied:', error);
         }
-      };
-      window.addEventListener('deviceorientation', handleOrientation);
-      return () => window.removeEventListener('deviceorientation', handleOrientation);
-    }
+      } else {
+        setCompassCalibrated(true);
+      }
+
+      // Set up orientation listener
+      if ('DeviceOrientationEvent' in window) {
+        compassHandler = (event: DeviceOrientationEvent) => {
+          if (event.alpha !== null) {
+            // Normalize heading to 0-360 range
+            let newHeading = event.alpha;
+            
+            // For Android devices, use webkitCompassHeading if available
+            if ((event as any).webkitCompassHeading) {
+              newHeading = (event as any).webkitCompassHeading;
+            } else {
+              // iOS returns alpha relative to device, adjust for magnetic north
+              newHeading = 360 - event.alpha;
+            }
+            
+            setHeading(newHeading);
+          }
+        };
+        
+        window.addEventListener('deviceorientation', compassHandler, true);
+      }
+    };
+
+    requestPermissionAndSetup();
+
+    return () => {
+      if (compassHandler) {
+        window.removeEventListener('deviceorientation', compassHandler, true);
+      }
+    };
   }, []);
 
   const relativeDirection = qiblaDirection !== null ? (qiblaDirection - heading + 360) % 360 : 0;
-  const isAligned = Math.abs(relativeDirection) < 5 || Math.abs(relativeDirection) > 355;
+  const isAligned = Math.abs(relativeDirection) < 3 || Math.abs(relativeDirection) > 357;
   const rotationNeeded = relativeDirection > 180 ? -(360 - relativeDirection) : relativeDirection;
+  
+  // Get compass accuracy level
+  const getAccuracyLevel = () => {
+    if (!accuracy) return "unknown";
+    if (accuracy < 10) return "excellent";
+    if (accuracy < 30) return "good";
+    if (accuracy < 50) return "fair";
+    return "poor";
+  };
+
+  const getAccuracyColor = () => {
+    const level = getAccuracyLevel();
+    switch (level) {
+      case "excellent": return "text-green-600";
+      case "good": return "text-emerald-600";
+      case "fair": return "text-amber-600";
+      case "poor": return "text-red-600";
+      default: return "text-muted-foreground";
+    }
+  };
 
   // Haptic vibration feedback when aligned
   useEffect(() => {
@@ -110,17 +179,23 @@ const Qibla = () => {
       return "অনুগ্রহ করে লোকেশন অনুমতি দিন";
     }
     
-    if (Math.abs(heading) < 10 && Math.abs(rotationNeeded) > 10) {
-      return "ফোনটি সমতল রাখুন";
+    if (!compassCalibrated) {
+      return "দয়া করে কম্পাস ক্যালিব্রেট করুন";
     }
     
     if (isAligned) {
-      return "আপনি এখন মক্কার দিকে মুখ করছেন";
+      return "✓ সঠিক দিকে - মক্কার দিকে মুখ করছেন";
     }
     
     const degrees = Math.abs(Math.round(rotationNeeded));
     const direction = rotationNeeded > 0 ? "ডানে" : "বামে";
-    return `ফোনটি ${degrees}° ${direction} ঘুরান`;
+    return `${degrees}° ${direction} ঘুরান`;
+  };
+
+  const getCardinalDirection = (deg: number) => {
+    const dirs = ['উত্তর', 'উত্তর-পূর্ব', 'পূর্ব', 'দক্ষিণ-পূর্ব', 'দক্ষিণ', 'দক্ষিণ-পশ্চিম', 'পশ্চিম', 'উত্তর-পশ্চিম'];
+    const index = Math.round(deg / 45) % 8;
+    return dirs[index];
   };
 
   return (
@@ -128,58 +203,58 @@ const Qibla = () => {
       <TopBar title="Qibla" showBack />
 
       <main className="max-w-lg mx-auto px-4 py-4 space-y-4">
-        {/* Top Info Card - Map Style */}
-        {location && (
+        {/* Top Info Card - Real-time Metrics */}
+        {location && qiblaDirection !== null && (
           <Card className="overflow-hidden border-border shadow-lg">
-            <div className="relative h-32 bg-gradient-to-br from-primary/10 to-primary/5">
-              {/* Map visualization */}
-              <div className="absolute inset-0 flex items-center justify-between px-8">
-                <div className="flex flex-col items-center gap-2">
-                  <div className="relative">
-                    <div className="w-10 h-10 bg-amber-400 rounded-full flex items-center justify-center shadow-lg">
-                      <svg className="w-5 h-5 text-slate-900" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2L4 9v12h16V9l-8-7z"/>
-                      </svg>
-                    </div>
-                  </div>
-                  <span className="text-[10px] text-muted-foreground font-medium">Mecca</span>
+            {/* Live Compass Info Bar */}
+            <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-primary/10 p-3 border-b border-border">
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Device</p>
+                  <p className="text-lg font-bold text-foreground">{Math.round(heading)}°</p>
+                  <p className="text-[9px] text-muted-foreground">{getCardinalDirection(heading)}</p>
                 </div>
-                
-                {/* Curved path */}
-                <svg className="absolute inset-0 w-full h-full pointer-events-none">
-                  <path
-                    d="M 80 64 Q 200 30, 320 64"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth="2"
-                    strokeDasharray="6,4"
-                    fill="none"
-                    opacity="0.5"
-                  />
-                </svg>
-                
-                <div className="flex flex-col items-center gap-2">
-                  <div className="relative">
-                    <MapPin className="w-10 h-10 text-primary fill-primary/20" />
-                  </div>
-                  <span className="text-[10px] text-muted-foreground font-medium">You</span>
+                <div className="border-x border-border">
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Qibla</p>
+                  <p className="text-lg font-bold text-primary">{Math.round(qiblaDirection)}°</p>
+                  <p className="text-[9px] text-muted-foreground">{getCardinalDirection(qiblaDirection)}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Offset</p>
+                  <p className={`text-lg font-bold ${isAligned ? 'text-green-600' : 'text-amber-600'}`}>
+                    {Math.abs(Math.round(rotationNeeded))}°
+                  </p>
+                  <p className="text-[9px] text-muted-foreground">
+                    {isAligned ? "Aligned" : rotationNeeded > 0 ? "Turn Right" : "Turn Left"}
+                  </p>
                 </div>
               </div>
             </div>
             
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 gap-4 p-4 bg-muted/30">
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground font-medium">Distance from Mecca</p>
+            {/* Location & Distance Info */}
+            <div className="grid grid-cols-2 gap-px bg-border">
+              <div className="bg-card p-3 space-y-1">
+                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Distance</p>
                 <p className="text-xl font-bold text-foreground">
-                  {distance ? `${distance.toFixed(1)} KM` : "---"}
+                  {distance ? distance.toFixed(1) : "---"}
+                  <span className="text-xs font-normal text-muted-foreground ml-1">KM</span>
                 </p>
+                <p className="text-[9px] text-muted-foreground">to Mecca</p>
               </div>
-              <div className="space-y-1">
-                <p className="text-xs text-muted-foreground font-medium">Qibla Direction</p>
-                <p className="text-xl font-bold text-foreground">
-                  {qiblaDirection !== null ? `${Math.round(qiblaDirection)}°` : "---"}
+              <div className="bg-card p-3 space-y-1">
+                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide">Accuracy</p>
+                <p className={`text-xl font-bold ${getAccuracyColor()}`}>
+                  {accuracy ? `±${accuracy.toFixed(0)}m` : "---"}
                 </p>
+                <p className="text-[9px] text-muted-foreground capitalize">{getAccuracyLevel()}</p>
               </div>
+            </div>
+
+            {/* Coordinates */}
+            <div className="bg-muted/30 p-2 text-center">
+              <p className="text-[9px] text-muted-foreground">
+                📍 {location.lat.toFixed(6)}°, {location.lon.toFixed(6)}°
+              </p>
             </div>
           </Card>
         )}
@@ -258,10 +333,10 @@ const Qibla = () => {
                     );
                   })}
                   
-                  {/* Rotating compass needle */}
+                  {/* Rotating compass needle - rotates with device */}
                   <div 
-                    className="absolute inset-0 flex items-center justify-center transition-transform duration-500 ease-out"
-                    style={{ transform: `rotate(${relativeDirection}deg)`, zIndex: 10 }}
+                    className="absolute inset-0 flex items-center justify-center transition-transform duration-200 ease-out"
+                    style={{ transform: `rotate(${-heading}deg)`, zIndex: 10 }}
                   >
                     {/* Needle */}
                     <div className="absolute flex flex-col items-center">
@@ -291,18 +366,36 @@ const Qibla = () => {
                     </div>
                   </div>
                   
-                  {/* Kaaba Icon - Fixed positioning */}
+                  {/* Qibla Direction Indicator - Fixed position showing Qibla */}
+                  {qiblaDirection !== null && (
+                    <div 
+                      className="absolute inset-0 flex items-center justify-center transition-transform duration-200 ease-out pointer-events-none"
+                      style={{ transform: `rotate(${qiblaDirection}deg)`, zIndex: 5 }}
+                    >
+                      <div className="absolute flex flex-col items-center">
+                        {/* Qibla direction line */}
+                        <div 
+                          className="w-1 h-24 rounded-t-full opacity-50"
+                          style={{
+                            background: 'linear-gradient(to bottom, hsl(var(--primary)), transparent)',
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Kaaba Icon - Fixed at top, showing Qibla direction */}
                   <div 
-                    className="absolute top-1/2 left-1/2 transition-all duration-500 ease-out pointer-events-none"
+                    className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"
                     style={{ 
-                      transform: `translate(-50%, -50%) rotate(${relativeDirection}deg) translateY(-110px)`,
-                      zIndex: 20
+                      transform: `translateX(-50%) translateY(-8px)`,
+                      zIndex: 30
                     }}
                   >
                     <div 
                       className={`p-2.5 rounded-lg transition-all duration-300 ${
                         isAligned 
-                          ? 'bg-primary scale-110 shadow-lg' 
+                          ? 'bg-primary scale-110 shadow-lg shadow-primary/50' 
                           : 'bg-muted border-2 border-border'
                       }`}
                     >
@@ -318,6 +411,13 @@ const Qibla = () => {
                         <div className="absolute inset-0 rounded-lg bg-primary animate-ping opacity-75" />
                       )}
                     </div>
+                  </div>
+                  
+                  {/* Current heading indicator */}
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-card/90 backdrop-blur-sm px-3 py-1 rounded-full border border-border shadow-lg" style={{ zIndex: 25 }}>
+                    <p className="text-xs font-bold text-foreground">
+                      {Math.round(heading)}° {getCardinalDirection(heading)}
+                    </p>
                   </div>
                 </div>
               </div>
