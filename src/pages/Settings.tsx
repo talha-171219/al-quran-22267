@@ -18,6 +18,7 @@ import {
   Package,
   RefreshCw,
   CheckCircle2,
+  Database,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
@@ -26,6 +27,7 @@ import { AzkarStatsCard } from "@/components/azkar/AzkarStats";
 import { calculateAzkarStats } from "@/utils/azkarTracker";
 import { useNavigate } from "react-router-dom";
 import { versionManager } from "@/utils/versionManager";
+import { CacheManagement } from "@/components/settings/CacheManagement";
 
 const Settings = () => {
   const { theme, setTheme } = useTheme();
@@ -285,6 +287,15 @@ const Settings = () => {
             />
           </div>
         </Card>
+
+        {/* Cache Management Section */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Database className="h-5 w-5 text-primary" />
+            <h3 className="text-lg font-semibold">ক্যাশ ম্যানেজমেন্ট</h3>
+          </div>
+          <CacheManagement />
+        </div>
 
         {/* Azkar Progress Section */}
         <div className="space-y-2">
