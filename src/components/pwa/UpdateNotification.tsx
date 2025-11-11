@@ -14,7 +14,54 @@ export const UpdateNotification = () => {
     if ('serviceWorker' in navigator) {
       let userInitiatedUpdate = false;
 
-      // Check for updates every 5 minutes (not too aggressive)
+      // Function to check for waiting service worker
+      const checkForWaitingWorker = async () => {
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (reg) {
+          setRegistration(reg);
+          
+          // Check if there's a waiting worker (update available)
+          if (reg.waiting) {
+            console.log('Update available - waiting worker found on app open');
+            setShowUpdate(true);
+            toast.info('নতুন আপডেট উপলব্ধ!', {
+              description: 'আপডেট বাটনে ক্লিক করুন'
+            });
+            return true;
+          }
+          
+          // Check if there's an installing worker
+          if (reg.installing) {
+            console.log('Update installing - will show notification when ready');
+            const newWorker = reg.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                console.log('Update ready - showing notification');
+                setShowUpdate(true);
+                setRegistration(reg);
+                toast.info('নতুন আপডেট উপলব্ধ!', {
+                  description: 'আপডেট বাটনে ক্লিক করুন'
+                });
+              }
+            });
+          }
+        }
+        return false;
+      };
+
+      // Check immediately when component mounts (when user opens app)
+      checkForWaitingWorker();
+
+      // Also force an update check to detect new versions
+      navigator.serviceWorker.getRegistration().then((reg) => {
+        if (reg) {
+          reg.update().then(() => {
+            console.log('Update check completed');
+          });
+        }
+      });
+
+      // Check for updates periodically (every 5 minutes)
       const interval = setInterval(() => {
         navigator.serviceWorker.getRegistration().then((reg) => {
           if (reg) {
@@ -23,24 +70,8 @@ export const UpdateNotification = () => {
         });
       }, 5 * 60 * 1000);
 
-      // Check immediately on mount
-      navigator.serviceWorker.getRegistration().then((reg) => {
-        if (reg) {
-          reg.update();
-        }
-      });
-
-      // Listen for new service worker waiting
+      // Listen for new updates while app is running
       navigator.serviceWorker.ready.then((reg) => {
-        setRegistration(reg);
-        
-        // Check if there's already a waiting worker
-        if (reg.waiting) {
-          console.log('Update available - waiting worker found');
-          setShowUpdate(true);
-        }
-
-        // Listen for updates
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
           console.log('Update found - new worker installing');
@@ -50,12 +81,13 @@ export const UpdateNotification = () => {
               console.log('Worker state changed:', newWorker.state);
               
               // Only show update notification if there's already an active controller
-              // This prevents showing notification on first install
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                 console.log('Update ready - showing notification');
                 setShowUpdate(true);
                 setRegistration(reg);
-                toast.info('নতুন আপডেট উপলব্ধ!');
+                toast.info('নতুন আপডেট উপলব্ধ!', {
+                  description: 'আপডেট বাটনে ক্লিক করুন'
+                });
               }
             });
           }
