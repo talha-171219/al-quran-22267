@@ -48,18 +48,9 @@ const App = () => {
   const [isInitializing, setIsInitializing] = useState(true);
 
   useEffect(() => {
-    // Check version and clear cache if needed, then start preloading
+    // Initialize app and start preloading content
     const initializeApp = async () => {
       try {
-        // Check if cache needs to be cleared due to version change
-        const cacheCleared = await versionManager.checkAndClearCacheIfNeeded();
-        
-        if (cacheCleared) {
-          toast.info("নতুন সংস্করণ শনাক্ত করা হয়েছে", {
-            description: "ডেটা রিফ্রেশ করা হচ্ছে...",
-          });
-        }
-
         // Start preloading all surahs and hadiths in the background
         // This runs quietly without blocking the UI
         const preloadPromises = [

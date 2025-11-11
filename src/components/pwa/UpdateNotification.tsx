@@ -152,6 +152,14 @@ export const UpdateNotification = () => {
       console.error('❌ Error clearing caches:', error);
     }
     
+    // Update version ONLY when user clicks update button
+    try {
+      await versionManager.setVersion(APP_VERSION, 'User initiated update');
+      console.log(`✅ Version updated to ${APP_VERSION}`);
+    } catch (error) {
+      console.error('❌ Error updating version:', error);
+    }
+    
     // Show success message
     setUpdateSuccess(true);
     

@@ -64,18 +64,16 @@ class VersionManager {
     localStorage.setItem(VERSION_HISTORY_KEY, JSON.stringify(history));
   }
 
-  async checkAndClearCacheIfNeeded(): Promise<boolean> {
+  async isUpdateAvailable(): Promise<boolean> {
     const stored = await this.getStoredVersion();
     
-    // If no stored version or version has changed
+    // Check if stored version is different from current version
     if (!stored || stored.version !== this.currentVersion) {
-      console.log(`New version detected: ${this.currentVersion} (previous: ${stored?.version || 'none'})`);
-      await this.clearAllCaches();
-      await this.setVersion(this.currentVersion, 'System update');
-      return true; // Cache was cleared
+      console.log(`Update available: ${this.currentVersion} (current: ${stored?.version || 'none'})`);
+      return true;
     }
     
-    return false; // No cache clearing needed
+    return false;
   }
 
   async clearAllCaches(): Promise<void> {
