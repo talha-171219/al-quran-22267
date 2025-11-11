@@ -56,30 +56,32 @@ const Explore = () => {
       <TopBar title="Explore" showBack />
 
       <main className="max-w-lg mx-auto px-4 py-6">
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-3">
           {exploreFeatures.map((feature) => (
             <Link key={feature.path} to={feature.path}>
               <Card
                 className={cn(
-                  "p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer",
-                  "border-2 border-transparent hover:border-primary/20",
-                  "backdrop-blur-sm bg-card/50"
+                  "p-4 hover:shadow-xl transition-all duration-300 cursor-pointer",
+                  "border border-primary/10 backdrop-blur-md bg-gradient-to-br from-card/80 to-card/40",
+                  "hover:scale-105 hover:border-primary/30",
+                  "hover:shadow-primary/20 group"
                 )}
               >
-                <div className="flex flex-col items-center gap-3 text-center">
+                <div className="flex flex-col items-center gap-2 text-center">
                   <div
                     className={cn(
-                      "p-4 rounded-2xl bg-gradient-to-br shadow-md",
+                      "p-3 rounded-xl bg-gradient-to-br shadow-lg",
+                      "group-hover:shadow-xl group-hover:scale-110 transition-all duration-300",
                       feature.gradient
                     )}
                   >
-                    <feature.icon className="h-8 w-8 text-white" />
+                    <feature.icon className="h-5 w-5 text-white" />
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-sm text-foreground">
+                  <div className="space-y-0.5">
+                    <h3 className="font-semibold text-xs text-foreground leading-tight">
                       {feature.title}
                     </h3>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="text-[10px] text-muted-foreground leading-tight">
                       {feature.titleBengali}
                     </p>
                   </div>
