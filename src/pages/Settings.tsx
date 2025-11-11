@@ -15,6 +15,7 @@ import {
   Share2,
   Bell,
   TrendingUp,
+  Package,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
@@ -22,6 +23,7 @@ import { useState, useEffect } from "react";
 import { AzkarStatsCard } from "@/components/azkar/AzkarStats";
 import { calculateAzkarStats } from "@/utils/azkarTracker";
 import { useNavigate } from "react-router-dom";
+import { APP_VERSION } from "@/utils/versionManager";
 
 const Settings = () => {
   const { theme, setTheme } = useTheme();
@@ -123,7 +125,7 @@ const Settings = () => {
   };
 
   const handleAbout = () => {
-    toast.info('আল-কুরআন অ্যাপ v1.0.0 - বাংলা কুরআন পাঠের জন্য সম্পূর্ণ সমাধান');
+    toast.info(`আল-কুরআন অ্যাপ v${APP_VERSION} - বাংলা কুরআন পাঠের জন্য সম্পূর্ণ সমাধান`);
   };
 
   return (
@@ -242,6 +244,14 @@ const Settings = () => {
         </div>
 
         <Card className="p-4 space-y-3">
+          <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/50">
+            <Package className="h-5 w-5 text-primary" />
+            <div className="flex-1">
+              <div className="font-medium">অ্যাপ ভার্সন</div>
+              <div className="text-sm text-muted-foreground">v{APP_VERSION}</div>
+            </div>
+          </div>
+
           <button 
             onClick={handleShare}
             className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-muted transition-colors text-left"
@@ -261,7 +271,7 @@ const Settings = () => {
 
         <div className="text-center space-y-1 pt-4">
           <div className="text-xs text-muted-foreground">
-            আল-কুরআন অ্যাপ v2.0
+            আল-কুরআন অ্যাপ v{APP_VERSION}
           </div>
           <div className="text-xs text-muted-foreground">
             Developed by Monirul Hasan Talha

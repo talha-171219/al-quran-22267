@@ -2,17 +2,27 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Sparkles, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
-import { versionManager } from "@/utils/versionManager";
+import { versionManager, APP_VERSION } from "@/utils/versionManager";
 
 export const UpdateNotification = () => {
   const [showUpdate, setShowUpdate] = useState(false);
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [newVersion, setNewVersion] = useState<string>('');
+  const [oldVersion, setOldVersion] = useState<string>('');
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       let userInitiatedUpdate = false;
+
+      // Get version info
+      const loadVersionInfo = async () => {
+        const stored = await versionManager.getStoredVersion();
+        setOldVersion(stored?.version || '');
+        setNewVersion(APP_VERSION);
+      };
+      loadVersionInfo();
 
       // Function to check for waiting service worker
       const checkForWaitingWorker = async () => {
@@ -24,7 +34,7 @@ export const UpdateNotification = () => {
           if (reg.waiting) {
             console.log('Update available - waiting worker found on app open');
             setShowUpdate(true);
-            toast.info('নতুন আপডেট উপলব্ধ!', {
+            toast.info(`নতুন আপডেট উপলব্ধ! (v${APP_VERSION})`, {
               description: 'আপডেট বাটনে ক্লিক করুন'
             });
             return true;
@@ -39,7 +49,7 @@ export const UpdateNotification = () => {
                 console.log('Update ready - showing notification');
                 setShowUpdate(true);
                 setRegistration(reg);
-                toast.info('নতুন আপডেট উপলব্ধ!', {
+                toast.info(`নতুন আপডেট উপলব্ধ! (v${APP_VERSION})`, {
                   description: 'আপডেট বাটনে ক্লিক করুন'
                 });
               }
@@ -85,7 +95,7 @@ export const UpdateNotification = () => {
                 console.log('Update ready - showing notification');
                 setShowUpdate(true);
                 setRegistration(reg);
-                toast.info('নতুন আপডেট উপলব্ধ!', {
+                toast.info(`নতুন আপডেট উপলব্ধ! (v${APP_VERSION})`, {
                   description: 'আপডেট বাটনে ক্লিক করুন'
                 });
               }
@@ -205,9 +215,22 @@ export const UpdateNotification = () => {
                 <h3 className="text-xl font-bold text-foreground">
                   আপডেট উপলব্ধ
                 </h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  অ্যাপের একটি নতুন সংস্করণ প্রস্তুত। সর্বশেষ বৈশিষ্ট্য এবং উন্নতি পেতে এখনই আপডেট করুন।
-                </p>
+                <div className="space-y-1">
+                  <p className="text-muted-foreground text-sm leading-relaxed">
+                    অ্যাপের একটি নতুন সংস্করণ প্রস্তুত। সর্বশেষ বৈশিষ্ট্য এবং উন্নতি পেতে এখনই আপডেট করুন।
+                  </p>
+                  {oldVersion && newVersion && (
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="px-2 py-1 bg-muted rounded text-muted-foreground">
+                        v{oldVersion}
+                      </span>
+                      <span className="text-muted-foreground">→</span>
+                      <span className="px-2 py-1 bg-primary/10 rounded text-primary font-semibold">
+                        v{newVersion}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             

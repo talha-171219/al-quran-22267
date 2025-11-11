@@ -1,14 +1,27 @@
 // Version management and cache clearing utility
 const VERSION_KEY = 'app-version';
-const CURRENT_VERSION = '1.0.0'; // Increment this when you deploy updates
+const VERSION_HISTORY_KEY = 'app-version-history';
+
+// Auto-increment version based on build timestamp
+const CURRENT_VERSION = `2.${Math.floor(Date.now() / 100000)}`; // e.g., 2.17624021
 
 export interface VersionInfo {
   version: string;
   lastUpdated: number;
+  updateType?: 'feature' | 'bugfix' | 'improvement';
+  description?: string;
+}
+
+export interface VersionHistory {
+  versions: VersionInfo[];
 }
 
 class VersionManager {
   private currentVersion = CURRENT_VERSION;
+
+  getCurrentVersion(): string {
+    return this.currentVersion;
+  }
 
   async getStoredVersion(): Promise<VersionInfo | null> {
     try {
@@ -19,12 +32,35 @@ class VersionManager {
     }
   }
 
-  async setVersion(version: string): Promise<void> {
+  async getVersionHistory(): Promise<VersionHistory> {
+    try {
+      const stored = localStorage.getItem(VERSION_HISTORY_KEY);
+      return stored ? JSON.parse(stored) : { versions: [] };
+    } catch {
+      return { versions: [] };
+    }
+  }
+
+  async setVersion(version: string, description?: string): Promise<void> {
     const versionInfo: VersionInfo = {
       version,
       lastUpdated: Date.now(),
+      description,
     };
+    
+    // Save current version
     localStorage.setItem(VERSION_KEY, JSON.stringify(versionInfo));
+    
+    // Update version history
+    const history = await this.getVersionHistory();
+    history.versions.unshift(versionInfo);
+    
+    // Keep only last 10 versions in history
+    if (history.versions.length > 10) {
+      history.versions = history.versions.slice(0, 10);
+    }
+    
+    localStorage.setItem(VERSION_HISTORY_KEY, JSON.stringify(history));
   }
 
   async checkAndClearCacheIfNeeded(): Promise<boolean> {
@@ -32,9 +68,9 @@ class VersionManager {
     
     // If no stored version or version has changed
     if (!stored || stored.version !== this.currentVersion) {
-      console.log('New version detected, clearing caches...');
+      console.log(`New version detected: ${this.currentVersion} (previous: ${stored?.version || 'none'})`);
       await this.clearAllCaches();
-      await this.setVersion(this.currentVersion);
+      await this.setVersion(this.currentVersion, 'System update');
       return true; // Cache was cleared
     }
     
@@ -107,3 +143,6 @@ class VersionManager {
 }
 
 export const versionManager = new VersionManager();
+
+// Export current version for use in components
+export const APP_VERSION = CURRENT_VERSION;
