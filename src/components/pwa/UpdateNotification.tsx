@@ -28,9 +28,9 @@ export const UpdateNotification = () => {
         const stored = await versionManager.getStoredVersion();
         setOldVersion(stored?.version || '3.1');
         
-        // Calculate what the new version will be if user updates
-        const [major, minor] = (stored?.version || '3.1').split('.').map(Number);
-        setNewVersion(`${major}.${minor + 1}`);
+        // New version will be whatever BASE_VERSION is in code (developer controls this)
+        const codeVersion = versionManager.getCurrentVersion();
+        setNewVersion(codeVersion);
       };
       initializeApp();
 
@@ -77,16 +77,15 @@ export const UpdateNotification = () => {
             updateShown = true;
             clearDismissed(); // Clear any old dismissed version
             
-            // Load and show version info
-            const stored = await versionManager.getStoredVersion();
-            const currentVer = stored?.version || '3.0';
-            const [major, minor] = currentVer.split('.').map(Number);
-            const nextVer = `${major}.${minor + 1}`;
-            setOldVersion(currentVer);
-            setNewVersion(nextVer);
+                // Load and show version info
+                const stored = await versionManager.getStoredVersion();
+                const currentVer = stored?.version || '3.1';
+                const codeVersion = versionManager.getCurrentVersion();
+                setOldVersion(currentVer);
+                setNewVersion(codeVersion);
             
             setShowUpdate(true);
-            toast.info(`নতুন আপডেট উপলব্ধ! (v${nextVer})`, {
+            toast.info(`নতুন আপডেট উপলব্ধ! (v${codeVersion})`, {
               description: 'আপডেট বাটনে ক্লিক করুন',
               duration: Infinity,
             });
@@ -105,15 +104,14 @@ export const UpdateNotification = () => {
                 
                 // Load and show version info
                 const stored = await versionManager.getStoredVersion();
-                const currentVer = stored?.version || '3.0';
-                const [major, minor] = currentVer.split('.').map(Number);
-                const nextVer = `${major}.${minor + 1}`;
+                const currentVer = stored?.version || '3.1';
+                const codeVersion = versionManager.getCurrentVersion();
                 setOldVersion(currentVer);
-                setNewVersion(nextVer);
+                setNewVersion(codeVersion);
                 
                 setShowUpdate(true);
                 setRegistration(reg);
-                toast.info(`নতুন আপডেট উপলব্ধ! (v${nextVer})`, {
+                toast.info(`নতুন আপডেট উপলব্ধ! (v${codeVersion})`, {
                   description: 'আপডেট বাটনে ক্লিক করুন',
                   duration: Infinity,
                 });
@@ -172,15 +170,14 @@ export const UpdateNotification = () => {
                 
                 // Load and show version info
                 const stored = await versionManager.getStoredVersion();
-                const currentVer = stored?.version || '3.0';
-                const [major, minor] = currentVer.split('.').map(Number);
-                const nextVer = `${major}.${minor + 1}`;
+                const currentVer = stored?.version || '3.1';
+                const codeVersion = versionManager.getCurrentVersion();
                 setOldVersion(currentVer);
-                setNewVersion(nextVer);
+                setNewVersion(codeVersion);
                 
                 setShowUpdate(true);
                 setRegistration(reg);
-                toast.info(`নতুন আপডেট উপলব্ধ! (v${nextVer})`, {
+                toast.info(`নতুন আপডেট উপলব্ধ! (v${codeVersion})`, {
                   description: 'আপডেট বাটনে ক্লিক করুন',
                   duration: Infinity,
                 });

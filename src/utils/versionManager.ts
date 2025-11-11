@@ -123,24 +123,16 @@ class VersionManager {
     return false;
   }
 
-  private incrementVersion(currentVersion: string): string {
-    // Parse version (e.g., "3.0" -> major: 3, minor: 0)
-    const [major, minor] = currentVersion.split('.').map(Number);
-    
-    // Increment minor version
-    return `${major}.${minor + 1}`;
-  }
-
   async updateToNewVersion(description?: string): Promise<string> {
-    const stored = await this.getStoredVersion();
-    const currentVersion = stored?.version || this.baseVersion;
-    const newVersion = this.incrementVersion(currentVersion);
+    // Don't auto-increment - use BASE_VERSION from code
+    // Developer manually changes BASE_VERSION in code when they want to release new version
+    const newVersion = this.baseVersion;
     
     // Save new version and build ID
     await this.setVersion(newVersion, description);
     localStorage.setItem(BUILD_ID_KEY, this.buildId);
     
-    console.log(`✅ Version updated: ${currentVersion} → ${newVersion}`);
+    console.log(`✅ Version updated to: ${newVersion}`);
     return newVersion;
   }
 
