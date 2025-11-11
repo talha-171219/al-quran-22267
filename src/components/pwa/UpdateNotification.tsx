@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Sparkles, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
-import { versionManager, APP_VERSION } from "@/utils/versionManager";
+import { versionManager, CURRENT_BUILD_ID } from "@/utils/versionManager";
 
 const UPDATE_DISMISSED_KEY = 'update-dismissed-version';
 
@@ -22,15 +22,19 @@ export const UpdateNotification = () => {
       // Get version info
       const loadVersionInfo = async () => {
         const stored = await versionManager.getStoredVersion();
-        setOldVersion(stored?.version || '');
-        setNewVersion(APP_VERSION);
+        const storedBuildId = await versionManager.getStoredBuildId();
+        setOldVersion(stored?.version || '3.0');
+        
+        // Calculate what the new version will be if user updates
+        const [major, minor] = (stored?.version || '3.0').split('.').map(Number);
+        setNewVersion(`${major}.${minor + 1}`);
       };
       loadVersionInfo();
 
-      // Check if user dismissed this version's update
-      const isDismissed = (version: string): boolean => {
+      // Check if user dismissed this build's update
+      const isDismissed = (buildId: string): boolean => {
         const dismissed = localStorage.getItem(UPDATE_DISMISSED_KEY);
-        return dismissed === version;
+        return dismissed === buildId;
       };
 
       // Clear dismissed flag (called when showing update)
@@ -44,19 +48,28 @@ export const UpdateNotification = () => {
         if (reg) {
           setRegistration(reg);
           
-          // Check if user already dismissed this version OR we already showed update
-          if (isDismissed(APP_VERSION) || updateShown) {
-            console.log('⏭️ Update already dismissed or shown for v' + APP_VERSION);
+          // Check if user already dismissed this build OR we already showed update
+          if (isDismissed(CURRENT_BUILD_ID) || updateShown) {
+            console.log('⏭️ Update already dismissed or shown for build ' + CURRENT_BUILD_ID);
             return false;
           }
           
           // Check if there's a waiting worker (update available)
           if (reg.waiting) {
-            console.log('✅ Update available - waiting worker found (v' + APP_VERSION + ')');
+            console.log('✅ Update available - waiting worker found');
             updateShown = true;
             clearDismissed(); // Clear any old dismissed version
+            
+            // Load and show version info
+            const stored = await versionManager.getStoredVersion();
+            const currentVer = stored?.version || '3.0';
+            const [major, minor] = currentVer.split('.').map(Number);
+            const nextVer = `${major}.${minor + 1}`;
+            setOldVersion(currentVer);
+            setNewVersion(nextVer);
+            
             setShowUpdate(true);
-            toast.info(`নতুন আপডেট উপলব্ধ! (v${APP_VERSION})`, {
+            toast.info(`নতুন আপডেট উপলব্ধ! (v${nextVer})`, {
               description: 'আপডেট বাটনে ক্লিক করুন',
               duration: Infinity,
             });
@@ -67,19 +80,29 @@ export const UpdateNotification = () => {
           if (reg.installing) {
             console.log('⏳ Update installing - will show notification when ready');
             const newWorker = reg.installing;
-            newWorker.addEventListener('statechange', () => {
+            const handleStateChange = async () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller && !updateShown) {
                 console.log('✅ Update ready - showing notification');
                 updateShown = true;
                 clearDismissed();
+                
+                // Load and show version info
+                const stored = await versionManager.getStoredVersion();
+                const currentVer = stored?.version || '3.0';
+                const [major, minor] = currentVer.split('.').map(Number);
+                const nextVer = `${major}.${minor + 1}`;
+                setOldVersion(currentVer);
+                setNewVersion(nextVer);
+                
                 setShowUpdate(true);
                 setRegistration(reg);
-                toast.info(`নতুন আপডেট উপলব্ধ! (v${APP_VERSION})`, {
+                toast.info(`নতুন আপডেট উপলব্ধ! (v${nextVer})`, {
                   description: 'আপডেট বাটনে ক্লিক করুন',
                   duration: Infinity,
                 });
               }
-            });
+            };
+            newWorker.addEventListener('statechange', () => handleStateChange());
           }
         }
         return false;
@@ -113,7 +136,7 @@ export const UpdateNotification = () => {
           console.log('🔔 Update found - new worker installing');
           
           if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
+            const handleWorkerStateChange = async () => {
               console.log('📊 Worker state changed:', newWorker.state);
               
               // Only show update notification if:
@@ -123,18 +146,28 @@ export const UpdateNotification = () => {
               if (newWorker.state === 'installed' && 
                   navigator.serviceWorker.controller && 
                   !updateShown && 
-                  !isDismissed(APP_VERSION)) {
+                  !isDismissed(CURRENT_BUILD_ID)) {
                 console.log('✅ Update ready - showing notification to user');
                 updateShown = true;
                 clearDismissed();
+                
+                // Load and show version info
+                const stored = await versionManager.getStoredVersion();
+                const currentVer = stored?.version || '3.0';
+                const [major, minor] = currentVer.split('.').map(Number);
+                const nextVer = `${major}.${minor + 1}`;
+                setOldVersion(currentVer);
+                setNewVersion(nextVer);
+                
                 setShowUpdate(true);
                 setRegistration(reg);
-                toast.info(`নতুন আপডেট উপলব্ধ! (v${APP_VERSION})`, {
+                toast.info(`নতুন আপডেট উপলব্ধ! (v${nextVer})`, {
                   description: 'আপডেট বাটনে ক্লিক করুন',
                   duration: Infinity,
                 });
               }
-            });
+            };
+            newWorker.addEventListener('statechange', () => handleWorkerStateChange());
           }
         });
       });
@@ -186,10 +219,11 @@ export const UpdateNotification = () => {
       console.error('❌ Error clearing caches:', error);
     }
     
-    // Update version ONLY when user clicks update button
+    // Update version ONLY when user clicks update button (auto-increment)
     try {
-      await versionManager.setVersion(APP_VERSION, 'User initiated update');
-      console.log(`✅ Version updated to ${APP_VERSION}`);
+      const newVersion = await versionManager.updateToNewVersion('User initiated update');
+      console.log(`✅ Version updated to ${newVersion}`);
+      setNewVersion(newVersion);
     } catch (error) {
       console.error('❌ Error updating version:', error);
     }
@@ -210,9 +244,9 @@ export const UpdateNotification = () => {
   };
 
   const handleLater = () => {
-    console.log('👤 User dismissed update for v' + APP_VERSION);
-    // Save that user dismissed this version
-    localStorage.setItem(UPDATE_DISMISSED_KEY, APP_VERSION);
+    console.log('👤 User dismissed update for build ' + CURRENT_BUILD_ID);
+    // Save that user dismissed this build
+    localStorage.setItem(UPDATE_DISMISSED_KEY, CURRENT_BUILD_ID);
     setShowUpdate(false);
     toast.info('আপডেট পরে ইনস্টল করতে পারবেন', {
       description: 'অ্যাপ পরবর্তীবার খুললে আবার জিজ্ঞেস করা হবে'

@@ -1,10 +1,14 @@
 // Version management and cache clearing utility
 const VERSION_KEY = 'app-version';
 const VERSION_HISTORY_KEY = 'app-version-history';
+const BUILD_ID_KEY = 'app-build-id';
 
-// Manual version increment: Update this for each release
-// Format: MAJOR.MINOR (e.g., 3.0, 3.1, 3.2... 3.10, then 4.0)
-const CURRENT_VERSION = '3.0';
+// Build-time unique identifier (changes on every build/deploy)
+// This ensures each new deployment is detected as an update
+const BUILD_ID = Date.now().toString();
+
+// Semantic version display format (3.0, 3.1, 3.2, etc.)
+const BASE_VERSION = '3.0';
 
 export interface VersionInfo {
   version: string;
@@ -18,10 +22,24 @@ export interface VersionHistory {
 }
 
 class VersionManager {
-  private currentVersion = CURRENT_VERSION;
+  private buildId = BUILD_ID;
+  private baseVersion = BASE_VERSION;
 
   getCurrentVersion(): string {
-    return this.currentVersion;
+    const stored = localStorage.getItem(VERSION_KEY);
+    if (stored) {
+      try {
+        const versionInfo: VersionInfo = JSON.parse(stored);
+        return versionInfo.version;
+      } catch {
+        return this.baseVersion;
+      }
+    }
+    return this.baseVersion;
+  }
+
+  getBuildId(): string {
+    return this.buildId;
   }
 
   async getStoredVersion(): Promise<VersionInfo | null> {
@@ -31,6 +49,10 @@ class VersionManager {
     } catch {
       return null;
     }
+  }
+
+  async getStoredBuildId(): Promise<string | null> {
+    return localStorage.getItem(BUILD_ID_KEY);
   }
 
   async getVersionHistory(): Promise<VersionHistory> {
@@ -65,15 +87,36 @@ class VersionManager {
   }
 
   async isUpdateAvailable(): Promise<boolean> {
-    const stored = await this.getStoredVersion();
+    const storedBuildId = await this.getStoredBuildId();
     
-    // Check if stored version is different from current version
-    if (!stored || stored.version !== this.currentVersion) {
-      console.log(`Update available: ${this.currentVersion} (current: ${stored?.version || 'none'})`);
+    // Check if build ID is different (indicates new deployment)
+    if (!storedBuildId || storedBuildId !== this.buildId) {
+      console.log(`Update available: new build ${this.buildId} (current: ${storedBuildId || 'none'})`);
       return true;
     }
     
     return false;
+  }
+
+  private incrementVersion(currentVersion: string): string {
+    // Parse version (e.g., "3.0" -> major: 3, minor: 0)
+    const [major, minor] = currentVersion.split('.').map(Number);
+    
+    // Increment minor version
+    return `${major}.${minor + 1}`;
+  }
+
+  async updateToNewVersion(description?: string): Promise<string> {
+    const stored = await this.getStoredVersion();
+    const currentVersion = stored?.version || this.baseVersion;
+    const newVersion = this.incrementVersion(currentVersion);
+    
+    // Save new version and build ID
+    await this.setVersion(newVersion, description);
+    localStorage.setItem(BUILD_ID_KEY, this.buildId);
+    
+    console.log(`✅ Version updated: ${currentVersion} → ${newVersion}`);
+    return newVersion;
   }
 
   async clearAllCaches(): Promise<void> {
@@ -136,4 +179,5 @@ class VersionManager {
 export const versionManager = new VersionManager();
 
 // Export current version for use in components
-export const APP_VERSION = CURRENT_VERSION;
+export const APP_VERSION = versionManager.getCurrentVersion();
+export const CURRENT_BUILD_ID = versionManager.getBuildId();
