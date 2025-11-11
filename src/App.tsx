@@ -44,6 +44,14 @@ import ArifAzadBooks from "./pages/ArifAzadBooks";
 import SaimumSeries from "./pages/SaimumSeries";
 import Explore from "./pages/Explore";
 import Hajj from "./pages/Hajj";
+import HajjGuide from "./pages/HajjGuide";
+import HajjSteps from "./pages/HajjSteps";
+import HajjStepDetail from "./pages/HajjStepDetail";
+import HajjDuas from "./pages/HajjDuas";
+import HajjChecklistPage from "./pages/HajjChecklistPage";
+import HajjMaps from "./pages/HajjMaps";
+import HajjFAQ from "./pages/HajjFAQ";
+import HajjCalendar from "./pages/HajjCalendar";
 import Fasting from "./pages/Fasting";
 import NinetyNineNames from "./pages/NinetyNineNames";
 import Shahada from "./pages/Shahada";
@@ -125,6 +133,14 @@ const App = () => {
             <Route path="/azkar" element={<Azkar />} />
             <Route path="/explore" element={<Explore />} />
             <Route path="/hajj" element={<Hajj />} />
+            <Route path="/hajj/guide" element={<HajjGuide />} />
+            <Route path="/hajj/steps" element={<HajjSteps />} />
+            <Route path="/hajj/steps/:slug" element={<HajjStepDetail />} />
+            <Route path="/hajj/duas" element={<HajjDuas />} />
+            <Route path="/hajj/checklist" element={<HajjChecklistPage />} />
+            <Route path="/hajj/maps" element={<HajjMaps />} />
+            <Route path="/hajj/faq" element={<HajjFAQ />} />
+            <Route path="/hajj/calendar" element={<HajjCalendar />} />
             <Route path="/fasting" element={<Fasting />} />
             <Route path="/99-names" element={<NinetyNineNames />} />
             <Route path="/shahada" element={<Shahada />} />
