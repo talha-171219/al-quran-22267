@@ -153,9 +153,19 @@ const Qibla = () => {
     };
   }, []);
 
+  // Calculate relative direction from current heading to Qibla
   const relativeDirection = qiblaDirection !== null ? (qiblaDirection - heading + 360) % 360 : 0;
-  const isAligned = Math.abs(relativeDirection) < 3 || Math.abs(relativeDirection) > 357;
+  const isAligned = Math.abs(relativeDirection) < 5 || Math.abs(relativeDirection) > 355;
   const rotationNeeded = relativeDirection > 180 ? -(360 - relativeDirection) : relativeDirection;
+  
+  // Debug logging
+  useEffect(() => {
+    if (qiblaDirection !== null) {
+      console.log('Current Heading:', heading.toFixed(1), '°');
+      console.log('Qibla Direction:', qiblaDirection.toFixed(1), '°');
+      console.log('Relative Direction:', relativeDirection.toFixed(1), '°');
+    }
+  }, [heading, qiblaDirection, relativeDirection]);
   
   // Get compass accuracy level
   const getAccuracyLevel = () => {
@@ -399,52 +409,61 @@ const Qibla = () => {
                     </div>
                   </div>
                   
-                  {/* Qibla Direction Indicator - Always points to Qibla */}
+                  {/* Qibla Direction Indicator - Rotates to show exact Qibla direction */}
                   {qiblaDirection !== null && (
                     <div 
-                      className="absolute inset-0 flex items-center justify-center transition-transform duration-200 ease-out"
-                      style={{ transform: `rotate(${qiblaDirection - heading}deg)`, zIndex: 15 }}
+                      className="absolute inset-0 transition-transform duration-300 ease-out"
+                      style={{ 
+                        transform: `rotate(${relativeDirection}deg)`,
+                        zIndex: 15 
+                      }}
                     >
-                      <div className="absolute flex flex-col items-center">
-                        {/* Qibla direction pointer */}
+                      {/* Qibla direction line from center */}
+                      <div className="absolute inset-0 flex items-center justify-center">
                         <div 
-                          className={`w-2 h-24 rounded-t-full transition-all duration-300 ${
-                            isAligned ? 'opacity-100 scale-110' : 'opacity-70'
+                          className={`w-1 h-28 origin-bottom transition-all duration-300 ${
+                            isAligned ? 'opacity-100' : 'opacity-80'
                           }`}
                           style={{
                             background: isAligned 
-                              ? 'linear-gradient(to bottom, hsl(var(--primary)), hsl(var(--primary-light)))' 
-                              : 'linear-gradient(to bottom, hsl(var(--primary) / 0.7), transparent)',
-                            boxShadow: isAligned ? '0 0 20px hsla(var(--primary) / 0.8)' : 'none'
+                              ? 'linear-gradient(to top, transparent, hsl(var(--primary)), hsl(var(--primary)))' 
+                              : 'linear-gradient(to top, transparent, hsl(var(--primary) / 0.6), hsl(var(--primary) / 0.8))',
+                            boxShadow: isAligned ? '0 0 20px hsla(var(--primary) / 0.8)' : '0 0 10px hsla(var(--primary) / 0.4)',
+                            transform: 'translateY(-50%)'
                           }}
                         />
-                        
-                        {/* Kaaba Icon at Qibla direction */}
+                      </div>
+                      
+                      {/* Kaaba Icon at the end of Qibla line */}
+                      <div 
+                        className="absolute top-3 left-1/2 -translate-x-1/2"
+                      >
                         <div 
-                          className="absolute -top-2 left-1/2 -translate-x-1/2"
+                          className={`p-2.5 rounded-xl transition-all duration-300 ${
+                            isAligned 
+                              ? 'bg-primary scale-125 shadow-2xl' 
+                              : 'bg-primary/90 shadow-lg'
+                          }`}
+                          style={{
+                            boxShadow: isAligned 
+                              ? '0 0 30px hsla(var(--primary) / 0.8), 0 0 60px hsla(var(--primary) / 0.4)' 
+                              : '0 4px 12px hsla(var(--primary) / 0.3)'
+                          }}
                         >
-                          <div 
-                            className={`p-2 rounded-lg transition-all duration-300 ${
-                              isAligned 
-                                ? 'bg-primary scale-125 shadow-xl shadow-primary/50' 
-                                : 'bg-primary/80 shadow-lg'
-                            }`}
+                          <svg 
+                            className="w-6 h-6 text-white drop-shadow-lg" 
+                            fill="currentColor" 
+                            viewBox="0 0 24 24"
                           >
-                            <svg 
-                              className="w-5 h-5 text-white" 
-                              fill="currentColor" 
-                              viewBox="0 0 24 24"
-                            >
-                              <path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.18l6 3.75v7.5l-6 3.75-6-3.75v-7.5l6-3.75z"/>
-                              <rect x="8" y="10" width="8" height="8" rx="1"/>
-                            </svg>
-                            {isAligned && (
-                              <>
-                                <div className="absolute inset-0 rounded-lg bg-primary animate-ping opacity-75" />
-                                <div className="absolute -inset-1 rounded-lg bg-primary/30 blur-md animate-pulse" />
-                              </>
-                            )}
-                          </div>
+                            <path d="M12 2L4 7v10l8 5 8-5V7l-8-5zm0 2.18l6 3.75v7.5l-6 3.75-6-3.75v-7.5l6-3.75z"/>
+                            <rect x="8" y="10" width="8" height="8" rx="1"/>
+                          </svg>
+                          {isAligned && (
+                            <>
+                              <div className="absolute inset-0 rounded-xl bg-primary animate-ping opacity-75" />
+                              <div className="absolute -inset-2 rounded-xl bg-primary/30 blur-lg animate-pulse" />
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
