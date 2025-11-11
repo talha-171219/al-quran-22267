@@ -8,9 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { MapPin, Bell, Download, X } from "lucide-react";
-import { WelcomeCard } from "@/components/onboarding/WelcomeCard";
-import { versionManager } from "@/utils/versionManager";
+import { MapPin, Bell } from "lucide-react";
 
 interface PermissionsContextType {
   locationPermission: boolean;
@@ -33,14 +31,11 @@ export const PermissionsProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [locationPermission, setLocationPermission] = useState(false);
   const [notificationPermission, setNotificationPermission] = useState(false);
   const [showPermissionDialog, setShowPermissionDialog] = useState(false);
-  const [permissionStep, setPermissionStep] = useState<"location" | "notification" | "install" | "welcome" | "done">("location");
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const [showWelcome, setShowWelcome] = useState(false);
+  const [permissionStep, setPermissionStep] = useState<"location" | "notification" | "done">("location");
 
   useEffect(() => {
     // Check if permissions have been requested before
     const permissionsRequested = localStorage.getItem("permissionsRequested");
-    const isInstalled = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
     
     const checkPermissions = async () => {
       // Check location permission
@@ -61,46 +56,13 @@ export const PermissionsProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
     checkPermissions();
 
-    // Listen for beforeinstallprompt event
-    const handleBeforeInstall = (e: any) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-
-    const handleAppInstalled = () => {
-      setDeferredPrompt(null);
-      localStorage.setItem("appInstalled", "true");
-      toast.success("অ্যাপ সফলভাবে ইনস্টল হয়েছে! ✨");
-    };
-
-    window.addEventListener("beforeinstallprompt", handleBeforeInstall);
-    window.addEventListener("appinstalled", handleAppInstalled);
-
     // Show permission dialog if not requested before
     if (!permissionsRequested) {
+      // Wait for PWA install prompt to finish
       setTimeout(() => {
         setShowPermissionDialog(true);
-      }, 1000);
-    } else {
-      // Permissions already done, check for updates or first visit
-      const checkWelcome = async () => {
-        const isUpdate = await versionManager.isUpdateAvailable();
-        const hasSeenWelcome = localStorage.getItem("hasSeenWelcome");
-        
-        if (isUpdate || !hasSeenWelcome) {
-          // Show welcome for updates or first visit
-          setTimeout(() => {
-            setShowWelcome(true);
-          }, 500);
-        }
-      };
-      checkWelcome();
+      }, 2000);
     }
-
-    return () => {
-      window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
-      window.removeEventListener("appinstalled", handleAppInstalled);
-    };
   }, []);
 
   const requestLocationPermission = async (): Promise<boolean> => {
@@ -163,58 +125,19 @@ export const PermissionsProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const handleNotificationRequest = async () => {
     await requestNotificationPermission();
-    setPermissionStep("install");
-  };
-
-  const handleInstall = async () => {
-    if (!deferredPrompt) {
-      toast.info("অনুগ্রহ করে ব্রাউজার মেনু থেকে 'Add to Home Screen' নির্বাচন করুন", {
-        description: "Chrome/Edge: মেনু (⋮) → Install app\niOS Safari: Share → Add to Home Screen",
-        duration: 6000,
-      });
-      setPermissionStep("welcome");
-      setShowPermissionDialog(false);
-      setTimeout(() => setShowWelcome(true), 300);
-      return;
-    }
-
-    try {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      
-      if (outcome === "accepted") {
-        toast.success("ইনস্টল শুরু হয়েছে...");
-        localStorage.setItem("appInstalled", "true");
-      }
-      
-      setDeferredPrompt(null);
-      setPermissionStep("welcome");
-      setShowPermissionDialog(false);
-      setTimeout(() => setShowWelcome(true), 300);
-    } catch (error) {
-      console.error("Install error:", error);
-      setPermissionStep("welcome");
-      setShowPermissionDialog(false);
-      setTimeout(() => setShowWelcome(true), 300);
-    }
+    setPermissionStep("done");
+    localStorage.setItem("permissionsRequested", "true");
+    setShowPermissionDialog(false);
   };
 
   const handleSkip = () => {
     if (permissionStep === "location") {
       setPermissionStep("notification");
-    } else if (permissionStep === "notification") {
-      setPermissionStep("install");
-    } else if (permissionStep === "install") {
-      setPermissionStep("welcome");
+    } else {
+      setPermissionStep("done");
+      localStorage.setItem("permissionsRequested", "true");
       setShowPermissionDialog(false);
-      setTimeout(() => setShowWelcome(true), 300);
     }
-  };
-
-  const handleWelcomeComplete = () => {
-    setShowWelcome(false);
-    setPermissionStep("done");
-    localStorage.setItem("permissionsRequested", "true");
   };
 
   return (
@@ -228,11 +151,8 @@ export const PermissionsProvider: React.FC<{ children: React.ReactNode }> = ({ c
     >
       {children}
 
-      {/* Welcome Card */}
-      {showWelcome && <WelcomeCard onComplete={handleWelcomeComplete} />}
-
       {/* Permission Request Dialog */}
-      <Dialog open={showPermissionDialog} onOpenChange={() => {}}>
+      <Dialog open={showPermissionDialog} onOpenChange={setShowPermissionDialog}>
         <DialogContent className="sm:max-w-md bg-card/95 backdrop-blur">
           {permissionStep === "location" && (
             <>
@@ -304,35 +224,6 @@ export const PermissionsProvider: React.FC<{ children: React.ReactNode }> = ({ c
                   নোটিফিকেশন অনুমতি দিন
                 </Button>
                 <Button onClick={handleSkip} variant="ghost" size="sm" className="w-full">
-                  এখন নয়
-                </Button>
-              </div>
-            </>
-          )}
-
-          {permissionStep === "install" && (
-            <>
-              <DialogHeader>
-                <div className="mx-auto mb-4">
-                  <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Download className="h-12 w-12 text-primary" />
-                  </div>
-                </div>
-                <DialogTitle className="text-center text-xl">
-                  কুরআন অ্যাপ ইনস্টল করুন?
-                </DialogTitle>
-                <DialogDescription className="text-center">
-                  আপনার ডিভাইসে অ্যাপটি ইনস্টল করে সেরা অভিজ্ঞতা পান। দ্রুত অ্যাক্সেস এবং অফলাইন ব্যবহার করুন।
-                </DialogDescription>
-              </DialogHeader>
-
-              <div className="space-y-2 py-4">
-                <Button onClick={handleInstall} size="lg" className="w-full">
-                  <Download className="mr-2 h-5 w-5" />
-                  ইনস্টল করুন
-                </Button>
-                <Button onClick={handleSkip} variant="ghost" size="sm" className="w-full">
-                  <X className="mr-2 h-4 w-4" />
                   এখন নয়
                 </Button>
               </div>
