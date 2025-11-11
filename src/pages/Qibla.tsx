@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Card } from "@/components/ui/card";
-import { MapPin, Navigation2 } from "lucide-react";
+import { MapPin, Navigation2, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { CalibrationWizard } from "@/components/qibla/CalibrationWizard";
 
 const Qibla = () => {
   const [qiblaDirection, setQiblaDirection] = useState<number | null>(null);
@@ -12,6 +13,9 @@ const Qibla = () => {
   const [location, setLocation] = useState<{ lat: number; lon: number } | null>(null);
   const [distance, setDistance] = useState<number | null>(null);
   const [permissionGranted, setPermissionGranted] = useState(false);
+  const [showCalibration, setShowCalibration] = useState(false);
+  const lastVibrateTime = useRef<number>(0);
+  const wasAligned = useRef<boolean>(false);
 
   const calculateQibla = (lat: number, lon: number) => {
     // Kaaba coordinates
@@ -79,6 +83,27 @@ const Qibla = () => {
   const relativeDirection = qiblaDirection !== null ? (qiblaDirection - heading + 360) % 360 : 0;
   const isAligned = Math.abs(relativeDirection) < 5 || Math.abs(relativeDirection) > 355;
   const rotationNeeded = relativeDirection > 180 ? -(360 - relativeDirection) : relativeDirection;
+
+  // Haptic vibration feedback when aligned
+  useEffect(() => {
+    if (!permissionGranted || qiblaDirection === null) return;
+
+    const now = Date.now();
+    
+    // Vibrate when becoming aligned (and not already aligned)
+    if (isAligned && !wasAligned.current && now - lastVibrateTime.current > 1000) {
+      if ('vibrate' in navigator) {
+        // Triple pulse pattern for success
+        navigator.vibrate([100, 50, 100, 50, 100]);
+        lastVibrateTime.current = now;
+        toast.success("মক্কার দিকে সারিবদ্ধ! 🕋", {
+          duration: 2000
+        });
+      }
+    }
+    
+    wasAligned.current = isAligned;
+  }, [isAligned, permissionGranted, qiblaDirection]);
 
   const getInstructionText = () => {
     if (!permissionGranted) {
@@ -407,7 +432,7 @@ const Qibla = () => {
             </div>
 
             {/* Permission Button */}
-            {!permissionGranted && (
+            {!permissionGranted ? (
               <Button 
                 onClick={getLocation} 
                 size="lg"
@@ -415,6 +440,16 @@ const Qibla = () => {
               >
                 <MapPin className="h-5 w-5" />
                 Enable Location Access
+              </Button>
+            ) : (
+              <Button 
+                onClick={() => setShowCalibration(true)}
+                variant="outline"
+                size="lg"
+                className="w-full gap-2 border-slate-600 text-slate-300 hover:bg-slate-700 hover:text-white"
+              >
+                <Settings className="h-5 w-5" />
+                Calibrate Compass
               </Button>
             )}
           </div>
@@ -450,6 +485,11 @@ const Qibla = () => {
           </div>
         </Card>
       </main>
+
+      {/* Calibration Wizard Modal */}
+      {showCalibration && (
+        <CalibrationWizard onClose={() => setShowCalibration(false)} />
+      )}
 
       <BottomNav />
     </div>
