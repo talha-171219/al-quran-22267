@@ -154,7 +154,7 @@ export const PDFViewer = ({ pdfUrl, title, onClose, onPrevious, onNext, hasPrevi
       </div>
 
       {/* PDF Content */}
-      <div ref={containerRef} className="flex-1 overflow-auto bg-muted/30 p-4 relative">
+      <div ref={containerRef} className="flex-1 overflow-x-auto overflow-y-auto bg-muted/30 p-4 relative">
         {/* Previous Page Button */}
         <Button
           variant="default"
@@ -177,15 +177,17 @@ export const PDFViewer = ({ pdfUrl, title, onClose, onPrevious, onNext, hasPrevi
           <ChevronRight className="h-5 w-5 sm:h-6 sm:w-6" />
         </Button>
 
-        <div className="w-full mx-auto flex justify-center">
+        <div className="min-w-fit mx-auto">
           {loading && (
-            <Card className="p-8 flex flex-col items-center justify-center gap-4">
-              <Loader2 className="h-12 w-12 animate-spin text-primary" />
-              <div className="text-center space-y-2">
-                <p className="font-semibold">পিডিএফ লোড হচ্ছে...</p>
-                <p className="text-sm text-muted-foreground">অনুগ্রহ করে অপেক্ষা করুন</p>
-              </div>
-            </Card>
+            <div className="flex justify-center">
+              <Card className="p-8 flex flex-col items-center justify-center gap-4">
+                <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                <div className="text-center space-y-2">
+                  <p className="font-semibold">পিডিএফ লোড হচ্ছে...</p>
+                  <p className="text-sm text-muted-foreground">অনুগ্রহ করে অপেক্ষা করুন</p>
+                </div>
+              </Card>
+            </div>
           )}
           
           <Document
@@ -193,7 +195,6 @@ export const PDFViewer = ({ pdfUrl, title, onClose, onPrevious, onNext, hasPrevi
             onLoadSuccess={onDocumentLoadSuccess}
             onLoadError={onDocumentLoadError}
             loading=""
-            className="flex justify-center"
           >
             {pageWidth > 0 && (
               <Page
