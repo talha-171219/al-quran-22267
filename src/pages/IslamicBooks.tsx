@@ -24,7 +24,7 @@ const IslamicBooks = () => {
       titleBn: "আরিফ আজাদ বই সমগ্রী",
       description: "আরিফ আজাদ এর সকল বই এক জায়গায়",
       path: "/books/arif-azad",
-      bookCount: 4
+      bookCount: 8
     },
     {
       id: 2,

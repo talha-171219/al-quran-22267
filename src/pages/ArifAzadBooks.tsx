@@ -58,6 +58,42 @@ const ArifAzadBooks = () => {
       authorBn: "আরিফ আজাদ",
       description: "সময় শেষ হওয়ার আগে করণীয় নিয়ে একটি অনুপ্রেরণামূলক বই।",
       pdfUrl: "/books/bela-furabar-age.pdf"
+    },
+    {
+      id: 5,
+      title: "Prottyaborton",
+      titleBn: "প্রত্যাবর্তন",
+      author: "Arif Azad",
+      authorBn: "আরিফ আজাদ",
+      description: "জীবনের প্রত্যাবর্তন ও আল্লাহর দিকে ফিরে আসার গল্প।",
+      pdfUrl: "/books/prottyaborton-arif-azad.pdf"
+    },
+    {
+      id: 6,
+      title: "Maa O Baba",
+      titleBn: "মা ও বাবা",
+      author: "Arif Azad",
+      authorBn: "আরিফ আজাদ",
+      description: "মা-বাবার প্রতি সন্তানের দায়িত্ব ও ভালোবাসা নিয়ে।",
+      pdfUrl: "/books/maa-o-baba-arif-azad.pdf"
+    },
+    {
+      id: 7,
+      title: "Adhar Rater Musafir",
+      titleBn: "আঁধার রাতের মুসাফির",
+      author: "Nasim Hejazi",
+      authorBn: "নাসিম হেযাজী",
+      description: "অন্ধকার রাতের যাত্রী - একটি আধ্যাত্মিক উপন্যাস।",
+      pdfUrl: "/books/adhar-rater-musafir-nasim-hejaji.pdf"
+    },
+    {
+      id: 8,
+      title: "Ahban",
+      titleBn: "আহ্বান: আধুনিক মননে আলোর পরশ",
+      author: "Mizanur Rahman Azhari",
+      authorBn: "মিজানুর রহমান আজহারি",
+      description: "আধুনিক মননে ইসলামের আলোর পরশ।",
+      pdfUrl: "/books/ahban-adhunik-monone-mizanur-rahman-azhari.pdf"
     }
   ];
 
