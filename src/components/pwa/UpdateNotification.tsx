@@ -32,25 +32,27 @@ export const UpdateNotification = () => {
           
           // Check if there's a waiting worker (update available)
           if (reg.waiting) {
-            console.log('Update available - waiting worker found on app open');
+            console.log('✅ Update available - waiting worker found on app open');
             setShowUpdate(true);
             toast.info(`নতুন আপডেট উপলব্ধ! (v${APP_VERSION})`, {
-              description: 'আপডেট বাটনে ক্লিক করুন'
+              description: 'আপডেট বাটনে ক্লিক করুন',
+              duration: Infinity, // Don't auto-dismiss
             });
             return true;
           }
           
           // Check if there's an installing worker
           if (reg.installing) {
-            console.log('Update installing - will show notification when ready');
+            console.log('⏳ Update installing - will show notification when ready');
             const newWorker = reg.installing;
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('Update ready - showing notification');
+                console.log('✅ Update ready - showing notification');
                 setShowUpdate(true);
                 setRegistration(reg);
                 toast.info(`নতুন আপডেট উপলব্ধ! (v${APP_VERSION})`, {
-                  description: 'আপডেট বাটনে ক্লিক করুন'
+                  description: 'আপডেট বাটনে ক্লিক করুন',
+                  duration: Infinity,
                 });
               }
             });
@@ -66,7 +68,7 @@ export const UpdateNotification = () => {
       navigator.serviceWorker.getRegistration().then((reg) => {
         if (reg) {
           reg.update().then(() => {
-            console.log('Update check completed');
+            console.log('🔍 Update check completed');
           });
         }
       });
@@ -84,19 +86,20 @@ export const UpdateNotification = () => {
       navigator.serviceWorker.ready.then((reg) => {
         reg.addEventListener('updatefound', () => {
           const newWorker = reg.installing;
-          console.log('Update found - new worker installing');
+          console.log('🔔 Update found - new worker installing');
           
           if (newWorker) {
             newWorker.addEventListener('statechange', () => {
-              console.log('Worker state changed:', newWorker.state);
+              console.log('📊 Worker state changed:', newWorker.state);
               
               // Only show update notification if there's already an active controller
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('Update ready - showing notification');
+                console.log('✅ Update ready - showing notification to user');
                 setShowUpdate(true);
                 setRegistration(reg);
                 toast.info(`নতুন আপডেট উপলব্ধ! (v${APP_VERSION})`, {
-                  description: 'আপডেট বাটনে ক্লিক করুন'
+                  description: 'আপডেট বাটনে ক্লিক করুন',
+                  duration: Infinity,
                 });
               }
             });
@@ -104,11 +107,15 @@ export const UpdateNotification = () => {
         });
       });
 
-      // Listen for controller change ONLY after user initiates update
+      // CRITICAL: Listen for controller change ONLY after user initiates update
+      // This ensures NO automatic reloads happen without user consent
       const handleControllerChange = () => {
+        console.log('🔄 Controller change detected');
         if (userInitiatedUpdate) {
-          console.log('Controller changed - reloading');
+          console.log('✅ User initiated update - reloading app');
           window.location.reload();
+        } else {
+          console.log('⚠️ Blocked automatic reload - waiting for user action');
         }
       };
 
@@ -116,6 +123,7 @@ export const UpdateNotification = () => {
 
       // Store the setter for user-initiated updates
       (window as any).__userInitiatedUpdate = () => {
+        console.log('🎯 User initiated update flag set');
         userInitiatedUpdate = true;
       };
 
@@ -128,9 +136,10 @@ export const UpdateNotification = () => {
 
   const handleUpdate = async () => {
     setIsUpdating(true);
-    console.log('User initiated update');
+    console.log('🚀 User clicked update button - starting update process');
     
-    // Mark that this update is user-initiated
+    // CRITICAL: Mark that this update is user-initiated BEFORE anything else
+    // This ensures the controller change handler knows to reload
     if ((window as any).__userInitiatedUpdate) {
       (window as any).__userInitiatedUpdate();
     }
@@ -138,9 +147,9 @@ export const UpdateNotification = () => {
     // Clear all caches before updating
     try {
       await versionManager.clearAllCaches();
-      console.log('Caches cleared');
+      console.log('🧹 Dynamic caches cleared');
     } catch (error) {
-      console.error('Error clearing caches:', error);
+      console.error('❌ Error clearing caches:', error);
     }
     
     // Show success message
@@ -149,15 +158,23 @@ export const UpdateNotification = () => {
     // Wait a moment to show success, then activate new service worker
     setTimeout(() => {
       if (registration?.waiting) {
-        console.log('Telling service worker to skip waiting');
+        console.log('📤 Sending SKIP_WAITING message to service worker');
         // Tell the service worker to skip waiting and take control
         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
       } else {
-        console.log('No waiting worker, reloading directly');
+        console.log('⚠️ No waiting worker found, reloading directly');
         // If no waiting worker, just reload
         window.location.reload();
       }
     }, 1500);
+  };
+
+  const handleLater = () => {
+    console.log('👤 User dismissed update notification');
+    setShowUpdate(false);
+    toast.info('আপডেট পরে ইনস্টল করতে পারবেন', {
+      description: 'সেটিংস থেকে যেকোনো সময় আপডেট করুন'
+    });
   };
 
   if (!showUpdate) return null;
@@ -242,6 +259,14 @@ export const UpdateNotification = () => {
               >
                 <RefreshCw className="mr-2 h-4 w-4 group-hover:rotate-180 transition-transform duration-500" />
                 এখনই আপডেট করুন
+              </Button>
+              <Button 
+                onClick={handleLater} 
+                variant="ghost"
+                className="w-full"
+                size="lg"
+              >
+                পরে করব
               </Button>
             </div>
           </>
