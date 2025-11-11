@@ -2,8 +2,9 @@
 const VERSION_KEY = 'app-version';
 const VERSION_HISTORY_KEY = 'app-version-history';
 
-// Auto-increment version based on build timestamp
-const CURRENT_VERSION = `2.${Math.floor(Date.now() / 100000)}`; // e.g., 2.17624021
+// Manual version increment: Update this for each release
+// Format: MAJOR.MINOR (e.g., 3.0, 3.1, 3.2... 3.10, then 4.0)
+const CURRENT_VERSION = '3.0';
 
 export interface VersionInfo {
   version: string;
