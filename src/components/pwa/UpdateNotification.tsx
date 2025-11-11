@@ -224,6 +224,11 @@ export const UpdateNotification = () => {
       const newVersion = await versionManager.updateToNewVersion('User initiated update');
       console.log(`✅ Version updated to ${newVersion}`);
       setNewVersion(newVersion);
+      
+      // CRITICAL: Store the current build ID to mark this update as installed
+      // This prevents the update message from showing again after reload
+      localStorage.setItem('app-build-id', CURRENT_BUILD_ID);
+      console.log(`✅ Build ID ${CURRENT_BUILD_ID} marked as installed`);
     } catch (error) {
       console.error('❌ Error updating version:', error);
     }
