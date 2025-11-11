@@ -31,7 +31,14 @@ const Qibla = () => {
       }
 
       const data = await response.json();
-      const qiblaDirection = data.data.direction;
+      const qiblaDirection = parseFloat(data.data.direction);
+
+      // Validate the direction
+      if (isNaN(qiblaDirection) || qiblaDirection < 0 || qiblaDirection > 360) {
+        throw new Error('Invalid Qibla direction received');
+      }
+
+      console.log('Qibla Direction from API:', qiblaDirection);
 
       // Calculate distance using Haversine formula
       const kaabaLat = 21.4225;
@@ -111,17 +118,24 @@ const Qibla = () => {
       if ('DeviceOrientationEvent' in window) {
         compassHandler = (event: DeviceOrientationEvent) => {
           if (event.alpha !== null) {
-            // Normalize heading to 0-360 range
-            let newHeading = event.alpha;
+            let newHeading = 0;
             
-            // For Android devices, use webkitCompassHeading if available
-            if ((event as any).webkitCompassHeading) {
+            // For Android devices, use webkitCompassHeading if available (most accurate)
+            if ((event as any).webkitCompassHeading !== undefined) {
               newHeading = (event as any).webkitCompassHeading;
-            } else {
-              // iOS returns alpha relative to device, adjust for magnetic north
-              newHeading = 360 - event.alpha;
+            } else if (event.absolute && event.alpha !== null) {
+              // For devices with absolute orientation
+              newHeading = event.alpha;
+            } else if (event.alpha !== null) {
+              // iOS devices - alpha is angle between device and magnetic north
+              // Need to adjust based on device orientation
+              newHeading = event.alpha;
             }
             
+            // Normalize to 0-360 range
+            newHeading = (newHeading + 360) % 360;
+            
+            console.log('Device Heading:', newHeading.toFixed(1));
             setHeading(newHeading);
           }
         };
@@ -474,26 +488,39 @@ const Qibla = () => {
             </div>
 
             {/* Action Buttons */}
-            {!permissionGranted ? (
-              <Button 
-                onClick={getLocation} 
-                size="lg"
-                className="w-full gap-2"
-              >
-                <MapPin className="h-5 w-5" />
-                লোকেশন অনুমতি দিন
-              </Button>
-            ) : (
-              <Button 
-                onClick={() => setShowCalibration(true)}
-                variant="outline"
-                size="lg"
-                className="w-full gap-2"
-              >
-                <Settings className="h-5 w-5" />
-                ক্যালিব্রেট করুন
-              </Button>
-            )}
+            <div className="w-full space-y-2">
+              {!permissionGranted ? (
+                <Button 
+                  onClick={getLocation} 
+                  size="lg"
+                  className="w-full gap-2"
+                >
+                  <MapPin className="h-5 w-5" />
+                  লোকেশন অনুমতি দিন
+                </Button>
+              ) : (
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={getLocation}
+                    variant="outline"
+                    size="lg"
+                    className="flex-1 gap-2"
+                  >
+                    <Navigation2 className="h-4 w-4" />
+                    Refresh
+                  </Button>
+                  <Button 
+                    onClick={() => setShowCalibration(true)}
+                    variant="outline"
+                    size="lg"
+                    className="flex-1 gap-2"
+                  >
+                    <Settings className="h-4 w-4" />
+                    Calibrate
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         </Card>
 
