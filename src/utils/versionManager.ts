@@ -112,14 +112,16 @@ class VersionManager {
   }
 
   async isUpdateAvailable(): Promise<boolean> {
-    const storedBuildId = await this.getStoredBuildId();
+    const stored = await this.getStoredVersion();
+    const storedVersion = stored?.version || null;
     
-    // Check if build ID is different (indicates new deployment)
-    if (!storedBuildId || storedBuildId !== this.buildId) {
-      console.log(`Update available: new build ${this.buildId} (current: ${storedBuildId || 'none'})`);
+    // If no stored version OR stored version is different from BASE_VERSION
+    if (!storedVersion || storedVersion !== this.baseVersion) {
+      console.log(`Update available: ${storedVersion || 'none'} → ${this.baseVersion}`);
       return true;
     }
     
+    console.log(`✅ Already on latest version: ${this.baseVersion}`);
     return false;
   }
 
