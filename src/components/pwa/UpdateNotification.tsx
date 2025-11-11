@@ -4,6 +4,8 @@ import { RefreshCw, Sparkles, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { versionManager, APP_VERSION } from "@/utils/versionManager";
 
+const UPDATE_DISMISSED_KEY = 'update-dismissed-version';
+
 export const UpdateNotification = () => {
   const [showUpdate, setShowUpdate] = useState(false);
   const [registration, setRegistration] = useState<ServiceWorkerRegistration | null>(null);
@@ -15,6 +17,7 @@ export const UpdateNotification = () => {
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       let userInitiatedUpdate = false;
+      let updateShown = false; // Track if we've shown update notification this session
 
       // Get version info
       const loadVersionInfo = async () => {
@@ -24,19 +27,38 @@ export const UpdateNotification = () => {
       };
       loadVersionInfo();
 
+      // Check if user dismissed this version's update
+      const isDismissed = (version: string): boolean => {
+        const dismissed = localStorage.getItem(UPDATE_DISMISSED_KEY);
+        return dismissed === version;
+      };
+
+      // Clear dismissed flag (called when showing update)
+      const clearDismissed = () => {
+        localStorage.removeItem(UPDATE_DISMISSED_KEY);
+      };
+
       // Function to check for waiting service worker
       const checkForWaitingWorker = async () => {
         const reg = await navigator.serviceWorker.getRegistration();
         if (reg) {
           setRegistration(reg);
           
+          // Check if user already dismissed this version OR we already showed update
+          if (isDismissed(APP_VERSION) || updateShown) {
+            console.log('⏭️ Update already dismissed or shown for v' + APP_VERSION);
+            return false;
+          }
+          
           // Check if there's a waiting worker (update available)
           if (reg.waiting) {
-            console.log('✅ Update available - waiting worker found on app open');
+            console.log('✅ Update available - waiting worker found (v' + APP_VERSION + ')');
+            updateShown = true;
+            clearDismissed(); // Clear any old dismissed version
             setShowUpdate(true);
             toast.info(`নতুন আপডেট উপলব্ধ! (v${APP_VERSION})`, {
               description: 'আপডেট বাটনে ক্লিক করুন',
-              duration: Infinity, // Don't auto-dismiss
+              duration: Infinity,
             });
             return true;
           }
@@ -46,8 +68,10 @@ export const UpdateNotification = () => {
             console.log('⏳ Update installing - will show notification when ready');
             const newWorker = reg.installing;
             newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller && !updateShown) {
                 console.log('✅ Update ready - showing notification');
+                updateShown = true;
+                clearDismissed();
                 setShowUpdate(true);
                 setRegistration(reg);
                 toast.info(`নতুন আপডেট উপলব্ধ! (v${APP_VERSION})`, {
@@ -92,9 +116,17 @@ export const UpdateNotification = () => {
             newWorker.addEventListener('statechange', () => {
               console.log('📊 Worker state changed:', newWorker.state);
               
-              // Only show update notification if there's already an active controller
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // Only show update notification if:
+              // 1. Worker is installed and there's an active controller
+              // 2. We haven't shown it yet this session
+              // 3. User hasn't dismissed it
+              if (newWorker.state === 'installed' && 
+                  navigator.serviceWorker.controller && 
+                  !updateShown && 
+                  !isDismissed(APP_VERSION)) {
                 console.log('✅ Update ready - showing notification to user');
+                updateShown = true;
+                clearDismissed();
                 setShowUpdate(true);
                 setRegistration(reg);
                 toast.info(`নতুন আপডেট উপলব্ধ! (v${APP_VERSION})`, {
@@ -138,8 +170,10 @@ export const UpdateNotification = () => {
     setIsUpdating(true);
     console.log('🚀 User clicked update button - starting update process');
     
+    // Clear dismissed flag
+    localStorage.removeItem(UPDATE_DISMISSED_KEY);
+    
     // CRITICAL: Mark that this update is user-initiated BEFORE anything else
-    // This ensures the controller change handler knows to reload
     if ((window as any).__userInitiatedUpdate) {
       (window as any).__userInitiatedUpdate();
     }
@@ -167,21 +201,21 @@ export const UpdateNotification = () => {
     setTimeout(() => {
       if (registration?.waiting) {
         console.log('📤 Sending SKIP_WAITING message to service worker');
-        // Tell the service worker to skip waiting and take control
         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
       } else {
         console.log('⚠️ No waiting worker found, reloading directly');
-        // If no waiting worker, just reload
         window.location.reload();
       }
     }, 1500);
   };
 
   const handleLater = () => {
-    console.log('👤 User dismissed update notification');
+    console.log('👤 User dismissed update for v' + APP_VERSION);
+    // Save that user dismissed this version
+    localStorage.setItem(UPDATE_DISMISSED_KEY, APP_VERSION);
     setShowUpdate(false);
     toast.info('আপডেট পরে ইনস্টল করতে পারবেন', {
-      description: 'সেটিংস থেকে যেকোনো সময় আপডেট করুন'
+      description: 'অ্যাপ পরবর্তীবার খুললে আবার জিজ্ঞেস করা হবে'
     });
   };
 
