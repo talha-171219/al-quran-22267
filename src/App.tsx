@@ -53,6 +53,15 @@ import HajjMaps from "./pages/HajjMaps";
 import HajjFAQ from "./pages/HajjFAQ";
 import HajjCalendar from "./pages/HajjCalendar";
 import Fasting from "./pages/Fasting";
+import FastingGuide from "./pages/FastingGuide";
+import FastingTiming from "./pages/FastingTiming";
+import FastingDuas from "./pages/FastingDuas";
+import FastingSteps from "./pages/FastingSteps";
+import FastingTips from "./pages/FastingTips";
+import FastingTracker from "./pages/FastingTracker";
+import FastingFAQ from "./pages/FastingFAQ";
+import LaylatulQadr from "./pages/LaylatulQadr";
+import Itikaf from "./pages/Itikaf";
 import NinetyNineNames from "./pages/NinetyNineNames";
 import Shahada from "./pages/Shahada";
 import Gallery from "./pages/Gallery";
@@ -142,6 +151,15 @@ const App = () => {
             <Route path="/hajj/faq" element={<HajjFAQ />} />
             <Route path="/hajj/calendar" element={<HajjCalendar />} />
             <Route path="/fasting" element={<Fasting />} />
+            <Route path="/fasting/guide" element={<FastingGuide />} />
+            <Route path="/fasting/timing" element={<FastingTiming />} />
+            <Route path="/fasting/duas" element={<FastingDuas />} />
+            <Route path="/fasting/steps" element={<FastingSteps />} />
+            <Route path="/fasting/tips" element={<FastingTips />} />
+            <Route path="/fasting/tracker" element={<FastingTracker />} />
+            <Route path="/fasting/faq" element={<FastingFAQ />} />
+            <Route path="/fasting/laylatul-qadr" element={<LaylatulQadr />} />
+            <Route path="/fasting/itikaf" element={<Itikaf />} />
             <Route path="/99-names" element={<NinetyNineNames />} />
             <Route path="/shahada" element={<Shahada />} />
             <Route path="/gallery" element={<Gallery />} />
