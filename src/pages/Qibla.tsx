@@ -17,6 +17,8 @@ const Qibla = () => {
   const lastVibrateTime = useRef<number>(0);
   const wasAligned = useRef<boolean>(false);
 
+  console.log('Qibla component rendered', { permissionGranted, location, qiblaDirection, heading });
+
   const calculateQibla = (lat: number, lon: number) => {
     // Kaaba coordinates
     const kaabaLat = 21.4225;
@@ -214,15 +216,15 @@ const Qibla = () => {
         )}
 
         {/* Main Compass Card */}
-        <Card className="relative overflow-hidden bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border-slate-700/50 shadow-2xl p-8">
+        <Card className="relative overflow-hidden bg-gradient-to-br from-slate-900/90 to-slate-800/90 backdrop-blur-xl border-slate-700/50 shadow-2xl p-4 sm:p-8">
           {/* Background glow effects */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-amber-500/5 rounded-full blur-3xl" />
           </div>
           
-          <div className="flex flex-col items-center space-y-6 relative z-10">
+          <div className="flex flex-col items-center space-y-4 sm:space-y-6 relative z-10">
             {/* Premium Compass */}
-            <div className="relative w-80 h-80">
+            <div className="relative w-72 h-72 sm:w-80 sm:h-80 mx-auto">
               {/* Outer glow animation */}
               <div 
                 className="absolute inset-0 rounded-full animate-pulse"
