@@ -8,27 +8,20 @@ export const NamesIcon = ({ className = "h-6 w-6" }: IconProps) => {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="1.5"
+      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
     >
-      {/* Star with Arabic calligraphy style */}
+      {/* Star frame */}
       <path
-        d="M12 2 L14.5 9 L22 9.5 L16 14.5 L18 22 L12 17.5 L6 22 L8 14.5 L2 9.5 L9.5 9 Z"
-        fill="currentColor"
-        opacity="0.9"
+        d="M12 2 L14 8 L20 8 L15 12 L17 18 L12 14 L7 18 L9 12 L4 8 L10 8 Z"
+        strokeWidth="2.5"
       />
-      {/* Arabic style decorative elements */}
-      <circle cx="12" cy="12" r="3" fill="white" opacity="0.3" />
-      <path
-        d="M10 11.5 Q12 10 14 11.5"
-        fill="none"
-        stroke="white"
-        strokeWidth="1"
-        opacity="0.8"
-      />
-      <circle cx="12" cy="13" r="0.5" fill="white" />
+      {/* Allah calligraphy (stylized) */}
+      <text x="12" y="14" fontSize="8" textAnchor="middle" fill="currentColor" fontWeight="bold" style={{ fontFamily: 'serif' }}>
+        الله
+      </text>
     </svg>
   );
 };
