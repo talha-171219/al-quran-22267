@@ -48,8 +48,14 @@ export const WelcomeCard = ({ onComplete }: WelcomeCardProps) => {
     }
   }, [autoNavigate, welcomeType]);
 
-  const handleEnter = () => {
+  const handleEnter = async () => {
     setIsVisible(false);
+    
+    // If this is an update welcome, mark version as updated
+    if (welcomeType === "update") {
+      await versionManager.updateToNewVersion();
+    }
+    
     setTimeout(() => {
       if (onComplete) onComplete();
       // Navigate to home page without using react-router
