@@ -19,34 +19,42 @@ const Qibla = () => {
   const lastVibrateTime = useRef<number>(0);
   const wasAligned = useRef<boolean>(false);
 
-  const calculateQibla = (lat: number, lon: number) => {
-    // Kaaba coordinates
-    const kaabaLat = 21.4225;
-    const kaabaLon = 39.8262;
+  const calculateQibla = async (lat: number, lon: number) => {
+    try {
+      // Use Aladhan API for accurate Qibla calculation
+      const response = await fetch(
+        `https://api.aladhan.com/v1/qibla/${lat}/${lon}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to fetch Qibla direction');
+      }
 
-    const phiK = kaabaLat * Math.PI / 180;
-    const lambdaK = kaabaLon * Math.PI / 180;
-    const phi = lat * Math.PI / 180;
-    const lambda = lon * Math.PI / 180;
+      const data = await response.json();
+      const qiblaDirection = data.data.direction;
 
-    const qibla = Math.atan2(
-      Math.sin(lambdaK - lambda),
-      Math.cos(phi) * Math.tan(phiK) - Math.sin(phi) * Math.cos(lambdaK - lambda)
-    );
+      // Calculate distance using Haversine formula
+      const kaabaLat = 21.4225;
+      const kaabaLon = 39.8262;
+      const R = 6371; // Earth's radius in km
+      const phi = lat * Math.PI / 180;
+      const phiK = kaabaLat * Math.PI / 180;
+      const dLat = (kaabaLat - lat) * Math.PI / 180;
+      const dLon = (kaabaLon - lon) * Math.PI / 180;
+      const a = 
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(phi) * Math.cos(phiK) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      const dist = R * c;
 
-    // Calculate distance using Haversine formula
-    const R = 6371; // Earth's radius in km
-    const dLat = (kaabaLat - lat) * Math.PI / 180;
-    const dLon = (kaabaLon - lon) * Math.PI / 180;
-    const a = 
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos(phi) * Math.cos(phiK) *
-      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const dist = R * c;
-
-    setDistance(dist);
-    return (qibla * 180 / Math.PI + 360) % 360;
+      setDistance(dist);
+      return qiblaDirection;
+    } catch (error) {
+      console.error('Error calculating Qibla:', error);
+      toast.error("কিবলা দিক নির্ণয়ে সমস্যা হয়েছে");
+      return null;
+    }
   };
 
   const getLocation = () => {
@@ -58,14 +66,16 @@ const Qibla = () => {
     toast.loading("লোকেশন খুঁজছি...", { id: "location" });
 
     navigator.geolocation.getCurrentPosition(
-      (position) => {
+      async (position) => {
         const { latitude, longitude, accuracy: posAccuracy } = position.coords;
         setLocation({ lat: latitude, lon: longitude });
         setAccuracy(posAccuracy);
-        const direction = calculateQibla(latitude, longitude);
-        setQiblaDirection(direction);
-        setPermissionGranted(true);
-        toast.success("কিবলা নির্দেশনা খুঁজে পাওয়া গেছে", { id: "location" });
+        const direction = await calculateQibla(latitude, longitude);
+        if (direction !== null) {
+          setQiblaDirection(direction);
+          setPermissionGranted(true);
+          toast.success("কিবলা নির্দেশনা খুঁজে পাওয়া গেছে", { id: "location" });
+        }
       },
       (error) => {
         console.error("Location error:", error);
