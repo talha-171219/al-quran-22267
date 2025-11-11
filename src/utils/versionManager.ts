@@ -78,46 +78,50 @@ class VersionManager {
 
   async clearAllCaches(): Promise<void> {
     try {
-      console.log('Clearing dynamic caches only (keeping user progress and static content)...');
+      console.log('Clearing dynamic caches only (keeping user progress, prayer times and static content)...');
       
-      // DO NOT clear user progress databases - these must persist across updates:
+      // DO NOT clear these databases - user data and content must persist:
       // - azkar-tracker: User's azkar completion progress
-      // - prayer-tracker: User's prayer tracking history
+      // - prayer-tracker: User's prayer tracking history  
       // - tasbih-tracker: User's tasbih counts
       // - hadith-cache: Downloaded hadiths for offline reading
+      // - verse-cache: Downloaded Quran verses for offline reading
       
-      // No databases to clear - user data must be preserved
-      console.log('Preserving all user progress and cached content');
+      console.log('✅ Preserving all user progress, prayer times and cached content');
 
-      // Clear only dynamic localStorage items (keep static content and user preferences)
+      // Clear only localStorage items that should reset (keep user preferences)
       const keysToRemove = [
-        'prayerTimesCache',
-        'lastPrayerTimesUpdate'
+        // No keys to remove - preserve everything including prayer times cache
       ];
       
       keysToRemove.forEach(key => {
         localStorage.removeItem(key);
-        console.log(`Cleared dynamic localStorage: ${key}`);
+        console.log(`Cleared localStorage: ${key}`);
       });
 
-      // Clear only dynamic browser caches (keep static PDFs, audio, API data)
+      // Clear only dynamic browser caches (preserve static content, prayer times, user data)
       if ('caches' in window) {
         const cacheNames = await caches.keys();
-        // Only clear dynamic caches, keep static-v1, audio-v1, api-v1
+        // Keep all important caches:
+        // - al-quran-static-* (PDFs, books)
+        // - al-quran-audio-* (audio files)
+        // - al-quran-api-* (Quran/Hadith data)
+        // - al-quran-prayer-* (Prayer times)
+        // Only clear old dynamic app shell caches
         const cachesToClear = cacheNames.filter(name => 
-          name.startsWith('al-quran-dynamic-') || 
-          (name.startsWith('workbox-') && !name.includes('audio') && !name.includes('static'))
+          name.startsWith('al-quran-dynamic-') && 
+          !name.includes(Date.now().toString().substring(0, 8)) // Keep today's cache
         );
         
         await Promise.all(
           cachesToClear.map(cacheName => {
-            console.log(`Clearing cache: ${cacheName}`);
+            console.log(`🗑️ Clearing old cache: ${cacheName}`);
             return caches.delete(cacheName);
           })
         );
       }
 
-      console.log('Dynamic caches cleared, static content preserved');
+      console.log('✅ Dynamic caches cleared, all user data and content preserved');
     } catch (error) {
       console.error('Error clearing caches:', error);
     }

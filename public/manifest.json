@@ -1,12 +1,13 @@
 {
-  "name": "Al-Quran - Islamic Companion",
-  "short_name": "Al-Quran",
-  "description": "Complete Islamic companion app with Quran, Audio, Dua, and more",
+  "name": "আল কুরআন - সম্পূর্ণ ইসলামিক অ্যাপ",
+  "short_name": "আল কুরআন",
+  "description": "সম্পূর্ণ অফলাইন সক্ষম ইসলামিক অ্যাপ - কুরআন, হাদিস, প্রার্থনা সময়, দুআ এবং আরও অনেক কিছু",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0f766e",
   "theme_color": "#0f766e",
-  "orientation": "portrait",
+  "orientation": "portrait-primary",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "/icon-192.jpg",
@@ -19,9 +20,55 @@
       "sizes": "512x512",
       "type": "image/jpeg",
       "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
-  "categories": ["lifestyle", "education", "books"],
-  "lang": "en-US",
-  "dir": "ltr"
+  "categories": ["lifestyle", "education", "books", "religion"],
+  "lang": "bn-BD",
+  "dir": "ltr",
+  "scope": "/",
+  "related_applications": [],
+  "shortcuts": [
+    {
+      "name": "কুরআন পড়ুন",
+      "short_name": "কুরআন",
+      "description": "কুরআন শরীফ পড়ুন",
+      "url": "/surahs",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "হাদিস পড়ুন",
+      "short_name": "হাদিস",
+      "description": "হাদিস শরীফ পড়ুন",
+      "url": "/hadith",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "নামাজের সময়",
+      "short_name": "নামাজ",
+      "description": "নামাজের সময়সূচী দেখুন",
+      "url": "/calendar",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "তাসবীহ",
+      "short_name": "তাসবীহ",
+      "description": "ডিজিটাল তাসবীহ কাউন্টার",
+      "url": "/tasbih",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "screenshots": [],
+  "iarc_rating_id": ""
 }

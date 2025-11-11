@@ -10,6 +10,7 @@ import { versionManager } from "@/utils/versionManager";
 import { initializeMidnightRefresh } from "@/utils/prayerTimesRefresh";
 import { UpdateNotification } from "@/components/pwa/UpdateNotification";
 import { InstallPromptModal } from "@/components/pwa/InstallPromptModal";
+import { OfflineIndicator } from "@/components/layout/OfflineIndicator";
 import { AudioProvider } from "@/contexts/AudioContext";
 import { MiniPlayer } from "@/components/audio/MiniPlayer";
 import { toast } from "sonner";
@@ -85,6 +86,7 @@ const App = () => {
           <BrowserRouter>
             <UpdateNotification />
             <InstallPromptModal />
+            <OfflineIndicator />
             <MiniPlayer />
             <Routes>
             <Route path="/" element={<Home />} />
