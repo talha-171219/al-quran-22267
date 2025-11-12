@@ -9,10 +9,10 @@ import { BookFlip } from "@/components/book/BookFlip";
 const books = [
   {
     id: 1,
-    title: "সহজ কুরআন দোয়া সেকশন",
-    titleEnglish: "Easy Quran Dua Section",
-    pdfUrl: "/books/sahoj-quran-dua.pdf",
-    description: "কুরআন থেকে সহজ দোয়া সংকলন",
+    title: "প্যারাডক্সিক্যাল সাজিদ",
+    titleEnglish: "Paradoxical Sajid Part 1",
+    pdfUrl: "/books/paradoxical-sajid-1.pdf",
+    description: "জীবনের প্যারাডক্স নিয়ে একটি চমৎকার ইসলামিক উপন্যাস",
   },
 ];
 
