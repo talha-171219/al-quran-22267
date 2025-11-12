@@ -68,7 +68,6 @@ import NinetyNineNames from "./pages/NinetyNineNames";
 import Shahada from "./pages/Shahada";
 import Gallery from "./pages/Gallery";
 import StorePage from "./pages/StorePage";
-import BookViewPage from "./pages/BookViewPage";
 
 const queryClient = new QueryClient();
 
@@ -216,7 +215,6 @@ const App = () => {
             <Route path="/shahada" element={<Shahada />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/store" element={<StorePage />} />
-            <Route path="/book-view" element={<BookViewPage />} />
             <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />

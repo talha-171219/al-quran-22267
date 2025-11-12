@@ -1,7 +1,7 @@
 import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Card } from "@/components/ui/card";
-import { Plane, Moon, Star, Volume2, Image, Store, MapPin, BookOpen } from "lucide-react";
+import { Plane, Moon, Star, Volume2, Image, Store, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import exploreBanner from "@/assets/explore-banner.jpg";
@@ -55,13 +55,6 @@ const exploreFeatures = [
     titleBengali: "স্টোর",
     path: "/store",
     gradient: "from-green-500 to-emerald-600",
-  },
-  {
-    icon: BookOpen,
-    title: "Book View",
-    titleBengali: "বই ভিউ",
-    path: "/book-view",
-    gradient: "from-indigo-500 to-purple-600",
   },
 ];
 
