@@ -294,7 +294,7 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
                     )}
                   </TransformWrapper>
                 ) : (
-                  // Desktop: Flipbook
+                  // Desktop: Flipbook with double-page spread
                   <HTMLFlipBook
                     ref={bookRef}
                     width={pageWidth}
@@ -304,7 +304,7 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
                     maxWidth={500}
                     minHeight={400}
                     maxHeight={700}
-                    showCover={true}
+                    showCover={false}
                     flippingTime={800}
                     usePortrait={false}
                     startPage={0}
@@ -312,9 +312,9 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
                     className="book-flip"
                     onFlip={handleFlip}
                     startZIndex={0}
-                    autoSize={true}
+                    autoSize={false}
                     maxShadowOpacity={0.5}
-                    mobileScrollSupport={true}
+                    mobileScrollSupport={false}
                     clickEventForward={true}
                     useMouseEvents={true}
                     swipeDistance={30}
