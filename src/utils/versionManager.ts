@@ -150,23 +150,47 @@ class VersionManager {
     try {
       console.log('Clearing dynamic caches only (keeping user progress, prayer times and static content)...');
       
-      // DO NOT clear these databases - user data and content must persist:
+      // CRITICAL: DO NOT clear these - user data must persist across ALL updates:
+      // IndexedDB databases:
       // - azkar-tracker: User's azkar completion progress
       // - prayer-tracker: User's prayer tracking history  
       // - tasbih-tracker: User's tasbih counts
       // - hadith-cache: Downloaded hadiths for offline reading
       // - verse-cache: Downloaded Quran verses for offline reading
+      // - prayer-times-db: Cached prayer times
       
-      console.log('✅ Preserving all user progress, prayer times and cached content');
-
-      // Clear only localStorage items that should reset (keep user preferences)
-      const keysToRemove = [
-        // No keys to remove - preserve everything including prayer times cache
+      // localStorage keys that MUST be preserved:
+      const protectedKeys = [
+        'prayerRecords',          // Prayer tracker history
+        'tasbihRecords',          // Tasbih counter data
+        'fastingProgress',        // Fasting tracker data
+        'hajjProgress',           // Hajj progress
+        'hajjChecklistState',     // Hajj checklist
+        'hajjBookmarks',          // Hajj bookmarks
+        'mosque_favorites',       // Favorite mosques
+        'adhanSettings',          // Adhan notification settings
+        'prayerSettings',         // Prayer notification settings
+        'azkarSettings',          // Azkar settings
+        'tasbihSettings',         // Tasbih settings
+        'userBookmarks',          // User bookmarks
+        'quran-bookmarks',        // Quran bookmarks
+        'hadith-bookmarks',       // Hadith bookmarks
+        'theme',                  // User theme preference
+        'language',               // User language preference
       ];
       
+      console.log(`✅ Preserving ${protectedKeys.length} user data keys and all IndexedDB databases`);
+
+      // DO NOT remove any localStorage keys - preserve ALL user data
+      // keysToRemove is intentionally empty to protect user progress
+      const keysToRemove: string[] = [];
+      
       keysToRemove.forEach(key => {
-        localStorage.removeItem(key);
-        console.log(`Cleared localStorage: ${key}`);
+        // Double-check: never remove protected keys
+        if (!protectedKeys.includes(key)) {
+          localStorage.removeItem(key);
+          console.log(`Cleared localStorage: ${key}`);
+        }
       });
 
       // Clear only dynamic browser caches (preserve static content, prayer times, user data)
