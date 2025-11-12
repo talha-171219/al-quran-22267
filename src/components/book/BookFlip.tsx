@@ -22,11 +22,8 @@ import { cn } from "@/lib/utils";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
-// Configure PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url
-).toString();
+// Configure PDF.js worker - using CDN for reliability
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 const MOBILE_BREAKPOINT = 768;
 
@@ -43,11 +40,15 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [isMobile, setIsMobile] = useState(window.innerWidth < MOBILE_BREAKPOINT);
   const [loading, setLoading] = useState(true);
-  const [scale, setScale] = useState(1);
+  const [loadError, setLoadError] = useState(false);
 
   const bookRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
+
+  useEffect(() => {
+    console.log("📘 BookFlip initialized with PDF:", pdfUrl);
+  }, [pdfUrl]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -71,18 +72,15 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
     console.log("✅ PDF loaded successfully:", numPages, "pages");
     setNumPages(numPages);
     setLoading(false);
-    toast.success(`PDF লোড সফল! মোট ${numPages} পৃষ্ঠা`);
+    setLoadError(false);
+    toast.success(`বই লোড সফল! মোট ${numPages} পৃষ্ঠা`);
   };
 
   const onDocumentLoadError = (error: Error) => {
     console.error("❌ PDF Load Error:", error);
-    toast.error("PDF লোড ব্যর্থ হয়েছে। আবার চেষ্টা করুন।");
+    setLoadError(true);
     setLoading(false);
-  };
-
-  const onDocumentLoadProgress = ({ loaded, total }: { loaded: number; total: number }) => {
-    const progress = Math.round((loaded / total) * 100);
-    console.log(`📄 Loading PDF: ${progress}%`);
+    toast.error("বই লোড ব্যর্থ হয়েছে। আবার চেষ্টা করুন।");
   };
 
   const playFlipSound = () => {
@@ -198,14 +196,26 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center p-4 overflow-hidden bg-muted/30">
-        {loading && (
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Loading PDF...</p>
+        {loading && !loadError && (
+          <div className="text-center space-y-3">
+            <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto"></div>
+            <p className="text-lg font-semibold text-foreground">বই লোড হচ্ছে...</p>
+            <p className="text-sm text-muted-foreground">অনুগ্রহ করে অপেক্ষা করুন</p>
           </div>
         )}
 
-        {!loading && numPages > 0 && (
+        {loadError && (
+          <div className="text-center space-y-4">
+            <div className="text-6xl mb-4">📚</div>
+            <p className="text-lg font-semibold text-destructive">বই লোড করতে ব্যর্থ</p>
+            <p className="text-sm text-muted-foreground">পিডিএফ ফাইলটি খুঁজে পাওয়া যায়নি</p>
+            <Button onClick={onClose} variant="outline">
+              ফিরে যান
+            </Button>
+          </div>
+        )}
+
+        {!loading && !loadError && numPages > 0 && (
           <div className="flipbook-container" style={{ perspective: "2000px" }}>
             {isMobile ? (
               // Mobile: Single Page with Zoom
@@ -236,15 +246,11 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
                           file={pdfUrl} 
                           onLoadSuccess={onDocumentLoadSuccess} 
                           onLoadError={onDocumentLoadError}
-                          onLoadProgress={onDocumentLoadProgress}
-                          loading={
-                            <div className="flex items-center justify-center p-8">
-                              <div className="text-center">
-                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                                <p className="text-muted-foreground">PDF লোড হচ্ছে...</p>
-                              </div>
-                            </div>
-                          }
+                          options={{
+                            cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
+                            cMapPacked: true,
+                            standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/standard_fonts/',
+                          }}
                         >
                           <Page
                             pageNumber={currentPage + 1}
@@ -264,15 +270,11 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
                 file={pdfUrl} 
                 onLoadSuccess={onDocumentLoadSuccess} 
                 onLoadError={onDocumentLoadError}
-                onLoadProgress={onDocumentLoadProgress}
-                loading={
-                  <div className="flex items-center justify-center p-8">
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                      <p className="text-muted-foreground">PDF লোড হচ্ছে...</p>
-                    </div>
-                  </div>
-                }
+                options={{
+                  cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
+                  cMapPacked: true,
+                  standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/standard_fonts/',
+                }}
               >
                 <HTMLFlipBook
                   ref={bookRef}
