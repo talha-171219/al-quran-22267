@@ -1,4 +1,4 @@
-import React, { useState, useEffect, lazy, Suspense } from "react";
+import { useState, useEffect } from "react";
 import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Card } from "@/components/ui/card";
@@ -7,10 +7,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapPin, List, Heart, Navigation, Loader2, RefreshCw, AlertCircle } from "lucide-react";
 import { mosqueStorage, Mosque } from "@/utils/mosqueStorage";
 import { useToast } from "@/hooks/use-toast";
+import MosqueList from "@/components/mosque/MosqueList";
+import MosqueDetails from "@/components/mosque/MosqueDetails";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-
-const MosqueList = lazy(() => import("@/components/mosque/MosqueList"));
-const MosqueDetails = lazy(() => import("@/components/mosque/MosqueDetails"));
 
 const MosqueFinder = () => {
   const [mosques, setMosques] = useState<Mosque[]>([]);
@@ -267,34 +266,30 @@ const MosqueFinder = () => {
             </TabsList>
 
             <TabsContent value="list" className="mt-6">
-              <Suspense fallback={<div className="text-center py-8"><Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" /></div>}>
+              <MosqueList
+                mosques={mosques}
+                onMosqueSelect={setSelectedMosque}
+                onToggleFavorite={handleToggleFavorite}
+                onGetDirections={handleGetDirections}
+              />
+            </TabsContent>
+
+            <TabsContent value="favorites" className="mt-6">
+              {favorites.length > 0 ? (
                 <MosqueList
-                  mosques={mosques}
+                  mosques={favorites}
                   onMosqueSelect={setSelectedMosque}
                   onToggleFavorite={handleToggleFavorite}
                   onGetDirections={handleGetDirections}
                 />
-              </Suspense>
-            </TabsContent>
-
-            <TabsContent value="favorites" className="mt-6">
-              <Suspense fallback={<div className="text-center py-8"><Loader2 className="h-8 w-8 animate-spin mx-auto text-primary" /></div>}>
-                {favorites.length > 0 ? (
-                  <MosqueList
-                    mosques={favorites}
-                    onMosqueSelect={setSelectedMosque}
-                    onToggleFavorite={handleToggleFavorite}
-                    onGetDirections={handleGetDirections}
-                  />
-                ) : (
-                  <Card className="p-12 text-center">
-                    <Heart className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-muted-foreground">
-                      এখনো কোনো প্রিয় মসজিদ যুক্ত করা হয়নি
-                    </p>
-                  </Card>
-                )}
-              </Suspense>
+              ) : (
+                <Card className="p-12 text-center">
+                  <Heart className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-muted-foreground">
+                    এখনো কোনো প্রিয় মসজিদ যুক্ত করা হয়নি
+                  </p>
+                </Card>
+              )}
             </TabsContent>
           </Tabs>
         )}
@@ -317,15 +312,13 @@ const MosqueFinder = () => {
 
       {/* Mosque Details Modal */}
       {selectedMosque && (
-        <Suspense fallback={null}>
-          <MosqueDetails
-            mosque={selectedMosque}
-            userLocation={userLocation}
-            onClose={() => setSelectedMosque(null)}
-            onToggleFavorite={handleToggleFavorite}
-            onGetDirections={handleGetDirections}
-          />
-        </Suspense>
+        <MosqueDetails
+          mosque={selectedMosque}
+          userLocation={userLocation}
+          onClose={() => setSelectedMosque(null)}
+          onToggleFavorite={handleToggleFavorite}
+          onGetDirections={handleGetDirections}
+        />
       )}
 
       <BottomNav />
