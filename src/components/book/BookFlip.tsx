@@ -15,15 +15,15 @@ import {
   ChevronsLeft,
   ChevronsRight,
   RotateCcw,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
-// Configure PDF.js worker - using CDN for reliability
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+// Configure PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 const MOBILE_BREAKPOINT = 768;
 
@@ -77,10 +77,15 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
   };
 
   const onDocumentLoadError = (error: Error) => {
-    console.error("❌ PDF Load Error:", error);
+    console.error("❌ PDF Load Error:", error.message);
     setLoadError(true);
     setLoading(false);
-    toast.error("বই লোড ব্যর্থ হয়েছে। আবার চেষ্টা করুন।");
+    toast.error("দুঃখিত, এই বইটি বর্তমানে লোড করা যাচ্ছে না। পরে চেষ্টা করুন।");
+  };
+
+  const onDocumentLoadProgress = ({ loaded, total }: { loaded: number; total: number }) => {
+    const progress = Math.round((loaded / total) * 100);
+    console.log(`📄 Loading PDF: ${progress}%`);
   };
 
   const playFlipSound = () => {
@@ -195,28 +200,36 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center p-4 overflow-hidden bg-muted/30">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 overflow-hidden bg-gradient-to-b from-background to-muted/20">
         {loading && !loadError && (
-          <div className="text-center space-y-3">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-primary border-t-transparent mx-auto"></div>
-            <p className="text-lg font-semibold text-foreground">বই লোড হচ্ছে...</p>
-            <p className="text-sm text-muted-foreground">অনুগ্রহ করে অপেক্ষা করুন</p>
+          <div className="text-center space-y-4 animate-fade-in">
+            <div className="relative">
+              <Loader2 className="w-16 h-16 text-primary animate-spin mx-auto" />
+              <div className="absolute inset-0 w-16 h-16 rounded-full bg-primary/10 animate-pulse mx-auto"></div>
+            </div>
+            <div className="space-y-2">
+              <p className="text-xl font-bold text-foreground">📖 বই লোড হচ্ছে...</p>
+              <p className="text-sm text-muted-foreground">অনুগ্রহ করে অপেক্ষা করুন</p>
+            </div>
           </div>
         )}
 
         {loadError && (
-          <div className="text-center space-y-4">
-            <div className="text-6xl mb-4">📚</div>
-            <p className="text-lg font-semibold text-destructive">বই লোড করতে ব্যর্থ</p>
-            <p className="text-sm text-muted-foreground">পিডিএফ ফাইলটি খুঁজে পাওয়া যায়নি</p>
-            <Button onClick={onClose} variant="outline">
+          <div className="text-center space-y-4 animate-fade-in">
+            <div className="text-7xl mb-4 animate-bounce">📚</div>
+            <div className="space-y-2">
+              <p className="text-xl font-bold text-destructive">বই লোড করতে ব্যর্থ</p>
+              <p className="text-sm text-muted-foreground">দুঃখিত, এই বইটি বর্তমানে লোড করা যাচ্ছে না।</p>
+              <p className="text-xs text-muted-foreground">পরে আবার চেষ্টা করুন বা অন্য বই নির্বাচন করুন।</p>
+            </div>
+            <Button onClick={onClose} variant="outline" className="mt-4">
               ফিরে যান
             </Button>
           </div>
         )}
 
         {!loading && !loadError && numPages > 0 && (
-          <div className="flipbook-container" style={{ perspective: "2000px" }}>
+          <div className="flipbook-container animate-fade-in" style={{ perspective: "2000px" }}>
             {isMobile ? (
               // Mobile: Single Page with Zoom
               <TransformWrapper
@@ -246,17 +259,25 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
                           file={pdfUrl} 
                           onLoadSuccess={onDocumentLoadSuccess} 
                           onLoadError={onDocumentLoadError}
+                          onLoadProgress={onDocumentLoadProgress}
+                          loading={
+                            <div className="flex items-center justify-center p-12">
+                              <Loader2 className="w-8 h-8 text-primary animate-spin" />
+                            </div>
+                          }
                           options={{
-                            cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
+                            cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
                             cMapPacked: true,
-                            standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/standard_fonts/',
+                            standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
                           }}
                         >
                           <Page
                             pageNumber={currentPage + 1}
                             width={pageWidth}
                             renderMode="canvas"
-                            scale={1.5}
+                            scale={1.7}
+                            renderTextLayer={true}
+                            renderAnnotationLayer={false}
                           />
                         </Document>
                       </div>
@@ -270,10 +291,16 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
                 file={pdfUrl} 
                 onLoadSuccess={onDocumentLoadSuccess} 
                 onLoadError={onDocumentLoadError}
+                onLoadProgress={onDocumentLoadProgress}
+                loading={
+                  <div className="flex items-center justify-center p-12">
+                    <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                  </div>
+                }
                 options={{
-                  cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
+                  cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
                   cMapPacked: true,
-                  standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/standard_fonts/',
+                  standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
                 }}
               >
                 <HTMLFlipBook
@@ -309,7 +336,9 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
                         pageNumber={index + 1}
                         width={pageWidth}
                         renderMode="canvas"
-                        scale={1.5}
+                        scale={1.4}
+                        renderTextLayer={true}
+                        renderAnnotationLayer={false}
                         className="book-page"
                       />
                     </div>
@@ -322,7 +351,7 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
       </div>
 
       {/* Controls */}
-      {!loading && numPages > 0 && (
+      {!loading && !loadError && numPages > 0 && (
         <div className="bg-card border-t border-border px-4 py-4">
           <div className="max-w-4xl mx-auto flex items-center justify-between gap-4">
             <div className="flex items-center gap-2">
