@@ -3,12 +3,12 @@ const VERSION_KEY = 'app-version';
 const VERSION_HISTORY_KEY = 'app-version-history';
 const BUILD_ID_KEY = 'app-build-id';
 
-// Build-time unique identifier (changes on every build/deploy)
-// This ensures each new deployment is detected as an update
-const BUILD_ID = Date.now().toString();
-
 // Semantic version display format (3.1, 3.2, 3.3, etc.)
 const BASE_VERSION = '3.4';
+
+// Build identifier tied to version (only changes when version changes)
+// This ensures updates are detected only when version actually changes
+const BUILD_ID = `build-${BASE_VERSION}`;
 
 export interface VersionInfo {
   version: string;
