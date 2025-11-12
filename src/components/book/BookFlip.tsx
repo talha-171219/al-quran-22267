@@ -22,8 +22,11 @@ import { toast } from "sonner";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
-// Configure PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+// Configure PDF.js worker - CRITICAL for PDF loading
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url
+).toString();
 
 const MOBILE_BREAKPOINT = 768;
 
@@ -71,25 +74,29 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
   }, [currentPage, numPages, isFullscreen]);
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
-    console.log("✅ PDF loaded successfully:", numPages, "pages");
+    console.log("✅✅✅ PDF LOADED SUCCESSFULLY:", numPages, "pages");
     setNumPages(numPages);
     setLoading(false);
     setLoadError(false);
-    toast.success(`বই লোড সফল! মোট ${numPages} পৃষ্ঠা`);
+    toast.success(`বই সফলভাবে লোড হয়েছে! মোট ${numPages} পৃষ্ঠা`);
   };
 
-  const onDocumentLoadError = (error: Error) => {
-    console.error("❌ PDF Load Error:", error);
-    console.error("❌ Error Message:", error.message);
-    console.error("❌ PDF URL:", pdfUrl);
+  const onDocumentLoadError = (error: any) => {
+    console.error("❌❌❌ PDF LOAD ERROR:", error);
+    console.error("❌ Error Details:", {
+      message: error?.message,
+      name: error?.name,
+      stack: error?.stack,
+      pdfUrl: pdfUrl
+    });
     setLoadError(true);
     setLoading(false);
-    toast.error("দুঃখিত, এই বইটি বর্তমানে লোড করা যাচ্ছে না। পরে চেষ্টা করুন।");
+    toast.error(`PDF লোড করতে ব্যর্থ: ${error?.message || 'Unknown error'}`);
   };
 
   const onDocumentLoadProgress = ({ loaded, total }: { loaded: number; total: number }) => {
     const progress = Math.round((loaded / total) * 100);
-    console.log(`📄 Loading PDF: ${progress}% (${loaded}/${total} bytes)`);
+    console.log(`📄 Loading PDF: ${progress}% (${loaded.toLocaleString()}/${total.toLocaleString()} bytes)`);
   };
 
   const playFlipSound = () => {
@@ -236,45 +243,52 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
           <div className="flipbook-container animate-fade-in" style={{ perspective: "2000px" }}>
             {isMobile ? (
               // Mobile: Single Page with Zoom
-              <TransformWrapper
-                initialScale={1}
-                minScale={0.8}
-                maxScale={3}
-                wheel={{ step: 0.15 }}
-                pinch={{ step: 5 }}
-                doubleClick={{ mode: "zoomIn" }}
+              <Document 
+                file={pdfUrl} 
+                onLoadSuccess={onDocumentLoadSuccess} 
+                onLoadError={onDocumentLoadError}
+                onLoadProgress={onDocumentLoadProgress}
+                loading={
+                  <div className="flex flex-col items-center justify-center p-12 space-y-4">
+                    <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                    <p className="text-lg text-foreground">📖 বই লোড হচ্ছে...</p>
+                  </div>
+                }
+                error={
+                  <div className="text-center p-8">
+                    <p className="text-destructive text-lg">❌ PDF লোড ব্যর্থ</p>
+                  </div>
+                }
+                options={{
+                  cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+                  cMapPacked: true,
+                  standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
+                  verbosity: 5,
+                }}
               >
-                {({ zoomIn, zoomOut, resetTransform }) => (
-                  <div>
-                    <div className="mb-4 flex justify-center gap-2">
-                      <Button size="sm" onClick={() => zoomOut()} variant="outline">
-                        <ZoomOut className="w-4 h-4" />
-                      </Button>
-                      <Button size="sm" onClick={() => resetTransform()} variant="outline">
-                        <RotateCcw className="w-4 h-4" />
-                      </Button>
-                      <Button size="sm" onClick={() => zoomIn()} variant="outline">
-                        <ZoomIn className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <TransformComponent>
-                      <div className="bg-white rounded-lg shadow-2xl overflow-hidden">
-                        <Document 
-                          file={pdfUrl} 
-                          onLoadSuccess={onDocumentLoadSuccess} 
-                          onLoadError={onDocumentLoadError}
-                          onLoadProgress={onDocumentLoadProgress}
-                          loading={
-                            <div className="flex items-center justify-center p-12">
-                              <Loader2 className="w-8 h-8 text-primary animate-spin" />
-                            </div>
-                          }
-                          options={{
-                            cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
-                            cMapPacked: true,
-                            standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
-                          }}
-                        >
+                <TransformWrapper
+                  initialScale={1}
+                  minScale={0.8}
+                  maxScale={3}
+                  wheel={{ step: 0.15 }}
+                  pinch={{ step: 5 }}
+                  doubleClick={{ mode: "zoomIn" }}
+                >
+                  {({ zoomIn, zoomOut, resetTransform }) => (
+                    <div>
+                      <div className="mb-4 flex justify-center gap-2">
+                        <Button size="sm" onClick={() => zoomOut()} variant="outline">
+                          <ZoomOut className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" onClick={() => resetTransform()} variant="outline">
+                          <RotateCcw className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" onClick={() => zoomIn()} variant="outline">
+                          <ZoomIn className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <TransformComponent>
+                        <div className="bg-white rounded-lg shadow-2xl overflow-hidden">
                           <Page
                             pageNumber={currentPage + 1}
                             width={pageWidth}
@@ -293,12 +307,12 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
                               </div>
                             }
                           />
-                        </Document>
-                      </div>
-                    </TransformComponent>
-                  </div>
-                )}
-              </TransformWrapper>
+                        </div>
+                      </TransformComponent>
+                    </div>
+                  )}
+                </TransformWrapper>
+              </Document>
             ) : (
               // Desktop: Flipbook
               <Document 
@@ -307,14 +321,21 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
                 onLoadError={onDocumentLoadError}
                 onLoadProgress={onDocumentLoadProgress}
                 loading={
-                  <div className="flex items-center justify-center p-12">
+                  <div className="flex flex-col items-center justify-center p-12 space-y-4">
                     <Loader2 className="w-12 h-12 text-primary animate-spin" />
+                    <p className="text-lg text-foreground">📖 বই লোড হচ্ছে...</p>
+                  </div>
+                }
+                error={
+                  <div className="text-center p-8">
+                    <p className="text-destructive text-lg">❌ PDF লোড ব্যর্থ</p>
                   </div>
                 }
                 options={{
                   cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
                   cMapPacked: true,
                   standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
+                  verbosity: 5,
                 }}
               >
                 <HTMLFlipBook
