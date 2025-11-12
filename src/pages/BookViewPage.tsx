@@ -14,6 +14,13 @@ const books = [
     pdfUrl: "/books/paradoxical-sajid-1.pdf",
     description: "জীবনের প্যারাডক্স নিয়ে একটি চমৎকার ইসলামিক উপন্যাস",
   },
+  {
+    id: 2,
+    title: "টেস্ট বই",
+    titleEnglish: "Test Book",
+    pdfUrl: "/books/test.pdf",
+    description: "PDF লোডিং টেস্টের জন্য নমুনা বই",
+  },
 ];
 
 const BookViewPage = () => {

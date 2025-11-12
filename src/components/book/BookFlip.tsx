@@ -48,6 +48,8 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
 
   useEffect(() => {
     console.log("📘 BookFlip initialized with PDF:", pdfUrl);
+    console.log("🔧 PDF.js Worker:", pdfjs.GlobalWorkerOptions.workerSrc);
+    console.log("📦 PDF.js Version:", pdfjs.version);
   }, [pdfUrl]);
 
   useEffect(() => {
@@ -77,7 +79,9 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
   };
 
   const onDocumentLoadError = (error: Error) => {
-    console.error("❌ PDF Load Error:", error.message);
+    console.error("❌ PDF Load Error:", error);
+    console.error("❌ Error Message:", error.message);
+    console.error("❌ PDF URL:", pdfUrl);
     setLoadError(true);
     setLoading(false);
     toast.error("দুঃখিত, এই বইটি বর্তমানে লোড করা যাচ্ছে না। পরে চেষ্টা করুন।");
@@ -85,7 +89,7 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
 
   const onDocumentLoadProgress = ({ loaded, total }: { loaded: number; total: number }) => {
     const progress = Math.round((loaded / total) * 100);
-    console.log(`📄 Loading PDF: ${progress}%`);
+    console.log(`📄 Loading PDF: ${progress}% (${loaded}/${total} bytes)`);
   };
 
   const playFlipSound = () => {
@@ -275,9 +279,19 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
                             pageNumber={currentPage + 1}
                             width={pageWidth}
                             renderMode="canvas"
-                            scale={1.7}
+                            scale={1.8}
                             renderTextLayer={true}
                             renderAnnotationLayer={false}
+                            loading={
+                              <div className="flex items-center justify-center p-8">
+                                <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                              </div>
+                            }
+                            error={
+                              <div className="p-8 text-center text-destructive">
+                                পৃষ্ঠা লোড করতে ব্যর্থ
+                              </div>
+                            }
                           />
                         </Document>
                       </div>
@@ -336,10 +350,20 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
                         pageNumber={index + 1}
                         width={pageWidth}
                         renderMode="canvas"
-                        scale={1.4}
+                        scale={1.5}
                         renderTextLayer={true}
                         renderAnnotationLayer={false}
                         className="book-page"
+                        loading={
+                          <div className="flex items-center justify-center p-8">
+                            <Loader2 className="w-6 h-6 text-primary animate-spin" />
+                          </div>
+                        }
+                        error={
+                          <div className="p-8 text-center text-destructive">
+                            পৃষ্ঠা লোড করতে ব্যর্থ
+                          </div>
+                        }
                       />
                     </div>
                   ))}
