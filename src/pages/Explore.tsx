@@ -1,9 +1,10 @@
 import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Card } from "@/components/ui/card";
-import { Plane, Wheat, Star, Volume2, Image, Store } from "lucide-react";
+import { Plane, Moon, Star, Volume2, Image, Store } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import exploreBanner from "@/assets/explore-banner.jpg";
 
 const exploreFeatures = [
   {
@@ -14,9 +15,9 @@ const exploreFeatures = [
     gradient: "from-emerald-500 to-teal-600",
   },
   {
-    icon: Wheat,
-    title: "Fasting",
-    titleBengali: "রোজা",
+    icon: Moon,
+    title: "Ramadan Special",
+    titleBengali: "রমজান বিশেষ",
     path: "/fasting",
     gradient: "from-orange-500 to-amber-600",
   },
@@ -55,7 +56,16 @@ const Explore = () => {
     <div className="min-h-screen bg-background pb-20">
       <TopBar title="Explore" showBack />
 
-      <main className="max-w-lg mx-auto px-4 py-6">
+      <main className="max-w-lg mx-auto px-4 py-6 space-y-6">
+        {/* Banner Image */}
+        <div className="relative w-full h-48 rounded-xl overflow-hidden shadow-lg">
+          <img
+            src={exploreBanner}
+            alt="Islamic Explore Banner"
+            className="w-full h-full object-cover"
+          />
+        </div>
+
         <div className="grid grid-cols-3 gap-3">
           {exploreFeatures.map((feature) => (
             <Link key={feature.path} to={feature.path}>

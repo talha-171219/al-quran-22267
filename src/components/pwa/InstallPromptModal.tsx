@@ -121,10 +121,10 @@ export const InstallPromptModal = () => {
             </div>
           </div>
           <DialogTitle className="text-center text-xl">
-            কুরআন অ্যাপ ইনস্টল করুন?
+            কুরআন অ্যাপ ইনস্টল করুন। কারণঃ
           </DialogTitle>
           <DialogDescription className="text-center">
-            আপনার ডিভাইসে অ্যাপটি ইনস্টল করে সেরা অভিজ্ঞতা পান। দ্রুত অ্যাক্সেস এবং অফলাইন ব্যবহার করুন।
+            আপনার ডিভাইসে অ্যাপটি ইনস্টল করে অফলাইনে সেরা অভিজ্ঞতা পাবেন। দ্রুত অ্যাক্সেস এবং অফলাইন ব্যবহার করুন।
           </DialogDescription>
         </DialogHeader>
         
