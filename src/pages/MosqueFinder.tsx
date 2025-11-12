@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapPin, List, Heart, Navigation, Loader2, RefreshCw, AlertCircle } from "lucide-react";
 import { mosqueStorage, Mosque } from "@/utils/mosqueStorage";
 import { useToast } from "@/hooks/use-toast";
+import MosqueMapView from "@/components/mosque/MosqueMapView";
 import MosqueList from "@/components/mosque/MosqueList";
 import MosqueDetails from "@/components/mosque/MosqueDetails";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -69,8 +70,8 @@ const MosqueFinder = () => {
       setLoading(true);
       setError(null);
 
-      // Using Overpass API for OpenStreetMap data (more reliable for mosques)
-      const radius = 5000; // 5km
+      // Using Overpass API for OpenStreetMap data - fetch more mosques for better results
+      const radius = 10000; // Increased to 10km for more results
       const query = `
         [out:json][timeout:25];
         (
@@ -104,7 +105,7 @@ const MosqueFinder = () => {
           
           return {
             id: `${el.id}`,
-            name: el.tags.name || el.tags["name:bn"] || "নামহীন মসজিদ",
+            name: el.tags.name || el.tags["name:bn"] || el.tags["name:en"] || "নামহীন মসজিদ",
             address: formatAddress(el.tags),
             lat: el.lat,
             lon: el.lon,
@@ -112,14 +113,15 @@ const MosqueFinder = () => {
             type: el.tags.building || "mosque",
           };
         })
-        .sort((a: Mosque, b: Mosque) => (a.distance || 0) - (b.distance || 0));
+        .sort((a: Mosque, b: Mosque) => (a.distance || 0) - (b.distance || 0))
+        .slice(0, 20); // Get top 20 nearest mosques
 
       setMosques(mosquesData);
       
       if (mosquesData.length === 0) {
         toast({
           title: "কোনো মসজিদ পাওয়া যায়নি",
-          description: "আপনার আশেপাশে কোনো মসজিদ পাওয়া যায়নি। রেডিয়াস বাড়ান বা অন্য এলাকায় খুঁজুন।",
+          description: "আপনার আশেপাশে কোনো মসজিদ পাওয়া যায়নি। অন্য এলাকায় খুঁজুন।",
         });
       } else {
         toast({
@@ -152,10 +154,22 @@ const MosqueFinder = () => {
 
   const formatAddress = (tags: any): string => {
     const parts = [];
+    
+    // Try to get detailed address
+    if (tags["addr:housenumber"]) parts.push(tags["addr:housenumber"]);
     if (tags["addr:street"]) parts.push(tags["addr:street"]);
+    if (tags["addr:neighbourhood"]) parts.push(tags["addr:neighbourhood"]);
+    if (tags["addr:suburb"]) parts.push(tags["addr:suburb"]);
     if (tags["addr:city"]) parts.push(tags["addr:city"]);
     if (tags["addr:district"]) parts.push(tags["addr:district"]);
-    if (parts.length === 0 && tags.place) parts.push(tags.place);
+    if (tags["addr:state"]) parts.push(tags["addr:state"]);
+    
+    // Fallback to place name if no address
+    if (parts.length === 0) {
+      if (tags.place) parts.push(tags.place);
+      if (tags["is_in"]) parts.push(tags["is_in"]);
+    }
+    
     return parts.length > 0 ? parts.join(", ") : "ঠিকানা পাওয়া যায়নি";
   };
 
@@ -253,8 +267,12 @@ const MosqueFinder = () => {
 
         {/* Main Content */}
         {!loading && userLocation && mosques.length > 0 && (
-          <Tabs defaultValue="list" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+          <Tabs defaultValue="map" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="map" className="gap-2">
+                <MapPin className="h-4 w-4" />
+                ম্যাপ
+              </TabsTrigger>
               <TabsTrigger value="list" className="gap-2">
                 <List className="h-4 w-4" />
                 তালিকা
@@ -264,6 +282,14 @@ const MosqueFinder = () => {
                 প্রিয়
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="map" className="mt-6">
+              <MosqueMapView
+                mosques={mosques}
+                userLocation={userLocation}
+                onMosqueSelect={setSelectedMosque}
+              />
+            </TabsContent>
 
             <TabsContent value="list" className="mt-6">
               <MosqueList
