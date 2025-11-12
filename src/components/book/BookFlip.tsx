@@ -23,7 +23,10 @@ import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
 // Configure PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url
+).toString();
 
 const MOBILE_BREAKPOINT = 768;
 
@@ -65,15 +68,21 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
   }, [currentPage, numPages, isFullscreen]);
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
+    console.log("✅ PDF loaded successfully:", numPages, "pages");
     setNumPages(numPages);
     setLoading(false);
-    toast.success(`PDF Loaded Successfully! Total ${numPages} pages`);
+    toast.success(`PDF লোড সফল! মোট ${numPages} পৃষ্ঠা`);
   };
 
   const onDocumentLoadError = (error: Error) => {
-    console.error("PDF Load Error:", error);
-    toast.error("Failed to load PDF. Please try again.");
+    console.error("❌ PDF Load Error:", error);
+    toast.error("PDF লোড ব্যর্থ হয়েছে। আবার চেষ্টা করুন।");
     setLoading(false);
+  };
+
+  const onDocumentLoadProgress = ({ loaded, total }: { loaded: number; total: number }) => {
+    const progress = Math.round((loaded / total) * 100);
+    console.log(`📄 Loading PDF: ${progress}%`);
   };
 
   const playFlipSound = () => {
@@ -223,7 +232,20 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
                     </div>
                     <TransformComponent>
                       <div className="bg-white rounded-lg shadow-2xl overflow-hidden">
-                        <Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess} onLoadError={onDocumentLoadError}>
+                        <Document 
+                          file={pdfUrl} 
+                          onLoadSuccess={onDocumentLoadSuccess} 
+                          onLoadError={onDocumentLoadError}
+                          onLoadProgress={onDocumentLoadProgress}
+                          loading={
+                            <div className="flex items-center justify-center p-8">
+                              <div className="text-center">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                                <p className="text-muted-foreground">PDF লোড হচ্ছে...</p>
+                              </div>
+                            </div>
+                          }
+                        >
                           <Page
                             pageNumber={currentPage + 1}
                             width={pageWidth}
@@ -238,7 +260,20 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
               </TransformWrapper>
             ) : (
               // Desktop: Flipbook
-              <Document file={pdfUrl} onLoadSuccess={onDocumentLoadSuccess} onLoadError={onDocumentLoadError}>
+              <Document 
+                file={pdfUrl} 
+                onLoadSuccess={onDocumentLoadSuccess} 
+                onLoadError={onDocumentLoadError}
+                onLoadProgress={onDocumentLoadProgress}
+                loading={
+                  <div className="flex items-center justify-center p-8">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+                      <p className="text-muted-foreground">PDF লোড হচ্ছে...</p>
+                    </div>
+                  </div>
+                }
+              >
                 <HTMLFlipBook
                   ref={bookRef}
                   width={pageWidth}
