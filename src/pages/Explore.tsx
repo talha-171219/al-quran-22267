@@ -1,7 +1,7 @@
 import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Card } from "@/components/ui/card";
-import { Plane, Moon, Star, Volume2, Image, Store } from "lucide-react";
+import { Plane, Moon, Star, Volume2, Image, Store, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import exploreBanner from "@/assets/explore-banner.jpg";
@@ -27,6 +27,13 @@ const exploreFeatures = [
     titleBengali: "আল্লাহর ৯৯ নাম",
     path: "/99-names",
     gradient: "from-purple-500 to-pink-600",
+  },
+  {
+    icon: MapPin,
+    title: "Mosque Finder",
+    titleBengali: "মসজিদ খুঁজুন",
+    path: "/mosque-finder",
+    gradient: "from-teal-500 to-emerald-600",
   },
   {
     icon: Volume2,

@@ -48,6 +48,7 @@ import HajjGuide from "./pages/HajjGuide";
 import HajjSteps from "./pages/HajjSteps";
 import HajjStepDetail from "./pages/HajjStepDetail";
 import HajjDuas from "./pages/HajjDuas";
+import MosqueFinder from "./pages/MosqueFinder";
 import HajjChecklistPage from "./pages/HajjChecklistPage";
 import HajjMaps from "./pages/HajjMaps";
 import HajjFAQ from "./pages/HajjFAQ";
@@ -161,6 +162,7 @@ const App = () => {
             <Route path="/fasting/laylatul-qadr" element={<LaylatulQadr />} />
             <Route path="/fasting/itikaf" element={<Itikaf />} />
             <Route path="/99-names" element={<NinetyNineNames />} />
+            <Route path="/mosque-finder" element={<MosqueFinder />} />
             <Route path="/shahada" element={<Shahada />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/store" element={<StorePage />} />
