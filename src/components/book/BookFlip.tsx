@@ -260,9 +260,17 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
 
         {!loading && !loadError && numPages > 0 && (
           <div className="flipbook-container animate-fade-in" style={{ perspective: "2000px" }}>
-            {isMobile ? (
-              // Mobile: Single Page with Zoom
-              <TransformWrapper
+            <Document 
+              file={pdfUrl} 
+              options={{
+                cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
+                cMapPacked: true,
+                standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
+              }}
+            >
+              {isMobile ? (
+                // Mobile: Single Page with Zoom
+                <TransformWrapper
                   initialScale={1}
                   minScale={0.8}
                   maxScale={3}
@@ -270,78 +278,79 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
                   pinch={{ step: 5 }}
                   doubleClick={{ mode: "zoomIn" }}
                 >
-                {({ zoomIn, zoomOut, resetTransform }) => (
-                  <div>
-                    <div className="mb-4 flex justify-center gap-2">
-                      <Button size="sm" onClick={() => zoomOut()} variant="outline">
-                        <ZoomOut className="w-4 h-4" />
-                      </Button>
-                      <Button size="sm" onClick={() => resetTransform()} variant="outline">
-                        <RotateCcw className="w-4 h-4" />
-                      </Button>
-                      <Button size="sm" onClick={() => zoomIn()} variant="outline">
-                        <ZoomIn className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <TransformComponent>
-                      <div className="bg-white rounded-lg shadow-2xl overflow-hidden">
-                        <Page
-                          pageNumber={currentPage + 1}
-                          width={pageWidth}
-                          renderMode="canvas"
-                          scale={1.8}
-                          renderTextLayer={true}
-                          renderAnnotationLayer={false}
-                        />
+                  {({ zoomIn, zoomOut, resetTransform }) => (
+                    <div>
+                      <div className="mb-4 flex justify-center gap-2">
+                        <Button size="sm" onClick={() => zoomOut()} variant="outline">
+                          <ZoomOut className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" onClick={() => resetTransform()} variant="outline">
+                          <RotateCcw className="w-4 h-4" />
+                        </Button>
+                        <Button size="sm" onClick={() => zoomIn()} variant="outline">
+                          <ZoomIn className="w-4 h-4" />
+                        </Button>
                       </div>
-                    </TransformComponent>
-                  </div>
-                )}
-              </TransformWrapper>
-            ) : (
-              // Desktop: Flipbook
-              <HTMLFlipBook
-                ref={bookRef}
-                width={pageWidth}
-                height={pageHeight}
-                size="stretch"
-                minWidth={300}
-                maxWidth={500}
-                minHeight={400}
-                maxHeight={700}
-                showCover={true}
-                flippingTime={800}
-                usePortrait={false}
-                startPage={0}
-                drawShadow={true}
-                className="book-flip"
-                onFlip={handleFlip}
-                startZIndex={0}
-                autoSize={true}
-                maxShadowOpacity={0.5}
-                mobileScrollSupport={true}
-                clickEventForward={true}
-                useMouseEvents={true}
-                swipeDistance={30}
-                showPageCorners={true}
-                disableFlipByClick={false}
-                style={{}}
-              >
-                {Array.from({ length: numPages }, (_, index) => (
-                  <div key={index} className="page-wrapper bg-white shadow-xl">
-                    <Page
-                      pageNumber={index + 1}
-                      width={pageWidth}
-                      renderMode="canvas"
-                      scale={1.5}
-                      renderTextLayer={true}
-                      renderAnnotationLayer={false}
-                      className="book-page"
-                    />
-                  </div>
-                ))}
-              </HTMLFlipBook>
-            )}
+                      <TransformComponent>
+                        <div className="bg-white rounded-lg shadow-2xl overflow-hidden">
+                          <Page
+                            pageNumber={currentPage + 1}
+                            width={pageWidth}
+                            renderMode="canvas"
+                            scale={1.8}
+                            renderTextLayer={true}
+                            renderAnnotationLayer={false}
+                          />
+                        </div>
+                      </TransformComponent>
+                    </div>
+                  )}
+                </TransformWrapper>
+              ) : (
+                // Desktop: Flipbook
+                <HTMLFlipBook
+                  ref={bookRef}
+                  width={pageWidth}
+                  height={pageHeight}
+                  size="stretch"
+                  minWidth={300}
+                  maxWidth={500}
+                  minHeight={400}
+                  maxHeight={700}
+                  showCover={true}
+                  flippingTime={800}
+                  usePortrait={false}
+                  startPage={0}
+                  drawShadow={true}
+                  className="book-flip"
+                  onFlip={handleFlip}
+                  startZIndex={0}
+                  autoSize={true}
+                  maxShadowOpacity={0.5}
+                  mobileScrollSupport={true}
+                  clickEventForward={true}
+                  useMouseEvents={true}
+                  swipeDistance={30}
+                  showPageCorners={true}
+                  disableFlipByClick={false}
+                  style={{}}
+                >
+                  {Array.from({ length: numPages }, (_, index) => (
+                    <div key={index} className="page-wrapper bg-white shadow-xl">
+                       <Page
+                        pageNumber={index + 1}
+                        width={pageWidth}
+                        renderMode="canvas"
+                        scale={1.5}
+                        renderTextLayer={true}
+                        renderAnnotationLayer={false}
+                        className="book-page"
+                      />
+                    </div>
+                  ))}
+                </HTMLFlipBook>
+              )}
+            </Document>
           </div>
         )}
       </div>
