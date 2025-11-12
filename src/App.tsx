@@ -13,6 +13,7 @@ import { InstallPromptModal } from "@/components/pwa/InstallPromptModal";
 import { OfflineIndicator } from "@/components/layout/OfflineIndicator";
 import { AudioProvider } from "@/contexts/AudioContext";
 import { MiniPlayer } from "@/components/audio/MiniPlayer";
+import { WelcomeScreen } from "@/components/welcome/WelcomeScreen";
 import { toast } from "sonner";
 import Home from "./pages/Home";
 import Surahs from "./pages/Surahs";
@@ -72,13 +73,25 @@ const queryClient = new QueryClient();
 
 const App = () => {
   const [isInitializing, setIsInitializing] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
     // Initialize app and start preloading content
     const initializeApp = async () => {
       try {
+        // Check if welcome screen should be shown
+        const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
+        const storedVersion = localStorage.getItem('appVersion');
+        const currentVersion = versionManager.getCurrentVersion();
+
+        // Show welcome if first time OR version changed
+        if (!hasSeenWelcome || storedVersion !== currentVersion) {
+          setShowWelcome(true);
+          setIsInitializing(false);
+          return;
+        }
+
         // Start preloading all surahs and hadiths in the background
-        // This runs quietly without blocking the UI
         const preloadPromises = [
           surahPreloader.checkAndResume(),
           hadithPreloader.checkAndResume(),
@@ -103,6 +116,42 @@ const App = () => {
     
     initializeApp();
   }, []);
+
+  const handleWelcomeComplete = async () => {
+    // Save flags
+    const currentVersion = versionManager.getCurrentVersion();
+    localStorage.setItem('hasSeenWelcome', 'true');
+    localStorage.setItem('appVersion', currentVersion);
+    
+    // Hide welcome and continue initialization
+    setShowWelcome(false);
+    setIsInitializing(true);
+
+    try {
+      // Now preload data
+      const preloadPromises = [
+        surahPreloader.checkAndResume(),
+        hadithPreloader.checkAndResume(),
+      ];
+
+      Promise.all(preloadPromises).then(() => {
+        console.log('Background data refresh completed');
+      }).catch(err => {
+        console.error('Background refresh error:', err);
+      });
+
+      initializeMidnightRefresh();
+    } catch (error) {
+      console.error('Initialization error:', error);
+    } finally {
+      setIsInitializing(false);
+    }
+  };
+
+  // Show welcome screen if needed
+  if (showWelcome) {
+    return <WelcomeScreen onComplete={handleWelcomeComplete} />;
+  }
 
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
