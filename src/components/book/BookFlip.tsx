@@ -22,11 +22,8 @@ import { toast } from "sonner";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
-// Configure PDF.js worker - CRITICAL for PDF loading
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url
-).toString();
+// Configure PDF.js worker - use CDN for reliability
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
 
 const MOBILE_BREAKPOINT = 768;
 
@@ -53,6 +50,11 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
     console.log("📘 BookFlip initialized with PDF:", pdfUrl);
     console.log("🔧 PDF.js Worker:", pdfjs.GlobalWorkerOptions.workerSrc);
     console.log("📦 PDF.js Version:", pdfjs.version);
+    
+    // Reset states on PDF change
+    setLoading(true);
+    setLoadError(false);
+    setNumPages(0);
   }, [pdfUrl]);
 
   useEffect(() => {
@@ -212,6 +214,23 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col items-center justify-center p-4 overflow-hidden bg-gradient-to-b from-background to-muted/20">
+        {/* Hidden Document loader */}
+        <div style={{ display: 'none' }}>
+          <Document 
+            file={pdfUrl} 
+            onLoadSuccess={onDocumentLoadSuccess} 
+            onLoadError={onDocumentLoadError}
+            onLoadProgress={onDocumentLoadProgress}
+            options={{
+              cMapUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdfjs-dist/${pdfjs.version}/cmaps/`,
+              cMapPacked: true,
+              standardFontDataUrl: `https://cdnjs.cloudflare.com/ajax/libs/pdfjs-dist/${pdfjs.version}/standard_fonts/`,
+            }}
+          >
+            <div />
+          </Document>
+        </div>
+
         {loading && !loadError && (
           <div className="text-center space-y-4 animate-fade-in">
             <div className="relative">
@@ -243,30 +262,7 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
           <div className="flipbook-container animate-fade-in" style={{ perspective: "2000px" }}>
             {isMobile ? (
               // Mobile: Single Page with Zoom
-              <Document 
-                file={pdfUrl} 
-                onLoadSuccess={onDocumentLoadSuccess} 
-                onLoadError={onDocumentLoadError}
-                onLoadProgress={onDocumentLoadProgress}
-                loading={
-                  <div className="flex flex-col items-center justify-center p-12 space-y-4">
-                    <Loader2 className="w-12 h-12 text-primary animate-spin" />
-                    <p className="text-lg text-foreground">📖 বই লোড হচ্ছে...</p>
-                  </div>
-                }
-                error={
-                  <div className="text-center p-8">
-                    <p className="text-destructive text-lg">❌ PDF লোড ব্যর্থ</p>
-                  </div>
-                }
-                options={{
-                  cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
-                  cMapPacked: true,
-                  standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
-                  verbosity: 5,
-                }}
-              >
-                <TransformWrapper
+              <TransformWrapper
                   initialScale={1}
                   minScale={0.8}
                   maxScale={3}
@@ -274,122 +270,77 @@ export const BookFlip = ({ pdfUrl, title, onClose }: BookFlipProps) => {
                   pinch={{ step: 5 }}
                   doubleClick={{ mode: "zoomIn" }}
                 >
-                  {({ zoomIn, zoomOut, resetTransform }) => (
-                    <div>
-                      <div className="mb-4 flex justify-center gap-2">
-                        <Button size="sm" onClick={() => zoomOut()} variant="outline">
-                          <ZoomOut className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" onClick={() => resetTransform()} variant="outline">
-                          <RotateCcw className="w-4 h-4" />
-                        </Button>
-                        <Button size="sm" onClick={() => zoomIn()} variant="outline">
-                          <ZoomIn className="w-4 h-4" />
-                        </Button>
-                      </div>
-                      <TransformComponent>
-                        <div className="bg-white rounded-lg shadow-2xl overflow-hidden">
-                          <Page
-                            pageNumber={currentPage + 1}
-                            width={pageWidth}
-                            renderMode="canvas"
-                            scale={1.8}
-                            renderTextLayer={true}
-                            renderAnnotationLayer={false}
-                            loading={
-                              <div className="flex items-center justify-center p-8">
-                                <Loader2 className="w-6 h-6 text-primary animate-spin" />
-                              </div>
-                            }
-                            error={
-                              <div className="p-8 text-center text-destructive">
-                                পৃষ্ঠা লোড করতে ব্যর্থ
-                              </div>
-                            }
-                          />
-                        </div>
-                      </TransformComponent>
+                {({ zoomIn, zoomOut, resetTransform }) => (
+                  <div>
+                    <div className="mb-4 flex justify-center gap-2">
+                      <Button size="sm" onClick={() => zoomOut()} variant="outline">
+                        <ZoomOut className="w-4 h-4" />
+                      </Button>
+                      <Button size="sm" onClick={() => resetTransform()} variant="outline">
+                        <RotateCcw className="w-4 h-4" />
+                      </Button>
+                      <Button size="sm" onClick={() => zoomIn()} variant="outline">
+                        <ZoomIn className="w-4 h-4" />
+                      </Button>
                     </div>
-                  )}
-                </TransformWrapper>
-              </Document>
+                    <TransformComponent>
+                      <div className="bg-white rounded-lg shadow-2xl overflow-hidden">
+                        <Page
+                          pageNumber={currentPage + 1}
+                          width={pageWidth}
+                          renderMode="canvas"
+                          scale={1.8}
+                          renderTextLayer={true}
+                          renderAnnotationLayer={false}
+                        />
+                      </div>
+                    </TransformComponent>
+                  </div>
+                )}
+              </TransformWrapper>
             ) : (
               // Desktop: Flipbook
-              <Document 
-                file={pdfUrl} 
-                onLoadSuccess={onDocumentLoadSuccess} 
-                onLoadError={onDocumentLoadError}
-                onLoadProgress={onDocumentLoadProgress}
-                loading={
-                  <div className="flex flex-col items-center justify-center p-12 space-y-4">
-                    <Loader2 className="w-12 h-12 text-primary animate-spin" />
-                    <p className="text-lg text-foreground">📖 বই লোড হচ্ছে...</p>
-                  </div>
-                }
-                error={
-                  <div className="text-center p-8">
-                    <p className="text-destructive text-lg">❌ PDF লোড ব্যর্থ</p>
-                  </div>
-                }
-                options={{
-                  cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
-                  cMapPacked: true,
-                  standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
-                  verbosity: 5,
-                }}
+              <HTMLFlipBook
+                ref={bookRef}
+                width={pageWidth}
+                height={pageHeight}
+                size="stretch"
+                minWidth={300}
+                maxWidth={500}
+                minHeight={400}
+                maxHeight={700}
+                showCover={true}
+                flippingTime={800}
+                usePortrait={false}
+                startPage={0}
+                drawShadow={true}
+                className="book-flip"
+                onFlip={handleFlip}
+                startZIndex={0}
+                autoSize={true}
+                maxShadowOpacity={0.5}
+                mobileScrollSupport={true}
+                clickEventForward={true}
+                useMouseEvents={true}
+                swipeDistance={30}
+                showPageCorners={true}
+                disableFlipByClick={false}
+                style={{}}
               >
-                <HTMLFlipBook
-                  ref={bookRef}
-                  width={pageWidth}
-                  height={pageHeight}
-                  size="stretch"
-                  minWidth={300}
-                  maxWidth={500}
-                  minHeight={400}
-                  maxHeight={700}
-                  showCover={true}
-                  flippingTime={800}
-                  usePortrait={false}
-                  startPage={0}
-                  drawShadow={true}
-                  className="book-flip"
-                  onFlip={handleFlip}
-                  startZIndex={0}
-                  autoSize={true}
-                  maxShadowOpacity={0.5}
-                  mobileScrollSupport={true}
-                  clickEventForward={true}
-                  useMouseEvents={true}
-                  swipeDistance={30}
-                  showPageCorners={true}
-                  disableFlipByClick={false}
-                  style={{}}
-                >
-                  {Array.from({ length: numPages }, (_, index) => (
-                    <div key={index} className="page-wrapper bg-white shadow-xl">
-                      <Page
-                        pageNumber={index + 1}
-                        width={pageWidth}
-                        renderMode="canvas"
-                        scale={1.5}
-                        renderTextLayer={true}
-                        renderAnnotationLayer={false}
-                        className="book-page"
-                        loading={
-                          <div className="flex items-center justify-center p-8">
-                            <Loader2 className="w-6 h-6 text-primary animate-spin" />
-                          </div>
-                        }
-                        error={
-                          <div className="p-8 text-center text-destructive">
-                            পৃষ্ঠা লোড করতে ব্যর্থ
-                          </div>
-                        }
-                      />
-                    </div>
-                  ))}
-                </HTMLFlipBook>
-              </Document>
+                {Array.from({ length: numPages }, (_, index) => (
+                  <div key={index} className="page-wrapper bg-white shadow-xl">
+                    <Page
+                      pageNumber={index + 1}
+                      width={pageWidth}
+                      renderMode="canvas"
+                      scale={1.5}
+                      renderTextLayer={true}
+                      renderAnnotationLayer={false}
+                      className="book-page"
+                    />
+                  </div>
+                ))}
+              </HTMLFlipBook>
             )}
           </div>
         )}
