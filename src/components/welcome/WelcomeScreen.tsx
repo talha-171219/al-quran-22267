@@ -9,23 +9,24 @@ interface WelcomeScreenProps {
 export const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-[#1a1a1a] via-[#0f172a] to-[#000000] animate-in fade-in duration-700"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-[#1a1a1a] via-[#0f172a] to-[#000000] animate-in fade-in duration-700 p-4 md:p-8"
     >
-      {/* Islamic Frame Border */}
+      {/* Islamic Frame Border - Larger and more visible */}
       <div 
-        className="absolute inset-0 bg-contain bg-center bg-no-repeat opacity-40 animate-in zoom-in duration-1000"
+        className="absolute inset-4 md:inset-8 bg-contain bg-center bg-no-repeat opacity-70 animate-in zoom-in duration-1000"
         style={{
           backgroundImage: `url(${islamicFrame})`,
+          backgroundSize: '100% 100%',
         }}
       />
       
-      {/* Content Container */}
-      <div className="relative max-w-3xl mx-auto px-8 text-center space-y-8 animate-in slide-in-from-bottom duration-1000">
+      {/* Content Container - Better centered within frame */}
+      <div className="relative max-w-4xl w-full mx-auto px-12 md:px-16 py-8 text-center space-y-6 animate-in slide-in-from-bottom duration-1000 flex flex-col justify-center" style={{ minHeight: '80vh' }}>
         
         {/* Arabic Calligraphy - Main Bismillah */}
-        <div className="space-y-6 animate-in fade-in-up duration-1000 delay-300">
+        <div className="space-y-4 animate-in fade-in-up duration-1000 delay-300">
           <h1
-            className="text-5xl md:text-6xl lg:text-7xl font-bold bg-gradient-to-r from-[#D4AF37] via-[#F4E4C1] to-[#D4AF37] bg-clip-text text-transparent mb-4 drop-shadow-2xl"
+            className="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-[#D4AF37] via-[#F4E4C1] to-[#D4AF37] bg-clip-text text-transparent mb-3 drop-shadow-2xl"
             style={{ 
               fontFamily: 'Traditional Arabic, serif',
               textShadow: '0 0 20px rgba(212, 175, 55, 0.3)'
@@ -36,7 +37,7 @@ export const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
           
           {/* Arabic Welcome Text */}
           <p
-            className="text-xl md:text-2xl lg:text-3xl bg-gradient-to-r from-[#C9A961] to-[#E8D4A0] bg-clip-text text-transparent"
+            className="text-lg md:text-xl lg:text-2xl bg-gradient-to-r from-[#C9A961] to-[#E8D4A0] bg-clip-text text-transparent"
             style={{ 
               fontFamily: 'Traditional Arabic, serif',
               textShadow: '0 0 15px rgba(201, 169, 97, 0.2)'
@@ -49,7 +50,7 @@ export const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
         {/* App Name */}
         <div className="animate-in fade-in-up duration-1000 delay-500">
           <h2 
-            className="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-[#D4AF37] via-[#F4E4C1] to-[#D4AF37] bg-clip-text text-transparent tracking-wide"
+            className="text-3xl md:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-[#D4AF37] via-[#F4E4C1] to-[#D4AF37] bg-clip-text text-transparent tracking-wide"
             style={{
               textShadow: '0 0 30px rgba(212, 175, 55, 0.4)'
             }}
@@ -60,23 +61,23 @@ export const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
 
         {/* Developer Credit */}
         <div className="animate-in fade-in-up duration-1000 delay-700">
-          <p className="text-lg md:text-xl text-gray-300/90 font-light tracking-wide">
+          <p className="text-base md:text-lg text-gray-300/90 font-light tracking-wide">
             Designed and Developed by <span className="text-[#D4AF37] font-semibold">Monirul hasan talha</span> ✨
           </p>
         </div>
 
         {/* Bengali Welcome Text */}
-        <div className="space-y-5 text-gray-200/90 leading-relaxed animate-in fade-in-up duration-1000 delay-900 max-w-2xl mx-auto">
-          <p className="text-base md:text-lg">
+        <div className="space-y-3 text-gray-200/90 leading-relaxed animate-in fade-in-up duration-1000 delay-900 max-w-3xl mx-auto">
+          <p className="text-sm md:text-base lg:text-lg">
             এখানে আপনি কোরআনের পুরো অনুবাদ, তাজবীদসহ পাঠ, সূরা-অনুসারে সার্চ, বুকমার্ক, প্রিমিয়াম এআই বট, আপনার নামাজের সময়সূচি ও দোয়া ফিচারগুলো এবং কাছাকাছি মসজিদ ফাইন্ডার-সহ অনেক সুবিধা পাবেন।
           </p>
-          <p className="text-base md:text-lg text-gray-300/80">
+          <p className="text-sm md:text-base lg:text-lg text-gray-300/80">
             ফিচারগুলো সঠিকভাবে ব্যবহার করার জন্য দয়া করে অ্যাপটিকে লোকেশন এবং নোটিফিকেশন অনুমতি দিন।
           </p>
         </div>
 
         {/* Glossy 3D Arrow Button */}
-        <div className="pt-10 animate-in fade-in-up duration-1000 delay-1100">
+        <div className="pt-6 animate-in fade-in-up duration-1000 delay-1100">
           <button
             onClick={onComplete}
             className="group relative w-20 h-20 rounded-full bg-gradient-to-br from-blue-400 via-blue-500 to-blue-700 hover:from-blue-500 hover:via-blue-600 hover:to-blue-800 shadow-2xl hover:shadow-blue-500/50 transition-all duration-500 hover:scale-110 animate-pulse"
