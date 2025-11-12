@@ -1,20 +1,23 @@
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
 interface WelcomeScreenProps {
   onComplete: () => void;
 }
-
-export const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a] animate-in fade-in duration-500">
+export const WelcomeScreen = ({
+  onComplete
+}: WelcomeScreenProps) => {
+  return <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#0f172a] animate-in fade-in duration-500">
       <div className="max-w-2xl mx-auto px-6 text-center space-y-8">
         {/* Arabic Calligraphy */}
         <div className="space-y-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4" style={{ fontFamily: 'Traditional Arabic, serif' }}>
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4" style={{
+          fontFamily: 'Traditional Arabic, serif'
+        }}>
             بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ
           </h1>
-          <p className="text-xl md:text-2xl text-white/90" style={{ fontFamily: 'Traditional Arabic, serif' }}>
+          <p className="text-xl md:text-2xl text-white/90" style={{
+          fontFamily: 'Traditional Arabic, serif'
+        }}>
             السلام عليكم ورحمة الله وبركاته — أهلاً وسهلاً بكم في تطبيق القرآن
           </p>
         </div>
@@ -36,21 +39,15 @@ export const WelcomeScreen = ({ onComplete }: WelcomeScreenProps) => {
             ফিচারগুলো সঠিকভাবে ব্যবহার করার জন্য দয়া করে অ্যাপটিকে লোকেশন এবং নোটিফিকেশন অনুমতি দিন।
           </p>
           <p className="text-lg md:text-xl font-semibold text-white">
-            আল্লাহ্ আপনাকে উত্তম প্রতিদান দিক।
-          </p>
+        </p>
         </div>
 
         {/* Arrow Button */}
         <div className="pt-8">
-          <Button
-            onClick={onComplete}
-            size="lg"
-            className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
-          >
+          <Button onClick={onComplete} size="lg" className="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110">
             <ArrowRight className="w-8 h-8 text-white" />
           </Button>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
