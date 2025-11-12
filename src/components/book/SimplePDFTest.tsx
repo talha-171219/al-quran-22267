@@ -5,8 +5,8 @@ import { Loader2 } from "lucide-react";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
 
-// Configure worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
+// Configure worker - use unpkg CDN
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface SimplePDFTestProps {
   pdfUrl: string;
@@ -94,8 +94,9 @@ export const SimplePDFTest = ({ pdfUrl, onClose }: SimplePDFTestProps) => {
           onLoadError={onDocumentLoadError}
           onLoadProgress={onLoadProgress}
           options={{
-            cMapUrl: `//cdnjs.cloudflare.com/ajax/libs/pdfjs-dist/${pdfjs.version}/cmaps/`,
+            cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
             cMapPacked: true,
+            standardFontDataUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/standard_fonts/`,
           }}
         >
           {!loading && !error && numPages && (
