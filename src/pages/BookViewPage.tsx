@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { BookOpen } from "lucide-react";
 import { useState } from "react";
-import { BookFlip } from "@/components/book/BookFlip";
+import { SimplePDFTest } from "@/components/book/SimplePDFTest";
 
 const books = [
   {
@@ -28,9 +28,8 @@ const BookViewPage = () => {
 
   if (selectedBook) {
     return (
-      <BookFlip
+      <SimplePDFTest
         pdfUrl={selectedBook.pdfUrl}
-        title={selectedBook.title}
         onClose={() => setSelectedBook(null)}
       />
     );
