@@ -6,7 +6,7 @@ import { Volume2 } from "lucide-react";
 const Shahada = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
-      <TopBar title="Shahada - শাহাদা" showBack />
+      <TopBar title="Kalema - কালেমা" showBack />
 
       <main className="max-w-lg mx-auto px-4 py-8">
         <Card className="p-12 text-center">
@@ -15,9 +15,9 @@ const Shahada = () => {
               <Volume2 className="h-12 w-12 text-white" />
             </div>
             <div>
-              <h3 className="font-semibold text-lg mb-2">Shahada</h3>
+              <h3 className="font-semibold text-lg mb-2">Kalema - কালেমা</h3>
               <p className="text-sm text-muted-foreground">
-                Shahada with audio playback coming soon
+                Kalema with audio playback coming soon
               </p>
             </div>
           </div>

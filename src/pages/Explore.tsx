@@ -2,25 +2,47 @@ import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { CircularIconCard } from "@/components/features/CircularIconCard";
 import exploreBanner from "@/assets/explore-banner-premium.jpg";
-import hajjIcon from "@/assets/icons/hajj-3d.png";
+import shahadaIcon from "@/assets/icons/shahada-3d.png";
+import prayerIcon from "@/assets/icons/prayer-times-3d.png";
+import zakatIcon from "@/assets/icons/zakat-calculator-3d.png";
 import ramadanIcon from "@/assets/icons/ramadan-3d.png";
+import hajjIcon from "@/assets/icons/hajj-3d.png";
 import namesIcon from "@/assets/icons/99-names-3d.png";
 import mosqueFinderIcon from "@/assets/icons/mosque-finder-3d.png";
-import shahadaIcon from "@/assets/icons/shahada-3d.png";
 import galleryIcon from "@/assets/icons/gallery-3d.png";
 import storeIcon from "@/assets/icons/store-3d.png";
 
-const exploreFeatures = [
+// 5 Pillars of Islam (ইসলামের ৫টি স্তম্ভ) in order
+const fivePillars = [
+  {
+    icon: shahadaIcon,
+    title: "Kalema • কালেমা",
+    path: "/shahada",
+  },
+  {
+    icon: prayerIcon,
+    title: "Salah • সালাহ",
+    path: "/prayer-times",
+  },
+  {
+    icon: zakatIcon,
+    title: "Zakat • যাকাত",
+    path: "/zakat",
+  },
+  {
+    icon: ramadanIcon,
+    title: "Sawm • সাওম",
+    path: "/fasting",
+  },
   {
     icon: hajjIcon,
     title: "Hajj • হজ্জ",
     path: "/hajj",
   },
-  {
-    icon: ramadanIcon,
-    title: "Ramadan • রমজান",
-    path: "/fasting",
-  },
+];
+
+// Other Islamic Features
+const otherFeatures = [
   {
     icon: namesIcon,
     title: "99 Names • ৯৯ নাম",
@@ -30,11 +52,6 @@ const exploreFeatures = [
     icon: mosqueFinderIcon,
     title: "Mosque Finder • মসজিদ",
     path: "/mosque-finder",
-  },
-  {
-    icon: shahadaIcon,
-    title: "Shahada • শাহাদা",
-    path: "/shahada",
   },
   {
     icon: galleryIcon,
@@ -68,21 +85,50 @@ const Explore = () => {
       </div>
 
       <main className="max-w-lg mx-auto px-4 py-8">
-        <div className="grid grid-cols-3 gap-6">
-          {exploreFeatures.map((feature, index) => (
-            <div
-              key={feature.path}
-              className="animate-fade-in"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            >
-              <CircularIconCard
-                icon={feature.icon}
-                title={feature.title}
-                path={feature.path}
-                size="small"
-              />
-            </div>
-          ))}
+        {/* Five Pillars of Islam Section */}
+        <div className="mb-8">
+          <h2 className="text-xl font-bold mb-4 text-center text-foreground">
+            ইসলামের ৫টি স্তম্ভ • Five Pillars of Islam
+          </h2>
+          <div className="grid grid-cols-3 gap-6">
+            {fivePillars.map((feature, index) => (
+              <div
+                key={feature.path}
+                className="animate-fade-in"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <CircularIconCard
+                  icon={feature.icon}
+                  title={feature.title}
+                  path={feature.path}
+                  size="small"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Other Features Section */}
+        <div>
+          <h2 className="text-xl font-bold mb-4 text-center text-foreground">
+            আরও বৈশিষ্ট্য • More Features
+          </h2>
+          <div className="grid grid-cols-3 gap-6">
+            {otherFeatures.map((feature, index) => (
+              <div
+                key={feature.path}
+                className="animate-fade-in"
+                style={{ animationDelay: `${(index + 5) * 0.1}s` }}
+              >
+                <CircularIconCard
+                  icon={feature.icon}
+                  title={feature.title}
+                  path={feature.path}
+                  size="small"
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </main>
 
