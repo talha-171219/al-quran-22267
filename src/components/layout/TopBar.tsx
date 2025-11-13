@@ -16,7 +16,7 @@ export const TopBar = ({ title, showBack, backPath, showSearch, onSearch, action
   const navigate = useNavigate();
 
   return (
-    <header className="sticky top-0 z-40 bg-gradient-primary text-primary-foreground shadow-md">
+    <header className="sticky top-0 z-40 bg-primary text-primary-foreground shadow-md">
       <div className="flex items-center justify-between h-14 px-4 max-w-lg mx-auto">
         <div className="flex items-center gap-2">
           {showBack && (
