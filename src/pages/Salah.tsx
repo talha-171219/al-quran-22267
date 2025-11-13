@@ -90,6 +90,22 @@ const Salah = () => {
           </CardContent>
         </Card>
 
+        {/* Prayer Method Link */}
+        <Link to="/namaz">
+          <Card className="hover:shadow-lg transition-all cursor-pointer border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
+            <CardContent className="flex items-center justify-between p-4">
+              <div className="flex items-center gap-3">
+                <BookOpen className="h-8 w-8 text-primary" />
+                <div>
+                  <p className="font-semibold text-foreground">নামাজের বিস্তারিত নিয়ম</p>
+                  <p className="text-sm text-muted-foreground">ধাপে ধাপে নামাজ আদায়ের পদ্ধতি শিখুন</p>
+                </div>
+              </div>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </CardContent>
+          </Card>
+        </Link>
+
         {/* Prayer Times Link */}
         <Link to="/">
           <Card className="hover:shadow-lg transition-all cursor-pointer border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">

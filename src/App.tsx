@@ -66,6 +66,8 @@ import LaylatulQadr from "./pages/LaylatulQadr";
 import Itikaf from "./pages/Itikaf";
 import NinetyNineNames from "./pages/NinetyNineNames";
 import Shahada from "./pages/Shahada";
+import Salah from "./pages/Salah";
+import Namaz from "./pages/Namaz";
 import Gallery from "./pages/Gallery";
 import StorePage from "./pages/StorePage";
 
@@ -213,6 +215,8 @@ const App = () => {
             <Route path="/99-names" element={<NinetyNineNames />} />
             <Route path="/mosque-finder" element={<MosqueFinder />} />
             <Route path="/shahada" element={<Shahada />} />
+            <Route path="/salah" element={<Salah />} />
+            <Route path="/namaz" element={<Namaz />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/store" element={<StorePage />} />
             <Route path="*" element={<NotFound />} />
