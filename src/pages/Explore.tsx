@@ -60,10 +60,10 @@ const Explore = () => {
           alt="Islamic Explore Banner" 
           className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-transparent" />
-        <div className="absolute bottom-6 left-4 right-4 text-primary-foreground">
-          <h1 className="text-2xl font-bold mb-1">Explore Islamic Features</h1>
-          <p className="text-sm opacity-90">ইসলামিক বৈশিষ্ট্য অন্বেষণ করুন</p>
+        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+        <div className="absolute bottom-6 left-4 right-4">
+          <h1 className="text-2xl font-bold mb-1 text-white dark:text-white drop-shadow-lg">Explore Islamic Features</h1>
+          <p className="text-sm text-white/95 dark:text-white/90 drop-shadow-md">ইসলামিক বৈশিষ্ট্য অন্বেষণ করুন</p>
         </div>
       </div>
 
