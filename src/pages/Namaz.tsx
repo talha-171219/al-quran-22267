@@ -65,7 +65,7 @@ const Namaz = () => {
 
         {/* Prayer Times Button */}
         <Button 
-          onClick={() => navigate('/prayer-times')} 
+          onClick={() => navigate('/calendar')} 
           className="w-full"
           size="lg"
         >
