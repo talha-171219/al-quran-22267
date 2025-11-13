@@ -22,7 +22,7 @@ const fivePillars = [
   {
     icon: prayerIcon,
     title: "Salah • সালাহ",
-    path: "/prayer-times",
+    path: "/salah",
   },
   {
     icon: zakatIcon,
