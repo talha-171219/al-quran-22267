@@ -65,7 +65,7 @@ const MosqueFinder = () => {
     );
   };
 
-  const fetchNearbyMosques = async (location: { lat: number; lon: number }) => {
+  const fetchNearbyMosques = async (location: { lat: number; lon: number }, retryCount = 0) => {
     try {
       setLoading(true);
       setError(null);
@@ -83,12 +83,24 @@ const MosqueFinder = () => {
         out skel qt;
       `;
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await fetch(
-        `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`
+        `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`,
+        { signal: controller.signal }
       );
 
+      clearTimeout(timeoutId);
+
       if (!response.ok) {
-        throw new Error("মসজিদের তথ্য পেতে সমস্যা হয়েছে");
+        if (response.status === 504 && retryCount < 2) {
+          // Retry on gateway timeout
+          console.log(`Retrying... Attempt ${retryCount + 1}`);
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+          return fetchNearbyMosques(location, retryCount + 1);
+        }
+        throw new Error("মসজিদের তথ্য পেতে সমস্যা হয়েছে। দয়া করে কিছুক্ষণ পরে আবার চেষ্টা করুন।");
       }
 
       const data = await response.json();
@@ -129,9 +141,13 @@ const MosqueFinder = () => {
           description: `${mosquesData.length}টি মসজিদ খুঁজে পাওয়া গেছে`,
         });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error fetching mosques:", err);
-      setError("মসজিদের তথ্য লোড করতে সমস্যা হয়েছে। ইন্টারনেট সংযোগ চেক করুন।");
+      if (err.name === 'AbortError') {
+        setError("সময় শেষ। সার্ভার থেকে সাড়া পাওয়া যায়নি। পরে আবার চেষ্টা করুন।");
+      } else {
+        setError("মসজিদের তথ্য লোড করতে সমস্যা হয়েছে। ইন্টারনেট সংযোগ চেক করুন এবং আবার চেষ্টা করুন।");
+      }
     } finally {
       setLoading(false);
     }
