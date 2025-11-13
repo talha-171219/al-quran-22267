@@ -88,7 +88,7 @@ const features = [
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#0a2818] via-[#0f1f16] to-[#0a1510] pb-20">
+    <div className="min-h-screen bg-background dark:bg-gradient-to-b dark:from-[#0a2818] dark:via-[#0f1f16] dark:to-[#0a1510] pb-20">
       <TopBar title="আল কুরআন" />
 
       <main className="max-w-lg mx-auto px-6 py-6 space-y-6">

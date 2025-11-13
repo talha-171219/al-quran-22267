@@ -154,7 +154,7 @@ const App = () => {
   }
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="dark" storageKey="theme">
       <QueryClientProvider client={queryClient}>
         <AudioProvider>
           <BrowserRouter>
