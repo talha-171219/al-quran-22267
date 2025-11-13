@@ -97,7 +97,16 @@ const Home = () => {
         {/* 3D Circular Icon Grid */}
         <div className="grid grid-cols-3 gap-6 pt-4">
           {features.map((feature, index) => (
-            <CircularIconCard key={index} {...feature} />
+            <div 
+              key={index}
+              className="animate-fade-in opacity-0"
+              style={{
+                animationDelay: `${index * 0.1}s`,
+                animationFillMode: 'forwards'
+              }}
+            >
+              <CircularIconCard {...feature} />
+            </div>
           ))}
         </div>
       </main>
