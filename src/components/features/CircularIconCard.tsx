@@ -5,16 +5,21 @@ interface CircularIconCardProps {
   icon: string;
   title: string;
   path: string;
+  size?: "default" | "small";
 }
 
-export const CircularIconCard = ({ icon, title, path }: CircularIconCardProps) => {
+export const CircularIconCard = ({ icon, title, path, size = "default" }: CircularIconCardProps) => {
+  const sizeClasses = size === "small" ? "w-20 h-20" : "w-28 h-28";
+  const titleSize = size === "small" ? "text-xs" : "text-sm";
+  
   return (
     <Link to={path}>
       <div className="flex flex-col items-center gap-3 group cursor-pointer">
         {/* Circular Icon Container with Glowing Border */}
         <div
           className={cn(
-            "relative w-28 h-28 rounded-full overflow-hidden",
+            "relative rounded-full overflow-hidden",
+            sizeClasses,
             "border-2 border-emerald-500/20",
             "shadow-[0_0_15px_rgba(16,185,129,0.15),inset_0_0_10px_rgba(16,185,129,0.05)]",
             "transition-all duration-300",
@@ -43,7 +48,7 @@ export const CircularIconCard = ({ icon, title, path }: CircularIconCardProps) =
         </div>
 
         {/* Title Text */}
-        <h3 className="text-white font-semibold text-sm text-center leading-tight drop-shadow-lg">
+        <h3 className={cn("text-white font-semibold text-center leading-tight drop-shadow-lg", titleSize)}>
           {title}
         </h3>
       </div>
