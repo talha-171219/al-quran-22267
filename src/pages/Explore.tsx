@@ -79,6 +79,7 @@ const Explore = () => {
                 icon={feature.icon}
                 title={feature.title}
                 path={feature.path}
+                size="small"
               />
             </div>
           ))}
