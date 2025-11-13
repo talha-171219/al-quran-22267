@@ -10,10 +10,12 @@ import {
   CheckCircle2,
   BookOpen,
   Volume2,
-  Info
+  Info,
+  Clock
 } from "lucide-react";
 import { salahData } from "@/data/salah";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 const stepIcons = {
   1: HandMetal,
@@ -27,6 +29,8 @@ const stepIcons = {
 };
 
 const Namaz = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <TopBar title="নামাজের নিয়ম" showBack backPath="/salah" />
@@ -58,6 +62,16 @@ const Namaz = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Prayer Times Button */}
+        <Button 
+          onClick={() => navigate('/prayer-times')} 
+          className="w-full"
+          size="lg"
+        >
+          <Clock className="h-5 w-5 mr-2" />
+          আজকের নামাজের সময়সূচি দেখুন
+        </Button>
 
         {/* Steps */}
         <div className="space-y-4">
