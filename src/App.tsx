@@ -70,6 +70,7 @@ import Salah from "./pages/Salah";
 import Namaz from "./pages/Namaz";
 import Gallery from "./pages/Gallery";
 import StorePage from "./pages/StorePage";
+import IslamicNames from "./pages/IslamicNames";
 
 const queryClient = new QueryClient();
 
@@ -219,6 +220,7 @@ const App = () => {
             <Route path="/namaz" element={<Namaz />} />
             <Route path="/gallery" element={<Gallery />} />
             <Route path="/store" element={<StorePage />} />
+            <Route path="/islamic-names" element={<IslamicNames />} />
             <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
