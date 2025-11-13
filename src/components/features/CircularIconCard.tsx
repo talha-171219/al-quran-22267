@@ -48,7 +48,7 @@ export const CircularIconCard = ({ icon, title, path, size = "default" }: Circul
         </div>
 
         {/* Title Text */}
-        <h3 className={cn("text-white font-semibold text-center leading-tight drop-shadow-lg", titleSize)}>
+        <h3 className={cn("text-foreground font-semibold text-center leading-tight drop-shadow-lg", titleSize)}>
           {title}
         </h3>
       </div>
