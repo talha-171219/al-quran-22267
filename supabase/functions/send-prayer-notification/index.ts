@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { sendWebPushNotification } from "../_shared/webpush.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -30,15 +31,18 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { prayerName, prayerTime } = await req.json();
+    // Handle empty body gracefully
+    let prayerName = 'fajr';
+    let prayerTime = new Date().toISOString();
     
-    if (!prayerName) {
-      return new Response(
-        JSON.stringify({ error: 'Prayer name is required' }),
-        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    try {
+      const body = await req.json();
+      prayerName = body.prayerName || 'fajr';
+      prayerTime = body.prayerTime || new Date().toISOString();
+    } catch (e) {
+      console.log('ℹ️ No body provided, using default prayer name:', prayerName);
     }
-
+    
     console.log(`📢 Sending ${prayerName} prayer notification`);
 
     // Get all active subscriptions with prayer notifications enabled
@@ -100,26 +104,19 @@ serve(async (req) => {
           keys: sub.keys
         };
 
-        // Use web-push to send notification
-        const response = await fetch('https://fcm.googleapis.com/fcm/send', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `key=${vapidPublicKey}`,
-            'TTL': '86400'
-          },
-          body: JSON.stringify({
-            notification: notification,
-            to: pushSubscription.endpoint
-          })
-        });
+        const success = await sendWebPushNotification(
+          pushSubscription,
+          notification,
+          vapidPublicKey,
+          vapidPrivateKey
+        );
 
-        if (response.ok) {
+        if (success) {
           successCount++;
           console.log(`✅ Notification sent to ${sub.user_id}`);
         } else {
           failureCount++;
-          console.error(`❌ Failed to send notification to ${sub.user_id}:`, await response.text());
+          console.error(`❌ Failed to send notification to ${sub.user_id}`);
         }
       } catch (error) {
         failureCount++;
