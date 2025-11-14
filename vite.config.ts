@@ -15,34 +15,81 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["icon-192.jpg", "icon-512.jpg", "icon-192.png", "icon-512.png", "azan1.mp3", "alarm-clock-short-6402.mp3"],
+      injectRegister: "auto",
+      includeAssets: ["icon-192.jpg", "icon-512.jpg", "icon-192.png", "icon-512.png", "azan1.mp3", "alarm-clock-short-6402.mp3", "robots.txt"],
+      devOptions: {
+        enabled: false
+      },
       manifest: {
-        name: "Al-Quran - Islamic Companion",
-        short_name: "Al-Quran",
-        description: "Complete Islamic companion app with Quran reader, audio recitations, duas, Zakat calculator, and more",
+        name: "DeenSphereX - সম্পূর্ণ ইসলামিক অ্যাপ",
+        short_name: "DeenSphereX",
+        description: "সম্পূর্ণ অফলাইন সক্ষম ইসলামিক অ্যাপ - কুরআন, হাদিস, প্রার্থনা সময়, দুআ এবং আরও অনেক কিছু",
         theme_color: "#0f766e",
-        background_color: "#ffffff",
+        background_color: "#0f766e",
         display: "standalone",
         scope: "/",
         start_url: "/",
-        orientation: "any",
+        orientation: "portrait-primary",
         prefer_related_applications: false,
         icons: [
+          {
+            src: "/icon-192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any maskable"
+          },
+          {
+            src: "/icon-512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any maskable"
+          },
           {
             src: "/icon-192.jpg",
             sizes: "192x192",
             type: "image/jpeg",
-            purpose: "any maskable"
+            purpose: "any"
           },
           {
             src: "/icon-512.jpg",
             sizes: "512x512",
             type: "image/jpeg",
-            purpose: "any maskable"
+            purpose: "any"
           }
         ],
-        categories: ["lifestyle", "education", "books"],
-        lang: "bn"
+        categories: ["lifestyle", "education", "books", "religion"],
+        lang: "bn-BD",
+        dir: "ltr",
+        shortcuts: [
+          {
+            name: "কুরআন পড়ুন",
+            short_name: "কুরআন",
+            description: "কুরআন শরীফ পড়ুন",
+            url: "/surahs",
+            icons: [{ src: "/icon-192.png", sizes: "192x192" }]
+          },
+          {
+            name: "হাদিস পড়ুন",
+            short_name: "হাদিস",
+            description: "হাদিস শরীফ পড়ুন",
+            url: "/hadith",
+            icons: [{ src: "/icon-192.png", sizes: "192x192" }]
+          },
+          {
+            name: "নামাজের সময়",
+            short_name: "নামাজ",
+            description: "নামাজের সময়সূচী দেখুন",
+            url: "/calendar",
+            icons: [{ src: "/icon-192.png", sizes: "192x192" }]
+          },
+          {
+            name: "তাসবীহ",
+            short_name: "তাসবীহ",
+            description: "ডিজিটাল তাসবীহ কাউন্টার",
+            url: "/tasbih",
+            icons: [{ src: "/icon-192.png", sizes: "192x192" }]
+          }
+        ]
       },
       workbox: {
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MB limit
@@ -140,10 +187,6 @@ export default defineConfig(({ mode }) => ({
             }
           }
         ]
-      },
-      devOptions: {
-        enabled: true,
-        type: "module"
       }
     })
   ].filter(Boolean),
