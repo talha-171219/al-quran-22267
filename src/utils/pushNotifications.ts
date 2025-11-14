@@ -1,6 +1,6 @@
 import { supabase } from "@/integrations/supabase/client";
 
-const VAPID_PUBLIC_KEY = "BEl62iUYgUivxIkv-qz8xAcz5Q_1V9RrGMp7Rx5DhODfnOCYvMGvXW0kVBiCw3BO_WlS8TRqv9F2KUQ3wQJQGXU";
+const VAPID_PUBLIC_KEY = "BE0iQCkyxjqUgH0jyffnU9dk6v9fsd2dVvnVqTKuvwBzBR-J4JdD_FyKDcpFrByq5y8XGcQscciqT4--tTtrAso";
 
 /**
  * Convert VAPID public key to Uint8Array
