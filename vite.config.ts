@@ -92,9 +92,10 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       workbox: {
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB limit for large PDFs
+        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB limit for large PDFs
         globPatterns: [
           "**/*.{js,css,html,ico,png,jpg,jpeg,svg,woff,woff2}",
+          "**/*.pdf", // Cache all PDF books
           "*.mp3", // Cache adhan and alarm sounds
           "icon-*.{png,jpg}", // Cache app icons
         ],
@@ -246,6 +247,21 @@ export default defineConfig(({ mode }) => ({
               cacheName: "google-fonts-cache",
               expiration: {
                 maxEntries: 30,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            // Cache PDF.js worker from unpkg CDN
+            urlPattern: /^https:\/\/unpkg\.com\/pdfjs-dist@.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "pdfjs-worker-cache",
+              expiration: {
+                maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
               },
               cacheableResponse: {
