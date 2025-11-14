@@ -17,6 +17,7 @@ import zakatCalculatorIcon from "@/assets/icons/zakat-calculator-3d.png";
 import islamicAiIcon from "@/assets/icons/islamic-ai-3d.png";
 import digitalTasbihIcon from "@/assets/icons/digital-tasbih-3d.png";
 import qiblaFinderIcon from "@/assets/icons/qibla-finder-3d.png";
+import fastingTrackerIcon from "@/assets/icons/fasting-tracker-3d.png";
 
 const features = [
   {
@@ -65,6 +66,11 @@ const features = [
     path: "/prayer-tracker",
   },
   {
+    icon: fastingTrackerIcon,
+    title: "Fasting Tracker",
+    path: "/fasting-tracker",
+  },
+  {
     icon: zakatCalculatorIcon,
     title: "Zakat Calculator",
     path: "/zakat",
@@ -89,7 +95,7 @@ const features = [
 const Home = () => {
   return (
     <div className="min-h-screen bg-background dark:bg-gradient-to-b dark:from-[#0a2818] dark:via-[#0f1f16] dark:to-[#0a1510] pb-20">
-      <TopBar title="আল কুরআন" />
+      <TopBar title="DeenSphereX" />
 
       <main className="max-w-lg mx-auto px-6 py-6 space-y-6">
         <PrayerHeader />
