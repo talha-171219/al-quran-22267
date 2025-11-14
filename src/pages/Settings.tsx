@@ -34,7 +34,6 @@ const Settings = () => {
   const navigate = useNavigate();
   const [autoPlay, setAutoPlay] = useState(false);
   const [offlineMode, setOfflineMode] = useState(false);
-  const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [azkarStats, setAzkarStats] = useState(calculateAzkarStats());
   const [currentVersion, setCurrentVersion] = useState('');
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false);
@@ -44,11 +43,6 @@ const Settings = () => {
     const savedOffline = localStorage.getItem('offlineMode') === 'true';
     setAutoPlay(savedAutoPlay);
     setOfflineMode(savedOffline);
-    
-    // Check notification permission
-    if ('Notification' in window) {
-      setNotificationEnabled(Notification.permission === 'granted');
-    }
 
     // Refresh azkar stats
     setAzkarStats(calculateAzkarStats());
@@ -76,45 +70,6 @@ const Settings = () => {
     setOfflineMode(checked);
     localStorage.setItem('offlineMode', String(checked));
     toast.success(checked ? 'অফলাইন মোড চালু' : 'অফলাইন মোড বন্ধ');
-  };
-
-  const handleNotificationToggle = async (checked: boolean) => {
-    if (!('Notification' in window)) {
-      toast.error('আপনার ব্রাউজার নোটিফিকেশন সাপোর্ট করে না');
-      return;
-    }
-
-    if (checked) {
-      try {
-        // Request permission - this will show browser's native popup
-        const permission = await Notification.requestPermission();
-        
-        if (permission === 'granted') {
-          setNotificationEnabled(true);
-          toast.success('নোটিফিকেশন চালু হয়েছে ✓');
-          
-          // Show a test notification
-          new Notification('নোটিফিকেশন চালু হয়েছে', {
-            body: 'আপনি এখন নামাজের সময় জানান পাবেন',
-            icon: '/icon-192.png',
-            badge: '/icon-192.png',
-          });
-          
-        } else if (permission === 'denied') {
-          toast.error('নোটিফিকেশন অনুমতি প্রত্যাখ্যান করা হয়েছে। ব্রাউজার সেটিংস থেকে চালু করুন।');
-          setNotificationEnabled(false);
-        } else {
-          toast.error('নোটিফিকেশন অনুমতি দেওয়া হয়নি');
-          setNotificationEnabled(false);
-        }
-      } catch (error) {
-        console.error('Notification permission error:', error);
-        toast.error('নোটিফিকেশন চালু করতে সমস্যা হয়েছে');
-        setNotificationEnabled(false);
-      }
-    } else {
-      toast.info('নোটিফিকেশন বন্ধ করতে ব্রাউজার সেটিংস ব্যবহার করুন');
-    }
   };
 
   const handleShare = async () => {
@@ -230,23 +185,22 @@ const Settings = () => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div 
+            className="flex items-center justify-between cursor-pointer hover:bg-accent/50 transition-colors rounded-lg p-2 -m-2"
+            onClick={() => navigate('/notifications')}
+          >
             <div className="flex items-center gap-3">
               <Bell className="h-5 w-5 text-primary" />
               <div>
-                <Label htmlFor="notification-mode" className="font-medium cursor-pointer">
-                  নোটিফিকেশন
+                <Label className="font-medium cursor-pointer">
+                  নোটিফিকেশন সেটিংস
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  {notificationEnabled ? 'চালু আছে' : 'বন্ধ আছে'}
+                  নামাজের সময় নোটিফিকেশন পরিচালনা করুন
                 </p>
               </div>
             </div>
-            <Switch 
-              id="notification-mode" 
-              checked={notificationEnabled}
-              onCheckedChange={handleNotificationToggle}
-            />
+            <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
           </div>
 
           <div className="flex items-center justify-between">
