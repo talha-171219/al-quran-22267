@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { Bell } from "lucide-react";
 import { toast } from "sonner";
 import { convertTo12Hour, formatTime12Hour } from "@/utils/timeUtils";
 import { toBengaliNumerals, formatBengaliDate, getBengaliWeekday } from "@/utils/bengaliUtils";
@@ -236,54 +235,44 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
         </svg>
       </div>
 
-      <div className="p-3 sm:p-4 relative">
+      <div className="p-2.5 sm:p-3.5 relative">
         <div className="grid grid-cols-[1fr,auto] gap-3">
           {/* Left Column - Prayer Info */}
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             {/* Date and Location Row */}
-            <div className="flex items-start justify-between mb-2">
-              <div className="text-sky-400/90 text-[13px] font-medium tracking-wide">
+            <div className="flex items-start justify-between mb-1.5">
+              <div className="text-sky-400/90 text-xs font-medium tracking-wide">
                 {formatBengaliDate(currentDate)}
               </div>
-              <div className="text-amber-300/70 text-xs font-medium">
+              <div className="text-amber-300/70 text-[11px] font-medium">
                 {location}
               </div>
             </div>
 
-            {/* Bell Icon */}
-            <div className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 mb-1.5">
-              <Bell className="w-4 h-4 text-white/80" />
-            </div>
-
             {/* Current Prayer Status */}
             <div className="space-y-0.5">
-              <div className="flex items-center gap-2">
-                <span className="text-white/80 text-sm">এখন :</span>
-                <span className="text-white font-semibold text-sm">{currentPrayerName}</span>
-                <span className="w-2 h-2 bg-emerald-400 rounded-full shadow-lg shadow-emerald-400/50" style={{
+              <div className="flex items-center gap-1.5">
+                <span className="text-white/80 text-xs">এখন :</span>
+                <span className="text-white font-semibold text-xs">{currentPrayerName}</span>
+                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full shadow-lg shadow-emerald-400/50" style={{
                   boxShadow: '0 0 8px rgba(52, 211, 153, 0.8), 0 0 12px rgba(52, 211, 153, 0.4)'
                 }} />
               </div>
               
-              <div className="text-white text-[36px] sm:text-[42px] font-bold tracking-tight leading-none" style={{
+              <div className="text-white text-[32px] sm:text-[36px] font-bold tracking-tight leading-none" style={{
                 textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
               }}>
                 {prayerTimes[currentPrayer.name as keyof PrayerTimes] ? formatTime12Hour(prayerTimes[currentPrayer.name as keyof PrayerTimes], true) : '...'}
               </div>
               
-              <div className="text-emerald-300/70 text-[11px] font-light">
+              <div className="text-emerald-300/70 text-[10px] font-light">
                 (ওয়াক্ত শুরু)
-              </div>
-
-              {/* Countdown */}
-              <div className="text-white/85 text-xs mt-1 font-light">
-                {toBengaliNumerals(countdown)} বাকি (প্রায়)
               </div>
             </div>
 
             {/* Sehri & Iftar Times */}
             {(prayerTimes.Fajr || prayerTimes.Maghrib) && (
-              <div className="space-y-0.5 text-xs pt-2 border-t border-white/10">
+              <div className="space-y-0.5 text-[11px] pt-1.5 border-t border-white/10">
                 {prayerTimes.Fajr && (
                   <div className="text-white/70">
                     সেহরি: <span className="text-white/90 font-medium">{formatTime12Hour(prayerTimes.Fajr, true)}</span>
@@ -299,53 +288,56 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
           </div>
 
           {/* Right Column - Circular Timer */}
-          <div className="flex items-start justify-center pt-3">
-            <div className="relative w-24 h-24 sm:w-28 sm:h-28">
-              {/* Glow Effect */}
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-400/20 to-teal-400/10 blur-xl" />
+          <div className="flex items-start justify-center pt-1">
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24">
+              {/* Premium Glow Effect */}
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-400/30 to-emerald-400/20 blur-lg animate-pulse" />
               
               {/* Circular Progress */}
               <svg className="w-full h-full transform -rotate-90 relative z-10">
+                {/* Background Circle */}
                 <circle
                   cx="50%"
                   cy="50%"
-                  r="45%"
+                  r="42%"
                   fill="none"
-                  stroke="rgba(255,255,255,0.08)"
-                  strokeWidth="2.5"
+                  stroke="rgba(255,255,255,0.06)"
+                  strokeWidth="3"
                 />
+                {/* Progress Circle */}
                 <circle
                   cx="50%"
                   cy="50%"
-                  r="45%"
+                  r="42%"
                   fill="none"
                   stroke="url(#premium-gradient)"
-                  strokeWidth="2.5"
+                  strokeWidth="3"
                   strokeLinecap="round"
                   strokeDasharray={`${2 * Math.PI * (40)} ${2 * Math.PI * (40)}`}
                   strokeDashoffset={2 * Math.PI * (40) * (1 - 0.65)}
                   className="transition-all duration-1000"
                   style={{
-                    filter: 'drop-shadow(0 0 4px rgba(251, 191, 36, 0.4))'
+                    filter: 'drop-shadow(0 0 6px rgba(251, 191, 36, 0.6)) drop-shadow(0 0 10px rgba(16, 185, 129, 0.4))'
                   }}
                 />
                 <defs>
                   <linearGradient id="premium-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.9" />
-                    <stop offset="50%" stopColor="#10b981" stopOpacity="0.95" />
+                    <stop offset="0%" stopColor="#fbbf24" stopOpacity="1" />
+                    <stop offset="40%" stopColor="#f59e0b" stopOpacity="0.95" />
+                    <stop offset="70%" stopColor="#10b981" stopOpacity="0.95" />
                     <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.9" />
                   </linearGradient>
                 </defs>
               </svg>
               
-              {/* Time Display */}
+              {/* Time Display with Seconds */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-lg sm:text-xl font-bold text-white" style={{
-                  textShadow: '0 2px 8px rgba(0, 0, 0, 0.4)'
+                <div className="text-base sm:text-lg font-bold text-white leading-tight" style={{
+                  textShadow: '0 2px 8px rgba(0, 0, 0, 0.5), 0 0 20px rgba(251, 191, 36, 0.3)'
                 }}>
-                  {toBengaliNumerals(countdown.split(':').slice(0, 2).join(':'))}
+                  {toBengaliNumerals(countdown)}
                 </div>
-                <div className="text-[9px] text-white/60 mt-0 font-light">
+                <div className="text-[8px] text-white/60 mt-0.5 font-light">
                   বাকি
                 </div>
               </div>
@@ -354,8 +346,8 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
         </div>
 
         {/* Prayer Timeline */}
-        <div className="mt-3 pt-2.5 border-t border-white/10">
-          <div className="flex justify-between items-center px-1">
+        <div className="mt-2 pt-2 border-t border-white/10">
+          <div className="flex justify-between items-center px-0.5">
             {(['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const).map((prayer) => {
               const bengaliName = {
                 'Fajr': 'ফজর',
