@@ -91,6 +91,69 @@ export type Database = {
         }
         Relationships: []
       }
+      prayer_notifications_log: {
+        Row: {
+          failure_count: number | null
+          id: string
+          prayer_name: string
+          prayer_time: string
+          recipients_count: number | null
+          sent_at: string
+          success_count: number | null
+        }
+        Insert: {
+          failure_count?: number | null
+          id?: string
+          prayer_name: string
+          prayer_time: string
+          recipients_count?: number | null
+          sent_at?: string
+          success_count?: number | null
+        }
+        Update: {
+          failure_count?: number | null
+          id?: string
+          prayer_name?: string
+          prayer_time?: string
+          recipients_count?: number | null
+          sent_at?: string
+          success_count?: number | null
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          adhan_sound_enabled: boolean | null
+          created_at: string
+          endpoint: string
+          id: string
+          keys: Json
+          prayer_notifications_enabled: boolean | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          adhan_sound_enabled?: boolean | null
+          created_at?: string
+          endpoint: string
+          id?: string
+          keys: Json
+          prayer_notifications_enabled?: boolean | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          adhan_sound_enabled?: boolean | null
+          created_at?: string
+          endpoint?: string
+          id?: string
+          keys?: Json
+          prayer_notifications_enabled?: boolean | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
