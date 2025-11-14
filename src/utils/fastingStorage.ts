@@ -1,10 +1,13 @@
 // Storage utilities for fasting tracker and progress
 
+export type FastingType = 'ramadan' | 'nafl' | 'sunnah';
+
 interface FastingProgress {
   [date: string]: {
     completed: boolean;
     timestamp: number;
     note?: string;
+    type: FastingType;
   };
 }
 
@@ -32,12 +35,13 @@ const saveFastingProgress = (progress: FastingProgress): void => {
 };
 
 // Toggle fasting completion for a date
-export const toggleFastingDay = (date: string, completed: boolean, note?: string): void => {
+export const toggleFastingDay = (date: string, completed: boolean, note?: string, type: FastingType = 'ramadan'): void => {
   const progress = getFastingProgress();
   progress[date] = {
     completed,
     timestamp: Date.now(),
-    note
+    note,
+    type
   };
   saveFastingProgress(progress);
 };
