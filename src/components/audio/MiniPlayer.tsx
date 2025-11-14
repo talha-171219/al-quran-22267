@@ -20,28 +20,18 @@ export const MiniPlayer = () => {
   const location = useLocation();
   const surah = getSurahInfo();
 
-  console.log('MiniPlayer Debug:', { 
-    currentSurah, 
-    showPlayer, 
-    pathname: location.pathname,
-    isPlaying,
-    surah 
-  });
-
   // Don't show mini player on audio page itself
   if (location.pathname === "/audio") {
-    console.log('MiniPlayer hidden - on audio page');
     return null;
   }
 
   // Show when there's a surah selected and player is visible
   if (!currentSurah || !showPlayer) {
-    console.log('MiniPlayer hidden - no surah or player hidden', { currentSurah, showPlayer });
     return null;
   }
 
   return (
-    <Card className="fixed bottom-20 left-0 right-0 mx-auto max-w-lg bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 text-white shadow-xl border-0 z-40 animate-slide-up overflow-hidden relative">
+    <Card className="fixed bottom-20 left-0 right-0 mx-auto max-w-lg bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 text-white shadow-xl border-0 z-[60] animate-slide-up overflow-hidden relative">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
