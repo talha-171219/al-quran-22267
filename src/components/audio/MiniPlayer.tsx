@@ -31,7 +31,8 @@ export const MiniPlayer = () => {
   }
 
   return (
-    <Card className="fixed bottom-20 left-0 right-0 mx-auto max-w-lg bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 text-white shadow-xl border-0 z-[60] animate-slide-up overflow-hidden relative">
+    <div className="fixed bottom-20 left-0 right-0 z-[9999] pointer-events-none px-2" style={{ position: 'fixed' }}>
+      <Card className="pointer-events-auto max-w-lg mx-auto bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 text-white shadow-xl border-0 animate-slide-up overflow-hidden relative">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
@@ -101,6 +102,7 @@ export const MiniPlayer = () => {
           </Button>
         </div>
       </div>
-    </Card>
+      </Card>
+    </div>
   );
 };
