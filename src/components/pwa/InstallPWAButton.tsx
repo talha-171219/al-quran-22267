@@ -16,6 +16,11 @@ export const InstallPWAButton = () => {
     const isIOSInstalled = (window.navigator as any).standalone === true;
     setIsInstalled(installed || isIOSInstalled);
 
+    // Don't set up event listeners if already installed
+    if (installed || isIOSInstalled) {
+      return;
+    }
+
     const onBeforeInstall = (e: any) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -26,18 +31,14 @@ export const InstallPWAButton = () => {
       setIsInstalled(true);
       setCanInstall(false);
       setDeferredPrompt(null);
-      toast.success("অ্যাপ ইনস্টল হয়েছে");
+      toast.success("অ্যাপ সফলভাবে ইনস্টল হয়েছে! ✨");
     };
 
     window.addEventListener("beforeinstallprompt", onBeforeInstall);
     window.addEventListener("appinstalled", onInstalled);
     
-    // Check after a short delay if prompt is available
-    setTimeout(() => {
-      if (!deferredPrompt && !installed && !isIOSInstalled) {
-        setCanInstall(true);
-      }
-    }, 1000);
+    // Always show button - it will navigate to install guide if needed
+    setCanInstall(true);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", onBeforeInstall);
@@ -47,16 +48,27 @@ export const InstallPWAButton = () => {
 
   const handleClick = async () => {
     if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === "accepted") {
-        toast.success("ইনস্টল শুরু হয়েছে");
+      try {
+        await deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        
+        if (outcome === "accepted") {
+          toast.success("ইনস্টল শুরু হয়েছে...");
+        } else {
+          toast.info("ইনস্টল ক্যান্সেল করা হয়েছে");
+        }
+        
+        setDeferredPrompt(null);
+        setCanInstall(false);
+      } catch (error) {
+        console.error("Install error:", error);
+        // Fallback to install guide page
+        navigate("/install");
       }
-      setDeferredPrompt(null);
-      setCanInstall(false);
       return;
     }
-    // Fallback: open install guide page
+    
+    // If no prompt available, navigate to install guide
     navigate("/install");
   };
 
