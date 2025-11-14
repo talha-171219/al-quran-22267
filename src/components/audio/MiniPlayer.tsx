@@ -20,13 +20,23 @@ export const MiniPlayer = () => {
   const location = useLocation();
   const surah = getSurahInfo();
 
+  console.log('MiniPlayer Debug:', { 
+    currentSurah, 
+    showPlayer, 
+    pathname: location.pathname,
+    isPlaying,
+    surah 
+  });
+
   // Don't show mini player on audio page itself
   if (location.pathname === "/audio") {
+    console.log('MiniPlayer hidden - on audio page');
     return null;
   }
 
   // Show when there's a surah selected and player is visible
   if (!currentSurah || !showPlayer) {
+    console.log('MiniPlayer hidden - no surah or player hidden', { currentSurah, showPlayer });
     return null;
   }
 
