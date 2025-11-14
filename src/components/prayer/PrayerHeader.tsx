@@ -30,6 +30,7 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
   const [location, setLocation] = useState<string>("");
   const [currentTime, setCurrentTime] = useState("");
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [timeProgress, setTimeProgress] = useState(0);
 
   const prayerNamesBn: { [key: string]: string } = {
     Fajr: "ফজর",
@@ -188,6 +189,12 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
       const minutes = diff % 60;
       const seconds = (60 - now.getSeconds()) % 60;
       setCountdown(`${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`);
+      
+      // Calculate time progress for circular indicator (elapsed time / total time)
+      const totalMinutes = nextMinutes - current.minutes;
+      const elapsedMinutes = currentTime - current.minutes + (now.getSeconds() / 60);
+      const progress = Math.max(0, Math.min(1, elapsedMinutes / totalMinutes));
+      setTimeProgress(progress);
     };
 
     updateCurrentPrayer();
@@ -291,7 +298,7 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
           <div className="flex items-start justify-center pt-1">
             <div className="relative w-28 h-28 sm:w-32 sm:h-32">
               {/* Premium Glow Effect */}
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-400/30 to-emerald-400/20 blur-xl animate-pulse" />
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-400/30 to-emerald-400/20 blur-xl" />
               
               {/* Circular Progress */}
               <svg className="w-full h-full transform -rotate-90 relative z-10">
@@ -314,8 +321,8 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
                   strokeWidth="4"
                   strokeLinecap="round"
                   strokeDasharray={`${2 * Math.PI * (40)} ${2 * Math.PI * (40)}`}
-                  strokeDashoffset={2 * Math.PI * (40) * (1 - 0.65)}
-                  className="transition-all duration-1000"
+                  strokeDashoffset={2 * Math.PI * (40) * timeProgress}
+                  className="transition-all duration-300"
                   style={{
                     filter: 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.7)) drop-shadow(0 0 14px rgba(16, 185, 129, 0.5))'
                   }}
