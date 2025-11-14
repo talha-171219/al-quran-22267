@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { MapPin, ArrowRight } from "lucide-react";
+import { Bell } from "lucide-react";
 import { toast } from "sonner";
-import { convertTo12Hour, formatCurrentTime12Hour } from "@/utils/timeUtils";
-import { toBengaliNumerals } from "@/utils/bengaliUtils";
+import { convertTo12Hour, formatTime12Hour } from "@/utils/timeUtils";
+import { toBengaliNumerals, formatBengaliDate, getBengaliWeekday } from "@/utils/bengaliUtils";
 import { getLocationName } from "@/utils/prayerNotifications";
 import { buildPrayerTimesApiUrl } from "@/utils/prayerSettings";
 import mosqueImage from "@/assets/mosque-sunset.jpg";
@@ -30,6 +30,7 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
   const [countdown, setCountdown] = useState("");
   const [location, setLocation] = useState<string>("");
   const [currentTime, setCurrentTime] = useState("");
+  const [currentDate, setCurrentDate] = useState(new Date());
 
   const prayerNamesBn: { [key: string]: string } = {
     Fajr: "ফজর",
@@ -198,7 +199,8 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
 
   useEffect(() => {
     const updateTime = () => {
-      setCurrentTime(formatCurrentTime12Hour(new Date()));
+      const now = new Date();
+      setCurrentDate(now);
     };
     
     updateTime();
@@ -209,61 +211,181 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
 
   if (!prayerTimes || !currentPrayer) return null;
 
+  const currentPrayerName = prayerNamesBn[currentPrayer.name] || currentPrayer.name;
+
   return (
-    <Card
-      className={`relative overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground cursor-pointer hover:shadow-lg transition-shadow ${className}`}
-      onClick={() => navigate("/calendar")}
+    <Card 
+      className={`relative overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-2xl hover:shadow-emerald-500/20 bg-gradient-to-br from-emerald-950/95 via-emerald-900/90 to-teal-900/85 border-emerald-700/20 backdrop-blur-sm rounded-[28px] ${className}`}
+      onClick={() => navigate('/calendar')}
+      style={{
+        boxShadow: '0 0 40px rgba(16, 185, 129, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+      }}
     >
-      <div className="absolute inset-0 opacity-10">
-        <svg viewBox="0 0 800 400" className="w-full h-full">
-          <path
-            d="M400,50 L450,100 L450,200 L350,200 L350,100 Z M400,50 L400,20 L420,20 L420,40 L380,40 L380,20 L400,20 Z M340,200 L330,210 L340,220 L460,220 L470,210 L460,200 Z"
-            fill="currentColor"
-          />
-          <circle cx="400" cy="25" r="8" fill="currentColor" />
-          <rect x="320" y="220" width="160" height="30" rx="5" fill="currentColor" />
+      {/* Frosted Glass Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
+      
+      {/* Subtle Pattern */}
+      <div className="absolute inset-0 opacity-[0.02]">
+        <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="prayer-pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+              <circle cx="20" cy="20" r="1.5" fill="currentColor" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#prayer-pattern)" />
         </svg>
       </div>
 
-      <div className="relative p-4 space-y-2">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm opacity-90">
-            <MapPin className="h-4 w-4" />
-            <span>{location}</span>
+      <div className="p-4 sm:p-5 relative">
+        <div className="grid grid-cols-[1fr,auto] gap-4">
+          {/* Left Column - Prayer Info */}
+          <div className="space-y-2.5">
+            {/* Date and Location Row */}
+            <div className="flex items-start justify-between mb-3">
+              <div className="text-sky-400/90 text-[13px] font-medium tracking-wide">
+                {formatBengaliDate(currentDate)}
+              </div>
+              <div className="text-amber-300/70 text-xs font-medium">
+                {location}
+              </div>
+            </div>
+
+            {/* Bell Icon */}
+            <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 mb-2">
+              <Bell className="w-5 h-5 text-white/80" />
+            </div>
+
+            {/* Current Prayer Status */}
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-white/80 text-sm">এখন :</span>
+                <span className="text-white font-semibold text-sm">{currentPrayerName}</span>
+                <span className="w-2 h-2 bg-emerald-400 rounded-full shadow-lg shadow-emerald-400/50" style={{
+                  boxShadow: '0 0 8px rgba(52, 211, 153, 0.8), 0 0 12px rgba(52, 211, 153, 0.4)'
+                }} />
+              </div>
+              
+              <div className="text-white text-[42px] sm:text-5xl font-bold tracking-tight leading-none" style={{
+                textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+              }}>
+                {prayerTimes[currentPrayer.name as keyof PrayerTimes] ? formatTime12Hour(prayerTimes[currentPrayer.name as keyof PrayerTimes], true) : '...'}
+              </div>
+              
+              <div className="text-emerald-300/70 text-xs font-light">
+                (ওয়াক্ত শুরু)
+              </div>
+
+              {/* Countdown */}
+              <div className="text-white/85 text-[13px] mt-1.5 font-light">
+                {toBengaliNumerals(countdown)} বাকি (প্রায়)
+              </div>
+            </div>
+
+            {/* Sehri & Iftar Times */}
+            {(prayerTimes.Fajr || prayerTimes.Maghrib) && (
+              <div className="space-y-0.5 text-[13px] pt-2.5 border-t border-white/10">
+                {prayerTimes.Fajr && (
+                  <div className="text-white/70">
+                    সেহরি: <span className="text-white/90 font-medium">{formatTime12Hour(prayerTimes.Fajr, true)}</span>
+                  </div>
+                )}
+                {prayerTimes.Maghrib && (
+                  <div className="text-white/70">
+                    ইফতার: <span className="text-white/90 font-medium">{formatTime12Hour(prayerTimes.Maghrib, true)}</span>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-          <div className="flex flex-col items-end gap-1">
-            <span className="text-sm font-semibold">{currentTime}</span>
-            <span className="text-xs opacity-75">{hijriDate}</span>
+
+          {/* Right Column - Circular Timer */}
+          <div className="flex items-start justify-center pt-6">
+            <div className="relative w-28 h-28 sm:w-32 sm:h-32">
+              {/* Glow Effect */}
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-400/20 to-teal-400/10 blur-xl" />
+              
+              {/* Circular Progress */}
+              <svg className="w-full h-full transform -rotate-90 relative z-10">
+                <circle
+                  cx="50%"
+                  cy="50%"
+                  r="45%"
+                  fill="none"
+                  stroke="rgba(255,255,255,0.08)"
+                  strokeWidth="2.5"
+                />
+                <circle
+                  cx="50%"
+                  cy="50%"
+                  r="45%"
+                  fill="none"
+                  stroke="url(#premium-gradient)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeDasharray={`${2 * Math.PI * (40)} ${2 * Math.PI * (40)}`}
+                  strokeDashoffset={2 * Math.PI * (40) * (1 - 0.65)}
+                  className="transition-all duration-1000"
+                  style={{
+                    filter: 'drop-shadow(0 0 4px rgba(251, 191, 36, 0.4))'
+                  }}
+                />
+                <defs>
+                  <linearGradient id="premium-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.9" />
+                    <stop offset="50%" stopColor="#10b981" stopOpacity="0.95" />
+                    <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.9" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              
+              {/* Time Display */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <div className="text-xl sm:text-2xl font-bold text-white" style={{
+                  textShadow: '0 2px 8px rgba(0, 0, 0, 0.4)'
+                }}>
+                  {toBengaliNumerals(countdown.split(':').slice(0, 2).join(':'))}
+                </div>
+                <div className="text-[10px] text-white/60 mt-0.5 font-light">
+                  বাকি
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <h3 className="text-2xl font-bold">{prayerNamesBn[currentPrayer.name]}</h3>
-              <div className="h-3 w-3 bg-white rounded-full animate-pulse"></div>
-            </div>
-            <div className="flex items-baseline gap-2 mt-1">
-              <p className="text-4xl font-bold">{convertTo12Hour(currentPrayer.time).time}</p>
-              <span className="text-xl font-semibold opacity-90">{convertTo12Hour(currentPrayer.time).periodBn}</span>
-            </div>
-            <p className="text-sm opacity-90 mt-1">
-              পরবর্তী নামাজ {toBengaliNumerals(countdown)} এ
-            </p>
+        {/* Prayer Timeline */}
+        <div className="mt-5 pt-3.5 border-t border-white/10">
+          <div className="flex justify-between items-center px-1">
+            {(['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const).map((prayer) => {
+              const bengaliName = {
+                'Fajr': 'ফজর',
+                'Dhuhr': 'যোহর',
+                'Asr': 'আসর',
+                'Maghrib': 'মাগরিব',
+                'Isha': 'এশা'
+              }[prayer];
+              
+              const isActive = currentPrayer.name === prayer;
+              
+              return (
+                <div key={prayer} className="flex flex-col items-center space-y-1">
+                  <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                    isActive 
+                      ? 'bg-white scale-150 shadow-lg shadow-white/60' 
+                      : 'bg-white/25'
+                  }`} style={isActive ? {
+                    boxShadow: '0 0 10px rgba(255, 255, 255, 0.8), 0 0 15px rgba(255, 255, 255, 0.4)'
+                  } : {}} />
+                  <div className={`text-[11px] ${isActive ? 'text-white font-semibold' : 'text-white/60'}`}>
+                    {bengaliName}
+                  </div>
+                  <div className={`text-[11px] ${isActive ? 'text-white font-medium' : 'text-white/50'}`}>
+                    {prayerTimes[prayer] ? formatTime12Hour(prayerTimes[prayer], false).split(' ')[0] : '...'}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-
-          <div className="flex flex-col items-end justify-center">
-            <img
-              src={mosqueImage}
-              alt="Mosque"
-              className="h-24 w-24 object-cover rounded-lg opacity-90"
-            />
-          </div>
-        </div>
-
-        <div className="flex items-center justify-between pt-2 border-t border-white/20">
-          <span className="text-sm opacity-90">আরও দেখতে ট্যাপ করুন</span>
-          <ArrowRight className="h-5 w-5" />
         </div>
       </div>
     </Card>
