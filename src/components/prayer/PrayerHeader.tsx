@@ -235,7 +235,7 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
         </svg>
       </div>
 
-      <div className="p-2.5 sm:p-3.5 relative">
+      <div className="p-3.5 sm:p-5 relative">
         <div className="grid grid-cols-[1fr,auto] gap-3">
           {/* Left Column - Prayer Info */}
           <div className="space-y-1">

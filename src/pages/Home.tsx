@@ -97,8 +97,8 @@ const Home = () => {
     <div className="min-h-screen bg-background dark:bg-gradient-to-b dark:from-[#0a2818] dark:via-[#0f1f16] dark:to-[#0a1510] pb-20">
       <TopBar title="DeenSphereX" />
 
-      <main className="max-w-lg mx-auto px-6 py-6 space-y-6">
-        <PrayerHeader />
+      <main className="max-w-lg mx-auto px-4 py-6 space-y-6">
+        <PrayerHeader className="mx-0.5" />
         
         {/* 3D Circular Icon Grid */}
         <div className="grid grid-cols-3 gap-6 pt-4">
