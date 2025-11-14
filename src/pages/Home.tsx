@@ -68,7 +68,7 @@ const features = [
   {
     icon: fastingTrackerIcon,
     title: "Fasting Tracker",
-    path: "/fasting-tracker",
+    path: "/fasting/tracker",
   },
   {
     icon: zakatCalculatorIcon,
