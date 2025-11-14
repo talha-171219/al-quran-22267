@@ -92,12 +92,19 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       workbox: {
-        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024, // 3 MB limit
-        globPatterns: ["**/*.{js,css,html,ico,png,jpg,jpeg,svg,woff,woff2,mp3}"],
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB limit for large PDFs
+        globPatterns: [
+          "**/*.{js,css,html,ico,png,jpg,jpeg,svg,woff,woff2}",
+          "*.mp3", // Cache adhan and alarm sounds
+          "icon-*.{png,jpg}", // Cache app icons
+        ],
         // Ensure offline support for navigation requests
         navigateFallback: "index.html",
         navigateFallbackDenylist: [/^\/api/, /^\/auth/],
+        navigateFallbackAllowlist: [/^\//], // Allow all app routes
         cleanupOutdatedCaches: true,
+        skipWaiting: true, // Activate new service worker immediately
+        clientsClaim: true, // Take control of all clients immediately
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\.alquran\.cloud\/.*/i,
@@ -105,13 +112,24 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: "quran-api-cache",
               expiration: {
-                maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
+                maxEntries: 200,
+                maxAgeSeconds: 60 * 60 * 24 * 90 // 90 days - Quran never changes
               },
               cacheableResponse: {
                 statuses: [0, 200]
               },
-              networkTimeoutSeconds: 10
+              networkTimeoutSeconds: 8,
+              plugins: [
+                {
+                  cacheWillUpdate: async ({ response }: any) => {
+                    // Always cache successful responses
+                    if (response && response.status === 200) {
+                      return response;
+                    }
+                    return null;
+                  },
+                },
+              ],
             }
           },
           {
@@ -120,13 +138,24 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: "prayer-times-cache",
               expiration: {
-                maxEntries: 50,
+                maxEntries: 100,
                 maxAgeSeconds: 60 * 60 * 24 // 1 day
               },
               cacheableResponse: {
                 statuses: [0, 200]
               },
-              networkTimeoutSeconds: 5
+              networkTimeoutSeconds: 5,
+              plugins: [
+                {
+                  cacheWillUpdate: async ({ response }: any) => {
+                    // Cache prayer times even if slightly old
+                    if (response && response.status === 200) {
+                      return response;
+                    }
+                    return null;
+                  },
+                },
+              ],
             }
           },
           {
@@ -164,12 +193,20 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: "audio-cache",
               expiration: {
-                maxEntries: 200,
-                maxAgeSeconds: 60 * 60 * 24 * 90 // 90 days
+                maxEntries: 300,
+                maxAgeSeconds: 60 * 60 * 24 * 180 // 180 days - audio files never change
               },
               cacheableResponse: {
                 statuses: [0, 200]
-              }
+              },
+              plugins: [
+                {
+                  cacheKeyWillBeUsed: async ({ request }: any) => {
+                    // Normalize audio URLs for better caching
+                    return request.url;
+                  },
+                },
+              ],
             }
           },
           {
@@ -178,8 +215,38 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: "books-cache",
               expiration: {
-                maxEntries: 100,
+                maxEntries: 150,
                 maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year - books never change
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            // Cache images from any source
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp)$/,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "images-cache",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 90 // 90 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200]
+              }
+            }
+          },
+          {
+            // Cache Google Fonts
+            urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
+            handler: "CacheFirst",
+            options: {
+              cacheName: "google-fonts-cache",
+              expiration: {
+                maxEntries: 30,
+                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
               },
               cacheableResponse: {
                 statuses: [0, 200]
