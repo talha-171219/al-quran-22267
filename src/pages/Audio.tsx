@@ -42,8 +42,21 @@ const Audio = () => {
 
       <main className="max-w-lg mx-auto px-4 py-6 space-y-6">
         {/* Player */}
-        <Card className="p-6 bg-gradient-primary text-primary-foreground">
-          <div className="text-center mb-6">
+        <Card className="p-6 bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 text-white shadow-xl border-0 overflow-hidden relative">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 opacity-10">
+            <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="audio-grid" width="32" height="32" patternUnits="userSpaceOnUse">
+                  <circle cx="16" cy="16" r="1" fill="currentColor" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#audio-grid)" />
+            </svg>
+          </div>
+
+          <div className="relative z-10">
+            <div className="text-center mb-6">
             <h3 className="text-xl font-semibold mb-1">{surah.banglaName}</h3>
             <p className="text-sm opacity-90">
               {isLoading ? (
@@ -147,6 +160,7 @@ const Audio = () => {
               <Volume2 className="h-4 w-4 mr-2" />
               গতি
             </Button>
+          </div>
           </div>
         </Card>
 
