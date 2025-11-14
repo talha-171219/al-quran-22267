@@ -31,8 +31,20 @@ export const MiniPlayer = () => {
   }
 
   return (
-    <Card className="fixed bottom-20 left-0 right-0 mx-auto max-w-lg bg-gradient-primary text-primary-foreground shadow-lg border-0 z-40 animate-slide-up">
-      <div className="flex items-center gap-3 p-3">
+    <Card className="fixed bottom-20 left-0 right-0 mx-auto max-w-lg bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 text-white shadow-xl border-0 z-40 animate-slide-up overflow-hidden relative">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <pattern id="mini-grid" width="24" height="24" patternUnits="userSpaceOnUse">
+              <circle cx="12" cy="12" r="1" fill="currentColor" />
+            </pattern>
+          </defs>
+          <rect width="100%" height="100%" fill="url(#mini-grid)" />
+        </svg>
+      </div>
+
+      <div className="flex items-center gap-3 p-3 relative z-10">
         <div 
           className="flex-1 min-w-0 cursor-pointer" 
           onClick={() => navigate("/audio")}
@@ -47,7 +59,7 @@ export const MiniPlayer = () => {
           <Button
             size="icon"
             variant="ghost"
-            className="h-8 w-8 text-primary-foreground hover:bg-white/10"
+            className="h-8 w-8 text-white hover:bg-white/10"
             onClick={skipPrev}
             disabled={currentSurah === 1 || isLoading}
           >
@@ -56,7 +68,7 @@ export const MiniPlayer = () => {
           
           <Button
             size="icon"
-            className="h-10 w-10 bg-white/20 hover:bg-white/30 text-primary-foreground"
+            className="h-10 w-10 bg-white/20 hover:bg-white/30 text-white"
             onClick={togglePlay}
             disabled={isLoading}
           >
@@ -72,7 +84,7 @@ export const MiniPlayer = () => {
           <Button
             size="icon"
             variant="ghost"
-            className="h-8 w-8 text-primary-foreground hover:bg-white/10"
+            className="h-8 w-8 text-white hover:bg-white/10"
             onClick={skipNext}
             disabled={currentSurah === 114 || isLoading}
           >
@@ -82,7 +94,7 @@ export const MiniPlayer = () => {
           <Button
             size="icon"
             variant="ghost"
-            className="h-8 w-8 text-primary-foreground hover:bg-white/10 ml-1"
+            className="h-8 w-8 text-white hover:bg-white/10 ml-1"
             onClick={hidePlayer}
           >
             <X className="h-4 w-4" />
