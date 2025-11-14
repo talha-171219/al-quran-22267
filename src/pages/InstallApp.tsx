@@ -13,7 +13,10 @@ const InstallApp = () => {
 
   useEffect(() => {
     // Check if already installed
-    if (window.matchMedia("(display-mode: standalone)").matches) {
+    const installed = window.matchMedia("(display-mode: standalone)").matches;
+    const iosInstalled = (window.navigator as any).standalone === true;
+    
+    if (installed || iosInstalled) {
       setIsInstalled(true);
     }
 
@@ -27,28 +30,45 @@ const InstallApp = () => {
       setDeferredPrompt(e);
     };
 
+    const handleAppInstalled = () => {
+      setIsInstalled(true);
+      setDeferredPrompt(null);
+      toast.success("অ্যাপ সফলভাবে ইনস্টল হয়েছে! ✨");
+    };
+
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
     };
   }, []);
 
   const handleInstallClick = async () => {
     if (!deferredPrompt) {
-      toast.info("ইনস্টল অপশন আপনার ব্রাউজারে দেখাবে");
+      toast.info("অনুগ্রহ করে নিচের ম্যানুয়াল নির্দেশাবলী অনুসরণ করুন", {
+        duration: 4000,
+      });
       return;
     }
 
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
+    try {
+      await deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
 
-    if (outcome === "accepted") {
-      toast.success("অ্যাপ ইনস্টল হচ্ছে...");
-      setIsInstalled(true);
+      if (outcome === "accepted") {
+        toast.success("অ্যাপ ইনস্টল শুরু হয়েছে...");
+        setIsInstalled(true);
+      } else {
+        toast.info("ইনস্টল ক্যান্সেল করা হয়েছে");
+      }
+
+      setDeferredPrompt(null);
+    } catch (error) {
+      console.error("Installation failed:", error);
+      toast.error("ইনস্টল করতে সমস্যা হয়েছে। ম্যানুয়ালি নির্দেশাবলী অনুসরণ করুন।");
     }
-
-    setDeferredPrompt(null);
   };
 
   return (
