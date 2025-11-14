@@ -1,26 +1,37 @@
 {
-  "rewrites": [
-    {
-      "source": "/service-worker.js",
-      "destination": "/service-worker.js"
-    }
-  ],
   "headers": [
     {
-      "source": "/service-worker.js",
+      "source": "/(.*)",
       "headers": [
         {
-          "key": "Service-Worker-Allowed",
-          "value": "/"
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
         },
         {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
         }
       ]
     },
     {
-      "source": "/manifest.json",
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        },
+        {
+          "key": "Service-Worker-Allowed",
+          "value": "/"
+        }
+      ]
+    },
+    {
+      "source": "/manifest.webmanifest",
       "headers": [
         {
           "key": "Content-Type",
