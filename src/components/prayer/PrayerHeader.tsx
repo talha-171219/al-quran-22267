@@ -236,12 +236,12 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
         </svg>
       </div>
 
-      <div className="p-4 sm:p-5 relative">
-        <div className="grid grid-cols-[1fr,auto] gap-4">
+      <div className="p-3 sm:p-4 relative">
+        <div className="grid grid-cols-[1fr,auto] gap-3">
           {/* Left Column - Prayer Info */}
-          <div className="space-y-2.5">
+          <div className="space-y-1.5">
             {/* Date and Location Row */}
-            <div className="flex items-start justify-between mb-3">
+            <div className="flex items-start justify-between mb-2">
               <div className="text-sky-400/90 text-[13px] font-medium tracking-wide">
                 {formatBengaliDate(currentDate)}
               </div>
@@ -251,12 +251,12 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
             </div>
 
             {/* Bell Icon */}
-            <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 mb-2">
-              <Bell className="w-5 h-5 text-white/80" />
+            <div className="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-white/5 backdrop-blur-md border border-white/10 mb-1.5">
+              <Bell className="w-4 h-4 text-white/80" />
             </div>
 
             {/* Current Prayer Status */}
-            <div className="space-y-1">
+            <div className="space-y-0.5">
               <div className="flex items-center gap-2">
                 <span className="text-white/80 text-sm">এখন :</span>
                 <span className="text-white font-semibold text-sm">{currentPrayerName}</span>
@@ -265,25 +265,25 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
                 }} />
               </div>
               
-              <div className="text-white text-[42px] sm:text-5xl font-bold tracking-tight leading-none" style={{
+              <div className="text-white text-[36px] sm:text-[42px] font-bold tracking-tight leading-none" style={{
                 textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
               }}>
                 {prayerTimes[currentPrayer.name as keyof PrayerTimes] ? formatTime12Hour(prayerTimes[currentPrayer.name as keyof PrayerTimes], true) : '...'}
               </div>
               
-              <div className="text-emerald-300/70 text-xs font-light">
+              <div className="text-emerald-300/70 text-[11px] font-light">
                 (ওয়াক্ত শুরু)
               </div>
 
               {/* Countdown */}
-              <div className="text-white/85 text-[13px] mt-1.5 font-light">
+              <div className="text-white/85 text-xs mt-1 font-light">
                 {toBengaliNumerals(countdown)} বাকি (প্রায়)
               </div>
             </div>
 
             {/* Sehri & Iftar Times */}
             {(prayerTimes.Fajr || prayerTimes.Maghrib) && (
-              <div className="space-y-0.5 text-[13px] pt-2.5 border-t border-white/10">
+              <div className="space-y-0.5 text-xs pt-2 border-t border-white/10">
                 {prayerTimes.Fajr && (
                   <div className="text-white/70">
                     সেহরি: <span className="text-white/90 font-medium">{formatTime12Hour(prayerTimes.Fajr, true)}</span>
@@ -299,8 +299,8 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
           </div>
 
           {/* Right Column - Circular Timer */}
-          <div className="flex items-start justify-center pt-6">
-            <div className="relative w-28 h-28 sm:w-32 sm:h-32">
+          <div className="flex items-start justify-center pt-3">
+            <div className="relative w-24 h-24 sm:w-28 sm:h-28">
               {/* Glow Effect */}
               <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-400/20 to-teal-400/10 blur-xl" />
               
@@ -340,12 +340,12 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
               
               {/* Time Display */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-xl sm:text-2xl font-bold text-white" style={{
+                <div className="text-lg sm:text-xl font-bold text-white" style={{
                   textShadow: '0 2px 8px rgba(0, 0, 0, 0.4)'
                 }}>
                   {toBengaliNumerals(countdown.split(':').slice(0, 2).join(':'))}
                 </div>
-                <div className="text-[10px] text-white/60 mt-0.5 font-light">
+                <div className="text-[9px] text-white/60 mt-0 font-light">
                   বাকি
                 </div>
               </div>
@@ -354,7 +354,7 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
         </div>
 
         {/* Prayer Timeline */}
-        <div className="mt-5 pt-3.5 border-t border-white/10">
+        <div className="mt-3 pt-2.5 border-t border-white/10">
           <div className="flex justify-between items-center px-1">
             {(['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'] as const).map((prayer) => {
               const bengaliName = {
@@ -368,7 +368,7 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
               const isActive = currentPrayer.name === prayer;
               
               return (
-                <div key={prayer} className="flex flex-col items-center space-y-1">
+                <div key={prayer} className="flex flex-col items-center space-y-0.5">
                   <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
                     isActive 
                       ? 'bg-white scale-150 shadow-lg shadow-white/60' 
@@ -376,10 +376,10 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
                   }`} style={isActive ? {
                     boxShadow: '0 0 10px rgba(255, 255, 255, 0.8), 0 0 15px rgba(255, 255, 255, 0.4)'
                   } : {}} />
-                  <div className={`text-[11px] ${isActive ? 'text-white font-semibold' : 'text-white/60'}`}>
+                  <div className={`text-[10px] ${isActive ? 'text-white font-semibold' : 'text-white/60'}`}>
                     {bengaliName}
                   </div>
-                  <div className={`text-[11px] ${isActive ? 'text-white font-medium' : 'text-white/50'}`}>
+                  <div className={`text-[10px] ${isActive ? 'text-white font-medium' : 'text-white/50'}`}>
                     {prayerTimes[prayer] ? formatTime12Hour(prayerTimes[prayer], false).split(' ')[0] : '...'}
                   </div>
                 </div>
