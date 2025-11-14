@@ -14,27 +14,96 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     VitePWA({
-      registerType: "prompt",
-      injectRegister: false, // Manual registration in main.tsx for better Vercel compatibility
+      registerType: "autoUpdate",
+      injectRegister: "auto",
       includeAssets: ["icon-192.jpg", "icon-512.jpg", "icon-192.png", "icon-512.png", "azan1.mp3", "alarm-clock-short-6402.mp3", "robots.txt"],
       devOptions: {
         enabled: false
       },
-      manifest: false, // Use public/manifest.json instead
+      manifest: {
+        name: "DeenSphereX - সম্পূর্ণ ইসলামিক অ্যাপ",
+        short_name: "DeenSphereX",
+        description: "সম্পূর্ণ অফলাইন সক্ষম ইসলামিক অ্যাপ - কুরআন, হাদিস, প্রার্থনা সময়, দুআ এবং আরও অনেক কিছু",
+        theme_color: "#0f766e",
+        background_color: "#0f766e",
+        display: "standalone",
+        scope: "/",
+        start_url: "/",
+        orientation: "portrait-primary",
+        prefer_related_applications: false,
+        icons: [
+          {
+            src: "/icon-192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any maskable"
+          },
+          {
+            src: "/icon-512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any maskable"
+          },
+          {
+            src: "/icon-192.jpg",
+            sizes: "192x192",
+            type: "image/jpeg",
+            purpose: "any"
+          },
+          {
+            src: "/icon-512.jpg",
+            sizes: "512x512",
+            type: "image/jpeg",
+            purpose: "any"
+          }
+        ],
+        categories: ["lifestyle", "education", "books", "religion"],
+        lang: "bn-BD",
+        dir: "ltr",
+        shortcuts: [
+          {
+            name: "কুরআন পড়ুন",
+            short_name: "কুরআন",
+            description: "কুরআন শরীফ পড়ুন",
+            url: "/surahs",
+            icons: [{ src: "/icon-192.png", sizes: "192x192" }]
+          },
+          {
+            name: "হাদিস পড়ুন",
+            short_name: "হাদিস",
+            description: "হাদিস শরীফ পড়ুন",
+            url: "/hadith",
+            icons: [{ src: "/icon-192.png", sizes: "192x192" }]
+          },
+          {
+            name: "নামাজের সময়",
+            short_name: "নামাজ",
+            description: "নামাজের সময়সূচী দেখুন",
+            url: "/calendar",
+            icons: [{ src: "/icon-192.png", sizes: "192x192" }]
+          },
+          {
+            name: "তাসবীহ",
+            short_name: "তাসবীহ",
+            description: "ডিজিটাল তাসবীহ কাউন্টার",
+            url: "/tasbih",
+            icons: [{ src: "/icon-192.png", sizes: "192x192" }]
+          }
+        ]
+      },
       workbox: {
-        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB limit
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         globPatterns: [
           "**/*.{js,css,html,ico,png,jpg,jpeg,svg,woff,woff2}",
-          "*.mp3", // Cache adhan and alarm sounds
-          "icon-*.{png,jpg}", // Cache app icons
+          "*.mp3",
+          "icon-*.{png,jpg}",
         ],
-        // Ensure offline support for navigation requests
         navigateFallback: "index.html",
         navigateFallbackDenylist: [/^\/api/, /^\/auth/],
-        navigateFallbackAllowlist: [/^\//], // Allow all app routes
+        navigateFallbackAllowlist: [/^\//],
         cleanupOutdatedCaches: true,
-        skipWaiting: false, // Don't auto-activate, let user trigger update
-        clientsClaim: false, // Don't take control immediately
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\.alquran\.cloud\/.*/i,
