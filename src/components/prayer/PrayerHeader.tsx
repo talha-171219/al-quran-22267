@@ -289,9 +289,9 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
 
           {/* Right Column - Circular Timer */}
           <div className="flex items-start justify-center pt-1">
-            <div className="relative w-20 h-20 sm:w-24 sm:h-24">
+            <div className="relative w-28 h-28 sm:w-32 sm:h-32">
               {/* Premium Glow Effect */}
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-400/30 to-emerald-400/20 blur-lg animate-pulse" />
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-amber-400/30 to-emerald-400/20 blur-xl animate-pulse" />
               
               {/* Circular Progress */}
               <svg className="w-full h-full transform -rotate-90 relative z-10">
@@ -302,7 +302,7 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
                   r="42%"
                   fill="none"
                   stroke="rgba(255,255,255,0.06)"
-                  strokeWidth="3"
+                  strokeWidth="4"
                 />
                 {/* Progress Circle */}
                 <circle
@@ -311,13 +311,13 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
                   r="42%"
                   fill="none"
                   stroke="url(#premium-gradient)"
-                  strokeWidth="3"
+                  strokeWidth="4"
                   strokeLinecap="round"
                   strokeDasharray={`${2 * Math.PI * (40)} ${2 * Math.PI * (40)}`}
                   strokeDashoffset={2 * Math.PI * (40) * (1 - 0.65)}
                   className="transition-all duration-1000"
                   style={{
-                    filter: 'drop-shadow(0 0 6px rgba(251, 191, 36, 0.6)) drop-shadow(0 0 10px rgba(16, 185, 129, 0.4))'
+                    filter: 'drop-shadow(0 0 8px rgba(251, 191, 36, 0.7)) drop-shadow(0 0 14px rgba(16, 185, 129, 0.5))'
                   }}
                 />
                 <defs>
@@ -332,12 +332,12 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
               
               {/* Time Display with Seconds */}
               <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <div className="text-base sm:text-lg font-bold text-white leading-tight" style={{
+                <div className="text-lg sm:text-xl font-bold text-white leading-tight" style={{
                   textShadow: '0 2px 8px rgba(0, 0, 0, 0.5), 0 0 20px rgba(251, 191, 36, 0.3)'
                 }}>
                   {toBengaliNumerals(countdown)}
                 </div>
-                <div className="text-[8px] text-white/60 mt-0.5 font-light">
+                <div className="text-[9px] text-white/60 mt-1 font-light">
                   বাকি
                 </div>
               </div>

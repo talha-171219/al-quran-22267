@@ -503,49 +503,62 @@ const PrayerTimes = () => {
 
       <main className="max-w-lg mx-auto px-4 py-6 space-y-4">
         {/* Compact Header Card with Status */}
-        <Card className="relative overflow-hidden bg-gradient-to-br from-primary via-primary to-primary/80 text-primary-foreground">
-          <div className="absolute inset-0 opacity-10">
-            <svg viewBox="0 0 800 400" className="w-full h-full">
-              <path
-                d="M400,50 L450,100 L450,200 L350,200 L350,100 Z M400,50 L400,20 L420,20 L420,40 L380,40 L380,20 L400,20 Z M340,200 L330,210 L340,220 L460,220 L470,210 L460,200 Z"
-                fill="currentColor"
-              />
-              <circle cx="400" cy="25" r="8" fill="currentColor" />
-              <rect x="320" y="220" width="160" height="30" rx="5" fill="currentColor" />
+        <Card 
+          className="relative overflow-hidden bg-gradient-to-br from-emerald-950/95 via-emerald-900/90 to-teal-900/85 border-emerald-700/20 backdrop-blur-sm rounded-[28px]"
+          style={{
+            boxShadow: '0 0 40px rgba(16, 185, 129, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+          }}
+        >
+          {/* Frosted Glass Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent pointer-events-none" />
+          
+          {/* Subtle Pattern */}
+          <div className="absolute inset-0 opacity-[0.02]">
+            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <pattern id="calendar-prayer-pattern" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+                  <circle cx="20" cy="20" r="1.5" fill="currentColor" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#calendar-prayer-pattern)" />
             </svg>
           </div>
 
           <CardContent className="py-4 relative z-10">
             <div className="flex items-center justify-between mb-3">
-              <Button variant="ghost" size="sm" className="text-primary-foreground/90 hover:bg-white/10 gap-1 h-8 px-2">
+              <Button variant="ghost" size="sm" className="text-amber-300/70 hover:bg-white/10 gap-1 h-8 px-2">
                 <MapPin className="h-3 w-3" />
                 <span className="text-xs font-medium">{location || "বগুড়া"}</span>
               </Button>
-              <div className="flex items-center gap-3 text-xs font-medium">
+              <div className="flex items-center gap-3 text-xs font-medium text-white/90">
                 <span className="text-base">{currentTime}</span>
-                <span className="opacity-90 text-xs">🔋 {toBengaliNumerals(battery)}%</span>
+                <span className="opacity-80 text-xs">🔋 {toBengaliNumerals(battery)}%</span>
               </div>
             </div>
 
             <div className="text-center space-y-2 py-2">
               <div className="flex items-center justify-center gap-2">
-                <h2 className="text-xl font-bold">{currentPrayer ? prayerNamesBn[currentPrayer] : ""}</h2>
-                <div className="h-1.5 w-1.5 bg-white rounded-full animate-pulse"></div>
+                <h2 className="text-xl font-bold text-white">{currentPrayer ? prayerNamesBn[currentPrayer] : ""}</h2>
+                <div className="h-1.5 w-1.5 bg-emerald-400 rounded-full shadow-lg shadow-emerald-400/50" style={{
+                  boxShadow: '0 0 8px rgba(52, 211, 153, 0.8), 0 0 12px rgba(52, 211, 153, 0.4)'
+                }} />
               </div>
-              <p className="text-4xl font-bold tracking-tight">
+              <p className="text-4xl font-bold tracking-tight text-white" style={{
+                textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+              }}>
                 {currentPrayer && prayerTimes ? (() => {
                   const { time, periodBn } = convertTo12Hour(prayerTimes[currentPrayer as keyof PrayerTimes]);
                   return `${time} ${periodBn}`;
                 })() : ""}
               </p>
-              <p className="text-sm opacity-90 font-medium">
+              <p className="text-sm opacity-90 font-medium text-emerald-300/70">
                 পরবর্তী: {countdown}
               </p>
             </div>
 
-            <div className="mt-3 pt-3 border-t border-white/20 text-center">
-              <p className="text-xs opacity-90">{today}</p>
-              <p className="text-xs font-semibold mt-0.5">{hijriDate}</p>
+            <div className="mt-3 pt-3 border-t border-white/10 text-center">
+              <p className="text-xs text-sky-400/90">{today}</p>
+              <p className="text-xs font-semibold mt-0.5 text-white/80">{hijriDate}</p>
             </div>
           </CardContent>
         </Card>
