@@ -104,6 +104,8 @@ export default defineConfig(({ mode }) => ({
         cleanupOutdatedCaches: true,
         skipWaiting: true,
         clientsClaim: true,
+        // Import custom service worker code for push notifications
+        importScripts: ['/src/sw-custom.ts'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\.alquran\.cloud\/.*/i,
