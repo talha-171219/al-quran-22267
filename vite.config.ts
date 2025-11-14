@@ -92,10 +92,9 @@ export default defineConfig(({ mode }) => ({
         ]
       },
       workbox: {
-        maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB limit for large PDFs
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5 MB limit
         globPatterns: [
           "**/*.{js,css,html,ico,png,jpg,jpeg,svg,woff,woff2}",
-          "**/*.pdf", // Cache all PDF books
           "*.mp3", // Cache adhan and alarm sounds
           "icon-*.{png,jpg}", // Cache app icons
         ],
