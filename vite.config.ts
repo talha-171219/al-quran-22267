@@ -14,13 +14,9 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     VitePWA({
-      registerType: "autoUpdate",
+      registerType: "prompt",
       injectRegister: "auto",
       includeAssets: ["icon-192.jpg", "icon-512.jpg", "icon-192.png", "icon-512.png", "azan1.mp3", "alarm-clock-short-6402.mp3", "robots.txt"],
-      devOptions: {
-        enabled: true,
-        type: "module"
-      },
       manifest: {
         name: "DeenSphereX - সম্পূর্ণ ইসলামিক অ্যাপ",
         short_name: "DeenSphereX",
@@ -33,18 +29,19 @@ export default defineConfig(({ mode }) => ({
         orientation: "portrait-primary",
         id: "/",
         prefer_related_applications: false,
+        display_override: ["standalone", "fullscreen", "minimal-ui"],
         icons: [
           {
             src: "/icon-192.png",
             sizes: "192x192",
             type: "image/png",
-            purpose: "any maskable"
+            purpose: "maskable"
           },
           {
             src: "/icon-512.png",
             sizes: "512x512",
             type: "image/png",
-            purpose: "any maskable"
+            purpose: "maskable"
           },
           {
             src: "/icon-192.jpg",
