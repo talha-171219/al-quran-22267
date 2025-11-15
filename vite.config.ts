@@ -14,23 +14,30 @@ export default defineConfig(({ mode }) => ({
     react(),
     mode === "development" && componentTagger(),
     VitePWA({
-      registerType: "prompt",
+      registerType: "autoUpdate",
       injectRegister: "auto",
+      strategies: "generateSW",
       includeAssets: ["icon-192.jpg", "icon-512.jpg", "icon-192.png", "icon-512.png", "azan1.mp3", "alarm-clock-short-6402.mp3", "robots.txt"],
       manifest: {
         name: "DeenSphereX - সম্পূর্ণ ইসলামিক অ্যাপ",
         short_name: "DeenSphereX",
         description: "সম্পূর্ণ অফলাইন সক্ষম ইসলামিক অ্যাপ - কুরআন, হাদিস, প্রার্থনা সময়, দুআ এবং আরও অনেক কিছু",
         theme_color: "#0f766e",
-        background_color: "#0f766e",
+        background_color: "#ffffff",
         display: "standalone",
         scope: "/",
         start_url: "/",
         orientation: "portrait-primary",
-        id: "/",
+        id: "deenspherex-islamic-app",
         prefer_related_applications: false,
-        display_override: ["standalone", "fullscreen", "minimal-ui"],
+        display_override: ["standalone", "fullscreen"],
         icons: [
+          {
+            src: "/icon-192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any"
+          },
           {
             src: "/icon-192.png",
             sizes: "192x192",
@@ -41,19 +48,13 @@ export default defineConfig(({ mode }) => ({
             src: "/icon-512.png",
             sizes: "512x512",
             type: "image/png",
-            purpose: "maskable"
-          },
-          {
-            src: "/icon-192.jpg",
-            sizes: "192x192",
-            type: "image/jpeg",
             purpose: "any"
           },
           {
-            src: "/icon-512.jpg",
+            src: "/icon-512.png",
             sizes: "512x512",
-            type: "image/jpeg",
-            purpose: "any"
+            type: "image/png",
+            purpose: "maskable"
           }
         ],
         categories: ["lifestyle", "education", "books", "religion"],
