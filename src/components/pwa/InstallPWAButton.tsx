@@ -16,18 +16,22 @@ export const InstallPWAButton = () => {
     const isIOSInstalled = (window.navigator as any).standalone === true;
     setIsInstalled(installed || isIOSInstalled);
 
+    console.log('📱 PWA Install Status:', { installed, isIOSInstalled });
+
     // Don't set up event listeners if already installed
     if (installed || isIOSInstalled) {
       return;
     }
 
     const onBeforeInstall = (e: any) => {
+      console.log('🎯 beforeinstallprompt event fired!', e);
       e.preventDefault();
       setDeferredPrompt(e);
       setCanInstall(true);
     };
     
     const onInstalled = () => {
+      console.log('✅ App installed successfully');
       setIsInstalled(true);
       setCanInstall(false);
       setDeferredPrompt(null);
@@ -47,10 +51,15 @@ export const InstallPWAButton = () => {
   }, []);
 
   const handleClick = async () => {
+    console.log('🔘 Install button clicked', { hasDeferredPrompt: !!deferredPrompt });
+    
     if (deferredPrompt) {
       try {
+        console.log('🚀 Showing install prompt...');
         await deferredPrompt.prompt();
         const { outcome } = await deferredPrompt.userChoice;
+        
+        console.log('📊 User choice:', outcome);
         
         if (outcome === "accepted") {
           toast.success("ইনস্টল শুরু হয়েছে...");
@@ -68,6 +77,7 @@ export const InstallPWAButton = () => {
       return;
     }
     
+    console.log('ℹ️ No deferred prompt, navigating to install guide');
     // If no prompt available, navigate to install guide
     navigate("/install");
   };
