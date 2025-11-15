@@ -18,7 +18,8 @@ export default defineConfig(({ mode }) => ({
       injectRegister: "auto",
       includeAssets: ["icon-192.jpg", "icon-512.jpg", "icon-192.png", "icon-512.png", "azan1.mp3", "alarm-clock-short-6402.mp3", "robots.txt"],
       devOptions: {
-        enabled: false
+        enabled: true,
+        type: "module"
       },
       manifest: {
         name: "DeenSphereX - সম্পূর্ণ ইসলামিক অ্যাপ",
@@ -30,6 +31,7 @@ export default defineConfig(({ mode }) => ({
         scope: "/",
         start_url: "/",
         orientation: "portrait-primary",
+        id: "/",
         prefer_related_applications: false,
         icons: [
           {
