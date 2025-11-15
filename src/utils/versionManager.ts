@@ -3,8 +3,8 @@ const VERSION_KEY = 'app-version';
 const VERSION_HISTORY_KEY = 'app-version-history';
 const BUILD_ID_KEY = 'app-build-id';
 
-// Semantic version display format (4.9, 5.0, 5.1, etc.)
-const BASE_VERSION = '5.0';
+// Semantic version display format (5.0, 5.1, 5.2, etc.)
+const BASE_VERSION = '5.1';
 
 // Build identifier tied to version (only changes when version changes)
 // This ensures updates are detected only when version actually changes
