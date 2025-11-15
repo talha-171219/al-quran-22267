@@ -11,15 +11,39 @@ export const InstallPWAButton = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    console.log("🔧 PWA Install Button initialized");
+    console.log("📱 PWA Install Status:", { 
+      installed: isInstalled, 
+      isIOSInstalled: (window.navigator as any).standalone === true,
+      isStandalone: window.matchMedia && window.matchMedia("(display-mode: standalone)").matches,
+      userAgent: navigator.userAgent
+    });
+
+    // Check service worker registration
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(registration => {
+        console.log("🔄 Service Worker Status:", {
+          registered: !!registration,
+          state: registration?.active?.state,
+          scope: registration?.scope
+        });
+      });
+    } else {
+      console.warn("⚠️ Service Worker not supported in this browser");
+    }
+
+    // Check manifest
+    const manifestLink = document.querySelector('link[rel="manifest"]');
+    console.log("📋 Manifest Link:", manifestLink?.getAttribute('href'));
+
     // Check if already installed
     const installed = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
     const isIOSInstalled = (window.navigator as any).standalone === true;
     setIsInstalled(installed || isIOSInstalled);
 
-    console.log('📱 PWA Install Status:', { installed, isIOSInstalled });
-
     // Don't set up event listeners if already installed
     if (installed || isIOSInstalled) {
+      console.log("✅ App is already installed (standalone mode)");
       return;
     }
 
@@ -38,11 +62,24 @@ export const InstallPWAButton = () => {
       toast.success("অ্যাপ সফলভাবে ইনস্টল হয়েছে! ✨");
     };
 
+    console.log("👂 Setting up beforeinstallprompt listener");
     window.addEventListener("beforeinstallprompt", onBeforeInstall);
     window.addEventListener("appinstalled", onInstalled);
     
     // Always show button - it will navigate to install guide if needed
     setCanInstall(true);
+
+    // Check after a delay if event fired
+    setTimeout(() => {
+      console.log("⏰ 3 second check - beforeinstallprompt fired?", !!deferredPrompt);
+      if (!deferredPrompt && !installed && !isIOSInstalled) {
+        console.warn("⚠️ beforeinstallprompt event did not fire. Possible reasons:");
+        console.warn("  1. App might already be installed");
+        console.warn("  2. User dismissed prompt recently (browser cooldown)");
+        console.warn("  3. PWA criteria not met (check manifest, service worker, HTTPS)");
+        console.warn("  4. Browser doesn't support installation");
+      }
+    }, 3000);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", onBeforeInstall);
@@ -51,7 +88,12 @@ export const InstallPWAButton = () => {
   }, []);
 
   const handleClick = async () => {
-    console.log('🔘 Install button clicked', { hasDeferredPrompt: !!deferredPrompt });
+    console.log('🔘 Install button clicked');
+    console.log("📊 Current state:", { 
+      hasDeferredPrompt: !!deferredPrompt,
+      canInstall,
+      isInstalled 
+    });
     
     if (deferredPrompt) {
       try {
