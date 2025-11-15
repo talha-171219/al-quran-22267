@@ -11,22 +11,31 @@ export const InstallPWAButton = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    const standalone = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
+    const iosStandalone = (window.navigator as any).standalone === true;
+    
     console.log("🔧 PWA Install Button initialized");
-    console.log("📱 PWA Install Status:", { 
-      installed: isInstalled, 
-      isIOSInstalled: (window.navigator as any).standalone === true,
-      isStandalone: window.matchMedia && window.matchMedia("(display-mode: standalone)").matches,
-      userAgent: navigator.userAgent
-    });
+    console.log("📱 PWA Install Status:");
+    console.log("  - isInstalled:", isInstalled);
+    console.log("  - isStandalone (display-mode):", standalone);
+    console.log("  - isIOSInstalled (navigator.standalone):", iosStandalone);
+    console.log("  - userAgent:", navigator.userAgent);
+    console.log("  - protocol:", window.location.protocol);
+    console.log("  - hostname:", window.location.hostname);
 
     // Check service worker registration
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistration().then(registration => {
-        console.log("🔄 Service Worker Status:", {
-          registered: !!registration,
-          state: registration?.active?.state,
-          scope: registration?.scope
-        });
+        console.log("🔄 Service Worker Status:");
+        console.log("  - registered:", !!registration);
+        console.log("  - state:", registration?.active?.state);
+        console.log("  - scope:", registration?.scope);
+        console.log("  - waiting:", !!registration?.waiting);
+        console.log("  - installing:", !!registration?.installing);
+      });
+      
+      navigator.serviceWorker.ready.then(() => {
+        console.log("✅ Service Worker is ready");
       });
     } else {
       console.warn("⚠️ Service Worker not supported in this browser");
@@ -34,7 +43,26 @@ export const InstallPWAButton = () => {
 
     // Check manifest
     const manifestLink = document.querySelector('link[rel="manifest"]');
-    console.log("📋 Manifest Link:", manifestLink?.getAttribute('href'));
+    console.log("📋 Manifest:");
+    console.log("  - link found:", !!manifestLink);
+    console.log("  - href:", manifestLink?.getAttribute('href'));
+    
+    // Try to fetch and validate manifest
+    if (manifestLink) {
+      fetch(manifestLink.getAttribute('href') || '')
+        .then(res => res.json())
+        .then(manifest => {
+          console.log("📋 Manifest Content:");
+          console.log("  - name:", manifest.name);
+          console.log("  - short_name:", manifest.short_name);
+          console.log("  - start_url:", manifest.start_url);
+          console.log("  - display:", manifest.display);
+          console.log("  - icons count:", manifest.icons?.length);
+          console.log("  - has 192px icon:", manifest.icons?.some((i: any) => i.sizes.includes('192')));
+          console.log("  - has 512px icon:", manifest.icons?.some((i: any) => i.sizes.includes('512')));
+        })
+        .catch(err => console.error("❌ Failed to fetch manifest:", err));
+    }
 
     // Check if already installed
     const installed = window.matchMedia && window.matchMedia("(display-mode: standalone)").matches;
@@ -71,15 +99,24 @@ export const InstallPWAButton = () => {
 
     // Check after a delay if event fired
     setTimeout(() => {
-      console.log("⏰ 3 second check - beforeinstallprompt fired?", !!deferredPrompt);
-      if (!deferredPrompt && !installed && !isIOSInstalled) {
-        console.warn("⚠️ beforeinstallprompt event did not fire. Possible reasons:");
-        console.warn("  1. App might already be installed");
-        console.warn("  2. User dismissed prompt recently (browser cooldown)");
-        console.warn("  3. PWA criteria not met (check manifest, service worker, HTTPS)");
-        console.warn("  4. Browser doesn't support installation");
+      console.log("⏰ 5 second check - beforeinstallprompt fired?", !!deferredPrompt);
+      if (!deferredPrompt && !standalone && !iosStandalone) {
+        console.warn("⚠️ beforeinstallprompt event did NOT fire!");
+        console.warn("🔍 Troubleshooting steps:");
+        console.warn("  1. Check Chrome DevTools > Application > Manifest");
+        console.warn("     - Make sure manifest has no errors");
+        console.warn("     - Verify icons are loading (192px and 512px required)");
+        console.warn("  2. Check Chrome DevTools > Application > Service Workers");
+        console.warn("     - Service worker should be 'activated and running'");
+        console.warn("  3. If you recently dismissed the prompt:");
+        console.warn("     - Chrome has a 3-month cooldown period");
+        console.warn("     - Clear site data in DevTools > Application > Storage");
+        console.warn("  4. Check if already installed:");
+        console.warn("     - Look for the app in chrome://apps");
+        console.warn("     - Uninstall it from there if found");
+        console.warn("  5. Try in Incognito mode (no history/cooldown)");
       }
-    }, 3000);
+    }, 5000);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", onBeforeInstall);
