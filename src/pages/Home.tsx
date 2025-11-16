@@ -118,6 +118,16 @@ const Home = () => {
         </div>
 
         {/* Arabic Nasheed Section */}
+        {/* Islamic Lectures Section */}
+        <NasheedSection
+          title="Islamic Lectures"
+          subtitle="Short lectures and talks — click to explore speakers"
+          imageSrc="https://i.postimg.cc/nrX0qHts/Copilot-20251116-224659.png"
+          imageAlt="Islamic Lectures"
+          linkPath="/lectures"
+          linkLabel="Explore Lectures"
+        />
+
         <NasheedSection
           title="Arabic Nasheed"
           subtitle="Heart-touching Islamic Nasheeds to listen anytime."
@@ -125,6 +135,7 @@ const Home = () => {
           imageAlt="Arabic Nasheed"
           linkPath="/gojol/arabic" // Link to the Nasheed page
         />
+        {/* Premium Nasheed Section removed — using redesigned Arabic Nasheed page instead */}
           {/* Store Section (styled like Nasheed) - placeholder image, links to Store page */}
           <NasheedSection
             title="Store"

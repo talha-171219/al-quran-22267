@@ -1,0 +1,20 @@
+{
+  "items": [
+    {
+      "id": "dua-1",
+      "snippet": {
+        "title": "Morning Dua Collection",
+        "thumbnails": { "high": { "url": "https://i.ytimg.com/vi/VIDEOID3/hqdefault.jpg" } },
+        "resourceId": { "videoId": "VIDEOID3" }
+      }
+    },
+    {
+      "id": "dua-2",
+      "snippet": {
+        "title": "Evening Supplications",
+        "thumbnails": { "high": { "url": "https://i.ytimg.com/vi/VIDEOID4/hqdefault.jpg" } },
+        "resourceId": { "videoId": "VIDEOID4" }
+      }
+    }
+  ]
+}

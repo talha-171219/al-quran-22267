@@ -41,12 +41,12 @@ export const VideoPlayerProvider = ({ children }: { children: ReactNode }) => {
   const expand = () => setMode('full');
   const close = () => { setCurrent(undefined); setIsPlaying(false); setMode('hidden'); };
 
-  // Auto-minimize inline player when navigating away from /gojol
+  // Auto-minimize inline player when navigating to another route
   useEffect(() => {
     console.debug('[VideoPlayer] location changed', { pathname: location.pathname, mode, isPlaying, currentId: current?.id });
     if (!current) return;
-    if (mode === 'inline' && isPlaying && !location.pathname.startsWith('/gojol')) {
-      console.debug('[VideoPlayer] auto-minimize inline -> mini because left /gojol');
+    if (mode === 'inline' && isPlaying) {
+      console.debug('[VideoPlayer] auto-minimize inline -> mini because route changed');
       setMode('mini');
     }
   }, [location.pathname, current, mode, isPlaying]);

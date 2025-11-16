@@ -46,6 +46,7 @@ import IslamicBooks from "./pages/IslamicBooks";
 import ArifAzadBooks from "./pages/ArifAzadBooks";
 import SaimumSeries from "./pages/SaimumSeries";
 import Explore from "./pages/Explore";
+import Lectures from "./pages/Lectures";
 import Hajj from "./pages/Hajj";
 import HajjGuide from "./pages/HajjGuide";
 import HajjSteps from "./pages/HajjSteps";
@@ -237,6 +238,9 @@ const App = () => {
             <Route path="/gojol/bangla" element={<GojolBangla />} />
             <Route path="/gojol/bangla-youtube" element={<BanglaNasheedYouTube />} />
             <Route path="/gojol/sound" element={<GojolSimpleSound />} />
+            <Route path="/lectures" element={<Lectures />} />
+            <Route path="/lectures/ahmadullah" element={React.createElement(React.lazy(() => import('./pages/lectures/Ahmadullah')))} />
+            <Route path="/lectures/mizanur-rahman-azhari" element={React.createElement(React.lazy(() => import('./pages/lectures/MizanurRahmanAzhari')))} />
             <Route path="/shahada" element={<Shahada />} />
             <Route path="/salah" element={<Salah />} />
             <Route path="/namaz" element={<Namaz />} />

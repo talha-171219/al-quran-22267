@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
-import YouTubeGojolCard from "@/components/gojol/YouTubeGojolCard";
+import NasheedCardPremium from "@/components/gojol/NasheedCardPremium";
 import { useVideoPlayer } from '@/contexts/VideoPlayerContext';
 import FullVideoPlayer from '@/components/video/FullVideoPlayer';
 
@@ -68,13 +68,18 @@ const GojolArabic = () => {
       });
   }, []);
 
-  const { current, mode } = useVideoPlayer();
+  // Scroll reveal removed per user preference
+
+  const { current, mode, playVideo } = useVideoPlayer();
 
   return (
     <div className="min-h-screen bg-background pb-20">
       <TopBar title="Nasheed Video" showBack />
 
       <main className="max-w-lg mx-auto px-4 py-6 space-y-6">
+
+        {/* Restored original header layout (no hero) */}
+
         <Card className="p-4">
           {/* Full player area - shows when a video is active in full mode */}
           {current && mode === 'full' ? (
@@ -87,7 +92,11 @@ const GojolArabic = () => {
           <p className="text-sm text-muted-foreground mb-4"></p>
           <div className="grid grid-cols-1 gap-4">
             {videos.map(v => (
-              <YouTubeGojolCard key={v.id} title={v.title || 'YouTube Video'} embedUrl={v.embedUrl} thumbnailUrl={v.thumbnail} artist={v.artist} />
+              <NasheedCardPremium
+                key={v.id}
+                item={{ id: v.id, title: v.title || 'YouTube Video', subtitle: v.artist, thumbnail: v.thumbnail || '', youtubeId: v.id }}
+                onPlay={(youtubeId: string) => playVideo({ id: youtubeId, title: v.title, thumbnail: v.thumbnail, embedUrl: `https://www.youtube.com/embed/${youtubeId}` }, 'full')}
+              />
             ))}
           </div>
         </Card>

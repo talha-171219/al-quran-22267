@@ -14,6 +14,7 @@ import storeIcon from "@/assets/icons/store-3d.png";
 import islamicNamesIcon from "@/assets/icons/islamic-names-3d.png";
 import moreDuasIcon from "@/assets/icons/more-duas-3d.png";
 import gojolIcon from "@/assets/icons/gojol-3d.png";
+import audioRecitationIcon from "@/assets/icons/audio-recitation-3d.png";
 
 // 5 Pillars of Islam (ইসলামের ৫টি স্তম্ভ) in order
 const fivePillars = [
@@ -55,6 +56,11 @@ const otherFeatures = [
     icon: moreDuasIcon,
     title: "More Duas • আরও দোয়া",
     path: "/more-duas",
+  },
+  {
+    icon: audioRecitationIcon,
+    title: "Islamic Lectures • লেকচার",
+    path: "/lectures",
   },
   {
     icon: islamicNamesIcon,

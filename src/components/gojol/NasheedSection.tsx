@@ -47,7 +47,7 @@ export const NasheedSection = ({
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
           <div className="absolute inset-0 flex items-end p-4">
             <h3 className="text-white text-lg font-semibold z-10">
-              Heart-touching Islamic Nasheeds
+               
             </h3>
           </div>
         </Card>
