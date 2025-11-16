@@ -132,6 +132,7 @@ const Home = () => {
             imageSrc="https://i.postimg.cc/cJKnz4dB/Copilot-20251116-172838.png" // Placeholder - you can replace with your image
             imageAlt="Store"
             linkPath="/store" // Link to the Store page
+            linkLabel="See Images"
           />
       </main>
 

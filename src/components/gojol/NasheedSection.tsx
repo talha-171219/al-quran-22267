@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 
 interface NasheedSectionProps {
   title: string;
@@ -8,8 +7,8 @@ interface NasheedSectionProps {
   imageSrc: string;
   imageAlt: string;
   linkPath: string;
-  linkPath: string;
   linkLabel?: string;
+}
 
 export const NasheedSection = ({
   title,
@@ -17,8 +16,8 @@ export const NasheedSection = ({
   imageSrc,
   imageAlt,
   linkPath,
-  linkPath,
   linkLabel,
+}: NasheedSectionProps) => {
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
@@ -29,12 +28,12 @@ export const NasheedSection = ({
           )}
         </div>
         <Link
-        <Link
           to={linkPath}
           className="text-primary hover:text-primary-light flex items-center group animate-pulse-subtle transition-all duration-300"
         >
           {linkLabel || 'See Nasheeds'} <span className="ml-1 transition-transform group-hover:translate-x-1">›</span>
         </Link>
+      </div>
 
       <Link to={linkPath}>
         <Card className="relative w-full h-48 overflow-hidden rounded-xl shadow-lg group hover:shadow-primary-glow transition-all duration-300">
