@@ -50,6 +50,7 @@ import HajjSteps from "./pages/HajjSteps";
 import HajjStepDetail from "./pages/HajjStepDetail";
 import HajjDuas from "./pages/HajjDuas";
 import MosqueFinder from "./pages/MosqueFinder";
+import Gojol from "./pages/Gojol";
 import HajjChecklistPage from "./pages/HajjChecklistPage";
 import HajjMaps from "./pages/HajjMaps";
 import HajjFAQ from "./pages/HajjFAQ";
@@ -220,6 +221,7 @@ const App = () => {
             <Route path="/fasting/itikaf" element={<Itikaf />} />
             <Route path="/99-names" element={<NinetyNineNames />} />
             <Route path="/mosque-finder" element={<MosqueFinder />} />
+            <Route path="/gojol" element={<Gojol />} />
             <Route path="/shahada" element={<Shahada />} />
             <Route path="/salah" element={<Salah />} />
             <Route path="/namaz" element={<Namaz />} />
