@@ -5,6 +5,12 @@ import { audioCache } from "@/utils/audioCache";
 
 interface AudioContextType {
   currentSurah: number;
+  currentTrack: {
+    type: "surah" | "custom";
+    id?: string;
+    title?: string;
+    src?: string;
+  } | null;
   isPlaying: boolean;
   currentTime: number;
   duration: number;
@@ -12,6 +18,7 @@ interface AudioContextType {
   cachedSurahs: number[];
   showPlayer: boolean;
   setCurrentSurah: (surah: number) => void;
+  playTrack: (track: { id?: string; title?: string; src: string }) => void;
   togglePlay: () => Promise<void>;
   skipNext: () => void;
   skipPrev: () => void;
@@ -39,6 +46,7 @@ interface AudioProviderProps {
 
 export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
   const [currentSurah, setCurrentSurah] = useState(1);
+  const [currentTrack, setCurrentTrack] = useState<{ type: "surah" | "custom"; id?: string; title?: string; src?: string } | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -62,7 +70,17 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
 
   const handleSetCurrentSurah = (surah: number) => {
     setCurrentSurah(surah);
+    // mark track as surah so mini player shows correct info
+    setCurrentTrack({ type: 'surah', id: String(surah) });
     setShowPlayer(true);
+  };
+
+  const playTrack = (track: { id?: string; title?: string; src: string }) => {
+    // stop any surah context and play custom audio
+    setCurrentTrack({ type: 'custom', id: track.id, title: track.title, src: track.src });
+    // ensure show player and set playing state
+    setShowPlayer(true);
+    // reset surah selection (but keep value)
   };
 
   // Initialize cache
@@ -74,71 +92,83 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
     });
   }, []);
 
-  // Load audio when surah changes
+  // Load audio when track (surah or custom) changes
   useEffect(() => {
     const loadAudio = async () => {
       if (!audioRef.current) return;
-      
+
       setIsLoading(true);
-      toast.info("অডিও লোড হচ্ছে...", { duration: 1500 });
-      
+      toast.info("অডিও লোড হচ্ছে...", { duration: 1200 });
+
       try {
-        const cached = await audioCache.getCachedAudio(currentSurah);
-        
-        if (cached) {
-          const url = URL.createObjectURL(cached);
+        // If track is custom, load directly from src
+        if (currentTrack && currentTrack.type === 'custom' && currentTrack.src) {
+          // revoke previous blob URL if set
           if (currentAudioUrl.current) {
             URL.revokeObjectURL(currentAudioUrl.current);
+            currentAudioUrl.current = "";
           }
-          currentAudioUrl.current = url;
-          audioRef.current.src = url;
-          
-          // Auto play after loading if was playing before
+          audioRef.current.src = currentTrack.src;
           if (isPlaying) {
             await audioRef.current.play();
           }
-        } else {
-          const urls = getAudioUrls(currentSurah);
-          let loaded = false;
-          
-          for (const url of urls) {
-            try {
-              audioRef.current.src = url;
-              await new Promise((resolve, reject) => {
-                const onCanPlay = () => {
-                  audioRef.current?.removeEventListener('canplay', onCanPlay);
-                  audioRef.current?.removeEventListener('error', onError);
-                  resolve(true);
-                };
-                const onError = () => {
-                  audioRef.current?.removeEventListener('canplay', onCanPlay);
-                  audioRef.current?.removeEventListener('error', onError);
-                  reject();
-                };
-                audioRef.current?.addEventListener('canplay', onCanPlay);
-                audioRef.current?.addEventListener('error', onError);
-              });
-              loaded = true;
-              
-              // Auto play after loading if was playing before
-              if (isPlaying) {
-                await audioRef.current.play();
-              }
-              break;
-            } catch (e) {
-              continue;
+        } else if (currentTrack && currentTrack.type === 'surah') {
+          // load surah as before
+          const cached = await audioCache.getCachedAudio(currentSurah);
+
+          if (cached) {
+            const url = URL.createObjectURL(cached);
+            if (currentAudioUrl.current) {
+              URL.revokeObjectURL(currentAudioUrl.current);
             }
-          }
-          
-          if (!loaded) {
-            throw new Error("No audio source available");
+            currentAudioUrl.current = url;
+            audioRef.current.src = url;
+
+            if (isPlaying) {
+              await audioRef.current.play();
+            }
+          } else {
+            const urls = getAudioUrls(currentSurah);
+            let loaded = false;
+
+            for (const url of urls) {
+              try {
+                audioRef.current.src = url;
+                await new Promise((resolve, reject) => {
+                  const onCanPlay = () => {
+                    audioRef.current?.removeEventListener('canplay', onCanPlay);
+                    audioRef.current?.removeEventListener('error', onError);
+                    resolve(true);
+                  };
+                  const onError = () => {
+                    audioRef.current?.removeEventListener('canplay', onCanPlay);
+                    audioRef.current?.removeEventListener('error', onError);
+                    reject();
+                  };
+                  audioRef.current?.addEventListener('canplay', onCanPlay);
+                  audioRef.current?.addEventListener('error', onError);
+                });
+                loaded = true;
+
+                if (isPlaying) {
+                  await audioRef.current.play();
+                }
+                break;
+              } catch (e) {
+                continue;
+              }
+            }
+
+            if (!loaded) {
+              throw new Error("No audio source available");
+            }
           }
         }
 
-        toast.success("অডিও লোড সম্পন্ন", { duration: 1000 });
+        toast.success("অডিও লোড সম্পন্ন", { duration: 800 });
       } catch (e) {
         setIsPlaying(false);
-        toast.error("এই সূরার অডিও পাওয়া যায়নি");
+        toast.error("অডিও লোড করতে সমস্যা হয়েছে");
       } finally {
         setIsLoading(false);
       }
@@ -151,7 +181,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
         URL.revokeObjectURL(currentAudioUrl.current);
       }
     };
-  }, [currentSurah]);
+  }, [currentTrack, currentSurah]);
 
   const togglePlay = async () => {
     if (!audioRef.current) return;
@@ -193,15 +223,19 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
   };
 
   const handleEnded = () => {
-    // Auto-play next surah when current ends
-    if (currentSurah < 114) {
-      setIsPlaying(true); // Keep playing state for auto-play
-      skipNext();
-      toast.success("পরবর্তী সূরা চালু হচ্ছে...", { duration: 1500 });
-    } else {
-      setIsPlaying(false);
-      toast.info("সব সূরা সমাপ্ত", { duration: 2000 });
+    // If current track is a surah, auto-play next surah when current ends
+    if (currentTrack && currentTrack.type === 'surah') {
+      if (currentSurah < 114) {
+        setIsPlaying(true); // Keep playing state for auto-play
+        skipNext();
+        toast.success("পরবর্তী সূরা চালু হচ্ছে...", { duration: 1500 });
+        return;
+      }
     }
+
+    // otherwise stop playing
+    setIsPlaying(false);
+    toast.info("অডিও সমাপ্ত", { duration: 1200 });
   };
 
   const hidePlayer = () => {
@@ -281,6 +315,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
     <AudioContext.Provider
       value={{
         currentSurah,
+        currentTrack,
         isPlaying,
         currentTime,
         duration,
@@ -288,6 +323,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
         cachedSurahs,
         showPlayer,
         setCurrentSurah: handleSetCurrentSurah,
+        playTrack,
         togglePlay,
         skipNext,
         skipPrev,

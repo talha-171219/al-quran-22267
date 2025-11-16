@@ -2,32 +2,73 @@ import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Bookmark, ImageIcon } from "lucide-react";
+import { Bookmark, ImageIcon, BookOpen, Music } from "lucide-react";
+import { Link } from "react-router-dom";
+import headerImg from "@/assets/explore-banner.jpg";
 
 const Gojol = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       <TopBar title="Islamic Gojol" showBack />
 
-      <main className="max-w-lg mx-auto px-4 py-8 space-y-6">
-        <Card className="p-6 bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-primary/20 rounded-full">
-              <ImageIcon className="h-6 w-6 text-primary" />
-            </div>
-            <div className="flex-1">
-              <h3 className="font-semibold text-lg mb-1">Islamic Gojol • গজল</h3>
-              <p className="text-sm text-muted-foreground">এই পেজে গজল সম্পর্কিত কন্টেন্ট যোগ করা হবে।</p>
-            </div>
+      <main className="max-w-lg mx-auto px-4 py-6 space-y-6">
+        {/* Header image */}
+        <div className="relative h-44 rounded-lg overflow-hidden">
+          <img src={headerImg} alt="Gojol Banner" className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+          <div className="absolute left-4 bottom-4">
+            <h1 className="text-white text-2xl font-bold">Islamic Gojol • গজল</h1>
+            <p className="text-sm text-white/90">গজল শোনুন এবং পড়ুন — আরবী, বাংলা ও সিম্পল সাউন্ড</p>
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-6 text-center">
-          <Bookmark className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-          <h3 className="font-semibold text-lg mb-2">COMING SOON</h3>
-          <p className="text-muted-foreground mb-4">গজল কন্টেন্ট শীঘ্রই যোগ করা হবে।</p>
-          <Button variant="ghost" size="sm">আপডেট নোটিফাই</Button>
-        </Card>
+        {/* Sections as buttons */}
+        <div className="grid grid-cols-1 gap-4">
+          <Card className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-primary/10 rounded-md">
+                <BookOpen className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Arabic Gojol • আরবী গজল</h3>
+                <p className="text-sm text-muted-foreground">আরবীতে গজল তালিকা এবং টেক্সট</p>
+              </div>
+            </div>
+            <Link to="/gojol/arabic">
+              <Button size="sm">Open</Button>
+            </Link>
+          </Card>
+
+          <Card className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-primary/10 rounded-md">
+                <ImageIcon className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Bangla Gojol • বাংলা গজল</h3>
+                <p className="text-sm text-muted-foreground">বাংলা অনুবাদসহ গজল তালিকা</p>
+              </div>
+            </div>
+            <Link to="/gojol/bangla">
+              <Button size="sm">Open</Button>
+            </Link>
+          </Card>
+
+          <Card className="p-4 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-primary/10 rounded-md">
+                <Music className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-semibold">Simple Sound Gojol • সিম্পল সাউন্ড</h3>
+                <p className="text-sm text-muted-foreground">সহজ সাউন্ড প্লেয়ারের মাধ্যমে গজল শুনুন</p>
+              </div>
+            </div>
+            <Link to="/gojol/sound">
+              <Button size="sm">Open</Button>
+            </Link>
+          </Card>
+        </div>
       </main>
 
       <BottomNav />

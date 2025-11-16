@@ -51,6 +51,9 @@ import HajjStepDetail from "./pages/HajjStepDetail";
 import HajjDuas from "./pages/HajjDuas";
 import MosqueFinder from "./pages/MosqueFinder";
 import Gojol from "./pages/Gojol";
+import GojolArabic from "./pages/GojolArabic";
+import GojolBangla from "./pages/GojolBangla";
+import GojolSimpleSound from "./pages/GojolSimpleSound";
 import HajjChecklistPage from "./pages/HajjChecklistPage";
 import HajjMaps from "./pages/HajjMaps";
 import HajjFAQ from "./pages/HajjFAQ";
@@ -222,6 +225,9 @@ const App = () => {
             <Route path="/99-names" element={<NinetyNineNames />} />
             <Route path="/mosque-finder" element={<MosqueFinder />} />
             <Route path="/gojol" element={<Gojol />} />
+            <Route path="/gojol/arabic" element={<GojolArabic />} />
+            <Route path="/gojol/bangla" element={<GojolBangla />} />
+            <Route path="/gojol/sound" element={<GojolSimpleSound />} />
             <Route path="/shahada" element={<Shahada />} />
             <Route path="/salah" element={<Salah />} />
             <Route path="/namaz" element={<Namaz />} />
