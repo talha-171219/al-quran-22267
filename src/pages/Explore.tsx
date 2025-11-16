@@ -12,7 +12,7 @@ import mosqueFinderIcon from "@/assets/icons/mosque-finder-3d.png";
 import galleryIcon from "@/assets/icons/gallery-3d.png";
 import storeIcon from "@/assets/icons/store-3d.png";
 import islamicNamesIcon from "@/assets/icons/islamic-names-3d.png";
-import moreDuasIcon from "@/assets/icons/duas-3d.png";
+import moreDuasIcon from "@/assets/icons/more-duas-3d.png";
 
 // 5 Pillars of Islam (ইসলামের ৫টি স্তম্ভ) in order
 const fivePillars = [
