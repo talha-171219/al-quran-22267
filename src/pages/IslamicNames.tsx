@@ -132,8 +132,13 @@ const IslamicNames = () => {
 
         {/* Total Count */}
         <div className="mt-6 text-center text-sm text-muted-foreground">
-          মোট {filteredNames.length} টি নাম পাওয়া গেছে • Showing {filteredNames.length} names
+          মোট {islamicNames.length} টি নাম • Total {islamicNames.length} names
         </div>
+        {filteredNames.length !== islamicNames.length && (
+          <div className="text-center text-sm text-muted-foreground">
+            {filteredNames.length} টি নাম দেখানো হচ্ছে • Showing {filteredNames.length} names
+          </div>
+        )}
       </main>
 
       <BottomNav />

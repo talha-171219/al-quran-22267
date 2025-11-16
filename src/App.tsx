@@ -72,6 +72,8 @@ import Gallery from "./pages/Gallery";
 import StorePage from "./pages/StorePage";
 import IslamicNames from "./pages/IslamicNames";
 import NotificationSettings from "./pages/NotificationSettings";
+import MoreDuas from "./pages/MoreDuas";
+import DuaCategoryDetail from "./pages/DuaCategoryDetail";
 
 const queryClient = new QueryClient();
 
@@ -95,7 +97,7 @@ const App = () => {
           return;
         }
 
-        // Start preloading all surahs and hadiths in the background
+        // Start preloading all surahs, hadiths, and duas in the background
         const preloadPromises = [
           surahPreloader.checkAndResume(),
           hadithPreloader.checkAndResume(),
@@ -195,6 +197,8 @@ const App = () => {
             <Route path="/prayer-tracker" element={<PrayerTracker />} />
             <Route path="/azkar" element={<Azkar />} />
             <Route path="/explore" element={<Explore />} />
+            <Route path="/more-duas" element={<MoreDuas />} />
+            <Route path="/more-duas/:slug" element={<DuaCategoryDetail />} />
             <Route path="/hajj" element={<Hajj />} />
             <Route path="/hajj/guide" element={<HajjGuide />} />
             <Route path="/hajj/steps" element={<HajjSteps />} />

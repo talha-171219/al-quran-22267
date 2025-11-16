@@ -513,6 +513,226 @@ export const islamicNames: IslamicName[] = [
     gender: "female",
     category: "Popular Names"
   },
+  {
+    id: 118,
+    name: "Raqika",
+    arabic: "رَقِيْقَةٌ",
+    meaning: "Gentle",
+    meaningBengali: "কোমলবতী",
+    origin: "Arabic",
+    gender: "female",
+    category: "Sahabiyyah Names"
+  },
+  {
+    id: 119,
+    name: "Nafisa",
+    arabic: "نَفِيْسَةُ-",
+    meaning: "Precious",
+    meaningBengali: "মূল্যবান",
+    origin: "Arabic",
+    gender: "female",
+    category: "Sahabiyyah Names"
+  },
+  {
+    id: 120,
+    name: "Fariya",
+    arabic: "فَرِيْعَةُ",
+    meaning: "Tall, slender",
+    meaningBengali: "লম্বাদেহী",
+    origin: "Arabic",
+    gender: "female",
+    category: "Sahabiyyah Names"
+  },
+  {
+    id: 121,
+    name: "Atiqua",
+    arabic: "عَاتِكَةُ",
+    meaning: "Fragrant",
+    meaningBengali: "সুগন্ধিনী",
+    origin: "Arabic",
+    gender: "female",
+    category: "Sahabiyyah Names"
+  },
+  {
+    id: 122,
+    name: "Hujafa",
+    arabic: "حُذَافَةُ",
+    meaning: "Small object",
+    meaningBengali: "সামান্য বস্তু",
+    origin: "Arabic",
+    gender: "female",
+    category: "Sahabiyyah Names"
+  },
+  {
+    id: 123,
+    name: "Halima",
+    arabic: "حَلِيْمَةُ",
+    meaning: "Patient, forbearing",
+    meaningBengali: "ধৈর্য্যশীলা",
+    origin: "Arabic",
+    gender: "female",
+    category: "Sahabiyyah Names"
+  },
+  {
+    id: 124,
+    name: "Umme Mabad",
+    arabic: "أم مَعْبَد",
+    meaning: "Mother of Mabad",
+    meaningBengali: "মাবাদের মা",
+    origin: "Arabic",
+    gender: "female",
+    category: "Sahabiyyah Names"
+  },
+  {
+    id: 125,
+    name: "Rabab",
+    arabic: "رَبَاب",
+    meaning: "White cloud",
+    meaningBengali: "শুভ্র মেঘ",
+    origin: "Arabic",
+    gender: "female",
+    category: "Popular Names"
+  },
+  {
+    id: 126,
+    name: "Aarwa",
+    arabic: "أرْوَى",
+    meaning: "Soft and light",
+    meaningBengali: "কোমল ও হালকা",
+    origin: "Arabic",
+    gender: "female",
+    category: "Popular Names"
+  },
+  {
+    id: 127,
+    name: "Aanisa",
+    arabic: "أنِيْسَةُ",
+    meaning: "Good-hearted",
+    meaningBengali: "ভাল মনের অধিকারিনী",
+    origin: "Arabic",
+    gender: "female",
+    category: "Popular Names"
+  },
+  {
+    id: 128,
+    name: "Jaamila",
+    arabic: "جَمِيْلَةُ",
+    meaning: "Beautiful",
+    meaningBengali: "সুন্দরী",
+    origin: "Arabic",
+    gender: "female",
+    category: "Popular Names"
+  },
+  {
+    id: 129,
+    name: "Durrah",
+    arabic: "دُرَّة",
+    meaning: "Large pearl",
+    meaningBengali: "বড় মতি",
+    origin: "Arabic",
+    gender: "female",
+    category: "Popular Names"
+  },
+  {
+    id: 130,
+    name: "Rayhana",
+    arabic: "رَيْحَانَة",
+    meaning: "Fragrant plant",
+    meaningBengali: "সুগন্ধি তরু",
+    origin: "Arabic",
+    gender: "female",
+    category: "Popular Names"
+  },
+  {
+    id: 131,
+    name: "Suad",
+    arabic: "سُعَاد",
+    meaning: "Fortunate",
+    meaningBengali: "সৌভাগ্যবতী",
+    origin: "Arabic",
+    gender: "female",
+    category: "Popular Names"
+  },
+  {
+    id: 132,
+    name: "Lubaba",
+    arabic: "لُبَابَة",
+    meaning: "Best, choicest",
+    meaningBengali: "সর্বোত্তম",
+    origin: "Arabic",
+    gender: "female",
+    category: "Popular Names"
+  },
+  {
+    id: 133,
+    name: "Aaliya",
+    arabic: "عَلِيَّةُ",
+    meaning: "High-ranking, elevated",
+    meaningBengali: "উচ্চমর্যাদা সম্পন্না, সুউচ্চ, উন্নতা",
+    origin: "Arabic",
+    gender: "female",
+    category: "Popular Names"
+  },
+  {
+    id: 134,
+    name: "Karima",
+    arabic: "كَرِيْمَةُ",
+    meaning: "Noble, generous",
+    meaningBengali: "উচ্চবংশী, সম্ভ্রান্তা, দানশীলা",
+    origin: "Arabic",
+    gender: "female",
+    category: "Popular Names"
+  },
+  {
+    id: 135,
+    name: "Hasna",
+    arabic: "حَسْنَاء",
+    meaning: "Beautiful",
+    meaningBengali: "সুন্দরী",
+    origin: "Arabic",
+    gender: "female",
+    category: "Popular Names"
+  },
+  {
+    id: 136,
+    name: "Hamida",
+    arabic: "حَمِيْدَةُ",
+    meaning: "Praised",
+    meaningBengali: "প্রশংসিত",
+    origin: "Arabic",
+    gender: "female",
+    category: "Popular Names"
+  },
+  {
+    id: 137,
+    name: "Darda",
+    arabic: "دَرْدَاءُ",
+    meaning: "-",
+    meaningBengali: "-",
+    origin: "Arabic",
+    gender: "female",
+    category: "Popular Names"
+  },
+  {
+    id: 138,
+    name: "Mashqura",
+    arabic: "مَشْكُوْرَةٌ",
+    meaning: "Thanked, appreciated",
+    meaningBengali: "কৃতজ্ঞতাপ্রাপ্ত",
+    origin: "Arabic",
+    gender: "female",
+    category: "Popular Names"
+  },
+  {
+    id: 139,
+    name: "Afra",
+    arabic: "عَفْرَاءُ",
+    meaning: "Fair, white, reddish-white",
+    meaningBengali: "ফর্সা, শুভ্রা, শুক্লা, সাদা, কেশর",
+    origin: "Arabic",
+    gender: "female",
+    category: "Popular Names"
+  },
   
   // More Sahabi Names (Male)
   {
