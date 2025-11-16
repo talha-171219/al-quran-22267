@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, lazy, Suspense } from "react";
 import { surahPreloader } from "@/utils/surahPreloader";
 import { hadithPreloader } from "@/utils/hadithPreloader";
 import { versionManager } from "@/utils/versionManager";
@@ -30,7 +30,7 @@ import PrayerTimes from "./pages/PrayerTimes";
 import Tasbih from "./pages/Tasbih";
 import Tafsir from "./pages/Tafsir";
 import Qibla from "./pages/Qibla";
-import IslamicAI from "./pages/IslamicAI";
+const IslamicAI = lazy(() => import("./pages/IslamicAI"));
 import InstallApp from "./pages/InstallApp";
 import PrayerTracker from "./pages/PrayerTracker";
 import Azkar from "./pages/Azkar";
@@ -52,11 +52,11 @@ import HajjSteps from "./pages/HajjSteps";
 import HajjStepDetail from "./pages/HajjStepDetail";
 import HajjDuas from "./pages/HajjDuas";
 import MosqueFinder from "./pages/MosqueFinder";
-import Gojol from "./pages/Gojol";
-import GojolArabic from "./pages/GojolArabic";
-import GojolBangla from "./pages/GojolBangla";
-import GojolSimpleSound from "./pages/GojolSimpleSound";
-import BanglaNasheedYouTube from "./pages/BanglaNasheedYouTube";
+const Gojol = lazy(() => import("./pages/Gojol"));
+const GojolArabic = lazy(() => import("./pages/GojolArabic"));
+const GojolBangla = lazy(() => import("./pages/GojolBangla"));
+const GojolSimpleSound = lazy(() => import("./pages/GojolSimpleSound"));
+const BanglaNasheedYouTube = lazy(() => import("./pages/BanglaNasheedYouTube"));
 import HajjChecklistPage from "./pages/HajjChecklistPage";
 import HajjMaps from "./pages/HajjMaps";
 import HajjFAQ from "./pages/HajjFAQ";
@@ -75,8 +75,8 @@ import NinetyNineNames from "./pages/NinetyNineNames";
 import Shahada from "./pages/Shahada";
 import Salah from "./pages/Salah";
 import Namaz from "./pages/Namaz";
-import Gallery from "./pages/Gallery";
-import StorePage from "./pages/StorePage";
+const Gallery = lazy(() => import("./pages/Gallery"));
+const StorePage = lazy(() => import("./pages/StorePage"));
 import IslamicNames from "./pages/IslamicNames";
 import NotificationSettings from "./pages/NotificationSettings";
 import MoreDuas from "./pages/MoreDuas";
@@ -179,6 +179,7 @@ const App = () => {
             <MiniPlayer />
             {/* Floating video mini-player (renders when user navigates away) */}
             <FloatingVideoPlayer />
+            <Suspense fallback={<div className="p-6 text-center">Loading...</div>}>
             <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/surahs" element={<Surahs />} />
@@ -245,6 +246,7 @@ const App = () => {
             <Route path="/notifications" element={<NotificationSettings />} />
             <Route path="*" element={<NotFound />} />
             </Routes>
+            </Suspense>
             <Toaster />
             <Sonner />
             </VideoPlayerProvider>

@@ -41,6 +41,8 @@ export const NasheedSection = ({
             src={imageSrc}
             alt={imageAlt}
             className="w-full h-full object-cover absolute inset-0"
+            loading="lazy"
+            decoding="async"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
           <div className="absolute inset-0 flex items-end p-4">
