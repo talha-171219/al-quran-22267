@@ -4,7 +4,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const OfflineIndicator = () => {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [showOfflineAlert, setShowOfflineAlert] = useState(false);
+  const [showOfflineAlert, setShowOfflineAlert] = useState(!navigator.onLine);
 
   useEffect(() => {
     const handleOnline = () => {
@@ -17,19 +17,10 @@ export const OfflineIndicator = () => {
       setIsOnline(false);
       setShowOfflineAlert(true);
       console.log('📱 অফলাইন মোড - ক্যাশ করা কন্টেন্ট দেখাচ্ছে');
-      
-      // Auto-hide alert after 5 seconds
-      setTimeout(() => setShowOfflineAlert(false), 5000);
     };
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
-
-    // Show alert initially if offline
-    if (!navigator.onLine) {
-      setShowOfflineAlert(true);
-      setTimeout(() => setShowOfflineAlert(false), 5000);
-    }
 
     return () => {
       window.removeEventListener('online', handleOnline);
@@ -55,13 +46,33 @@ export const OfflineIndicator = () => {
                   ✅ ইন্টারনেট সংযোগ পুনরুদ্ধার হয়েছে
                 </span>
               ) : (
-                <div className="space-y-1">
+                <div className="space-y-2">
                   <p className="text-amber-800 dark:text-amber-200 font-medium">
-                    📱 অফলাইন মোড সক্রিয়
+                    📱 আপনি এখন অফলাইনে আছেন
                   </p>
                   <p className="text-amber-700 dark:text-amber-300 text-xs">
-                    কুরআন, হাদিস, প্রার্থনা সময়, তাসবীহ, আযকার এবং যাকাত ক্যালকুলেটর অফলাইনে কাজ করছে
+                    প্লেলিস্ট ও যে কন্টেন্টগুলো আগে লোড করা হয়েছে (কুরআন, হাদিস, সেভ করা গান, প্রার্থনা সময় ইত্যাদি) অফলাইনে দেখা/চলতে পারে।
                   </p>
+                  <p className="text-amber-700 dark:text-amber-300 text-xs">
+                    ভিডিও স্ট্রিমিং (YouTube iframe) অনলাইনে ছাড়া সম্ভব নয়। অনলাইন ফিরে এলে পূর্ণ কার্যকারিতা ফিরে পাবে।
+                  </p>
+                  <div className="flex gap-2 mt-2">
+                    <button
+                      onClick={() => {
+                        // Try reload to re-check network and resources
+                        try { window.location.reload(); } catch (e) { console.error(e); }
+                      }}
+                      className="px-3 py-1 bg-amber-700 text-white text-xs rounded-md hover:bg-amber-600"
+                    >
+                      রিলোড করুন
+                    </button>
+                    <button
+                      onClick={() => setShowOfflineAlert(false)}
+                      className="px-3 py-1 bg-amber-100 text-amber-800 text-xs rounded-md hover:bg-amber-200"
+                    >
+                      বন্ধ করুন
+                    </button>
+                  </div>
                 </div>
               )}
             </AlertDescription>
