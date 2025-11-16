@@ -102,12 +102,17 @@ export default {
             transform: "translateY(0)",
           },
         },
+        "pulse-subtle": {
+          "0%, 100%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.02)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "slide-up": "slide-up 0.3s ease-out",
         "fade-in": "fade-in 0.5s ease-out",
+        "pulse-subtle": "pulse-subtle 2s ease-in-out infinite", // Subtle pulse every 2 seconds
       },
     },
   },

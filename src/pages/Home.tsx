@@ -18,6 +18,7 @@ import islamicAiIcon from "@/assets/icons/islamic-ai-3d.png";
 import digitalTasbihIcon from "@/assets/icons/digital-tasbih-3d.png";
 import qiblaFinderIcon from "@/assets/icons/qibla-finder-3d.png";
 import fastingTrackerIcon from "@/assets/icons/fasting-tracker-3d.png";
+import { NasheedSection } from "@/components/gojol/NasheedSection"; // Import the new component
 
 const features = [
   {
@@ -115,6 +116,23 @@ const Home = () => {
             </div>
           ))}
         </div>
+
+        {/* Arabic Nasheed Section */}
+        <NasheedSection
+          title="Arabic Nasheed"
+          subtitle="Heart-touching Islamic Nasheeds to listen anytime."
+          imageSrc="https://i.postimg.cc/VNtR2FR0/Copilot-20251116-165530.png" // Placeholder image
+          imageAlt="Arabic Nasheed"
+          linkPath="/gojol/arabic" // Link to the Nasheed page
+        />
+          {/* Store Section (styled like Nasheed) - placeholder image, links to Store page */}
+          <NasheedSection
+            title="Store"
+            subtitle="Islamic card images available in the store."
+            imageSrc="https://i.postimg.cc/cJKnz4dB/Copilot-20251116-172838.png" // Placeholder - you can replace with your image
+            imageAlt="Store"
+            linkPath="/store" // Link to the Store page
+          />
       </main>
 
       <BottomNav />

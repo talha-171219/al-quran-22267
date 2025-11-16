@@ -38,11 +38,11 @@ const GojolBangla = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <TopBar title="Bangla Gojol" showBack />
+      <TopBar title="Bangla Gojol MP3" showBack />
 
       <main className="max-w-lg mx-auto px-4 py-8 space-y-6">
         <Card className="p-6">
-          <h2 className="text-lg font-semibold mb-2">বাংলা গজল</h2>
+          <h2 className="text-lg font-semibold mb-2">বাংলা গজল MP3</h2>
           <p className="text-sm text-muted-foreground mb-4">নিচের কার্ডে প্লে বাটনে ট্যাপ করে অডিও শুরু করুন।</p>
           <div className="flex gap-2">
             <Button onClick={() => navigate(-1)} variant="ghost" size="sm">

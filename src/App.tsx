@@ -13,6 +13,8 @@ import { InstallPromptModal } from "@/components/pwa/InstallPromptModal";
 import { OfflineIndicator } from "@/components/layout/OfflineIndicator";
 import { AudioProvider } from "@/contexts/AudioContext";
 import { MiniPlayer } from "@/components/audio/MiniPlayer";
+import { VideoPlayerProvider } from "@/contexts/VideoPlayerContext";
+import FloatingVideoPlayer from "@/components/video/FloatingVideoPlayer";
 import { WelcomeScreen } from "@/components/welcome/WelcomeScreen";
 import { toast } from "sonner";
 import Home from "./pages/Home";
@@ -54,6 +56,7 @@ import Gojol from "./pages/Gojol";
 import GojolArabic from "./pages/GojolArabic";
 import GojolBangla from "./pages/GojolBangla";
 import GojolSimpleSound from "./pages/GojolSimpleSound";
+import BanglaNasheedYouTube from "./pages/BanglaNasheedYouTube";
 import HajjChecklistPage from "./pages/HajjChecklistPage";
 import HajjMaps from "./pages/HajjMaps";
 import HajjFAQ from "./pages/HajjFAQ";
@@ -167,11 +170,15 @@ const App = () => {
     <ThemeProvider attribute="class" defaultTheme="dark" storageKey="theme">
       <QueryClientProvider client={queryClient}>
         <AudioProvider>
+          {/* Video player provider + floating mini-player (keeps playing across pages) */}
           <BrowserRouter>
+            <VideoPlayerProvider>
             <UpdateNotification />
             <InstallPromptModal />
             <OfflineIndicator />
             <MiniPlayer />
+            {/* Floating video mini-player (renders when user navigates away) */}
+            <FloatingVideoPlayer />
             <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/surahs" element={<Surahs />} />
@@ -227,6 +234,7 @@ const App = () => {
             <Route path="/gojol" element={<Gojol />} />
             <Route path="/gojol/arabic" element={<GojolArabic />} />
             <Route path="/gojol/bangla" element={<GojolBangla />} />
+            <Route path="/gojol/bangla-youtube" element={<BanglaNasheedYouTube />} />
             <Route path="/gojol/sound" element={<GojolSimpleSound />} />
             <Route path="/shahada" element={<Shahada />} />
             <Route path="/salah" element={<Salah />} />
@@ -239,6 +247,7 @@ const App = () => {
             </Routes>
             <Toaster />
             <Sonner />
+            </VideoPlayerProvider>
           </BrowserRouter>
         </AudioProvider>
       </QueryClientProvider>

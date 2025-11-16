@@ -18,7 +18,7 @@ const Gojol = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
           <div className="absolute left-4 bottom-4">
             <h1 className="text-white text-2xl font-bold">Islamic Gojol • গজল</h1>
-            <p className="text-sm text-white/90">গজল শোনুন এবং পড়ুন — আরবী, বাংলা ও সিম্পল সাউন্ড</p>
+            <p className="text-sm text-white/90">গজল শোনুন,দেখুন এবং পড়ুন — আরবী, বাংলা ও সিম্পল সাউন্ড</p>
           </div>
         </div>
 
@@ -30,7 +30,7 @@ const Gojol = () => {
                 <BookOpen className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold">Arabic Gojol • আরবী গজল</h3>
+                <h3 className="font-semibold">Arabic Nasheed • আরবী নাশিদ</h3>
                 <p className="text-sm text-muted-foreground">আরবীতে গজল তালিকা এবং টেক্সট</p>
               </div>
             </div>
