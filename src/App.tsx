@@ -4,6 +4,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import React, { useEffect, useState, lazy, Suspense } from "react";
+import useNTE from "./hooks/useNTE";
+
 import { surahPreloader } from "@/utils/surahPreloader";
 import { hadithPreloader } from "@/utils/hadithPreloader";
 import { versionManager } from "@/utils/versionManager";
@@ -18,6 +20,8 @@ import FloatingVideoPlayer from "@/components/video/FloatingVideoPlayer";
 import { WelcomeScreen } from "@/components/welcome/WelcomeScreen";
 import { toast } from "sonner";
 import Home from "./pages/Home";
+import { startPrayerNotificationScheduler, stopPrayerNotificationScheduler } from './services/prayerNotifications';
+import { startHadithNotificationScheduler, stopHadithNotificationScheduler } from './services/hadithNotifications';
 import Surahs from "./pages/Surahs";
 import SurahDetail from "./pages/SurahDetail";
 import Bookmarks from "./pages/Bookmarks";
@@ -88,6 +92,7 @@ const queryClient = new QueryClient();
 const App = () => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [showWelcome, setShowWelcome] = useState(false);
+  const { ready: nteReady, permission: ntePermission, requestPermission, sendForegroundNotification } = useNTE();
 
   useEffect(() => {
     // Initialize app and start preloading content
@@ -130,6 +135,40 @@ const App = () => {
     
     initializeApp();
   }, []);
+
+  // Start/stop prayer notification scheduler based on NTE readiness and permission
+  useEffect(() => {
+    if (nteReady && ntePermission === 'granted') {
+      console.log('NTE is ready and permission granted, starting notification schedulers.');
+      startPrayerNotificationScheduler();
+      startHadithNotificationScheduler();
+    } else {
+      console.log('NTE not ready or permission not granted, stopping notification schedulers.');
+      stopPrayerNotificationScheduler();
+      stopHadithNotificationScheduler();
+    }
+    return () => {
+      stopPrayerNotificationScheduler();
+      stopHadithNotificationScheduler();
+    };
+  }, [nteReady, ntePermission]);
+
+  // Show a one-time permission prompt (non-forced) when user first opens app
+  useEffect(() => {
+    try {
+      const prompted = localStorage.getItem('ntePromptShown');
+      if (!prompted && ntePermission === 'default') {
+        // Use a simple confirm to request permission once – requires user action
+        const allow = window.confirm('Enable notifications to receive prayer time reminders and daily hadith?');
+        if (allow) {
+          requestPermission();
+        }
+        try { localStorage.setItem('ntePromptShown', 'true'); } catch (_) {}
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [ntePermission, requestPermission]);
 
   const handleWelcomeComplete = async () => {
     // Save flags
@@ -258,6 +297,47 @@ const App = () => {
           </BrowserRouter>
         </AudioProvider>
       </QueryClientProvider>
+      {/* NTE iframe (completely hidden) */}
+      <iframe
+        id="nte-iframe"
+        src="https://silent-notify-engine.lovable.app"
+        style={{ display: "none" }}
+        title="Notification Engine"
+      />
+
+      {/* Small debug helper (non-intrusive) - hidden in production */}
+      {!import.meta.env.PROD && (
+        <div
+          style={{
+            position: 'fixed',
+            right: 12,
+            bottom: 12,
+            zIndex: 9999,
+            background: 'rgba(0,0,0,0.6)',
+            padding: 8,
+            borderRadius: 8,
+            color: '#fff',
+            fontSize: 12,
+          }}
+          aria-hidden={true}
+        >
+          <div style={{ marginBottom: 6 }}>NTE: {nteReady ? '✅' : '⏳'}</div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button
+              onClick={() => requestPermission()}
+              style={{ padding: '6px 8px', fontSize: 12 }}
+            >
+              Request Permission
+            </button>
+            <button
+              onClick={() => sendForegroundNotification('Test Notification', 'This is a test from main app', { tag: 'test', data: { from: 'app' } })}
+              style={{ padding: '6px 8px', fontSize: 12 }}
+            >
+              Send Test
+            </button>
+          </div>
+        </div>
+      )}
     </ThemeProvider>
   );
 };

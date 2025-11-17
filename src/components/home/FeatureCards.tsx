@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -40,6 +40,20 @@ const defaultItems: CardItem[] = [
 ];
 
 export const FeatureCards: React.FC<{ items?: CardItem[] }> = ({ items = defaultItems }) => {
+  const navigate = useNavigate();
+
+  const InnerGoButton: React.FC<{ to: string }> = ({ to }) => {
+    return (
+      <button
+        onClick={() => navigate(to)}
+        className="inline-flex items-center px-4 py-2 rounded-full bg-emerald-800/20 border border-emerald-700 text-emerald-100/90 text-sm"
+      >
+        Go
+        <span className="ml-2 text-emerald-200">›</span>
+      </button>
+    );
+  };
+
   return (
     <div className="overflow-x-auto">
       <div className="min-w-[480px] grid grid-cols-[1.5fr_1fr] gap-4">
@@ -52,12 +66,8 @@ export const FeatureCards: React.FC<{ items?: CardItem[] }> = ({ items = default
                   <h3 className="text-white text-2xl font-semibold leading-tight">{items[0].title}</h3>
                   <p className="text-emerald-100/90 mt-1">{items[0].subtitle}</p>
                   <div className="mt-4">
-                    <Link to={items[0].link || '#'}>
-                      <div className="inline-flex items-center px-4 py-2 rounded-full bg-emerald-800/20 border border-emerald-700 text-emerald-100/90 text-sm">
-                        Go
-                        <span className="ml-2 text-emerald-200">›</span>
-                      </div>
-                    </Link>
+                      {/* Avoid nested <a> by using a button to navigate */}
+                      <InnerGoButton to={items[0].link || '#'} />
                   </div>
                 </div>
 

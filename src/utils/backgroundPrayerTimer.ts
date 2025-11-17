@@ -2,6 +2,7 @@
 
 import { playAdhan } from './prayerNotifications';
 import { getDefaultAdhanStyle } from '@/data/adhanAudio';
+import nteClient from '@/nteClient';
 
 interface PrayerTimings {
   Fajr: string;
@@ -27,6 +28,7 @@ const state: BackgroundTimerState = {
   adhanSettings: {},
   lastCheck: 0,
   triggeredPrayers: new Set(),
+  triggeredAdhans: new Set(),
 };
 
 let timerInterval: NodeJS.Timeout | null = null;
@@ -47,11 +49,12 @@ const checkPrayerTimes = () => {
   const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   const currentDateKey = now.toDateString();
 
-  // Reset triggered prayers at midnight
+  // Reset triggered prayers and adhans at midnight
   const midnight = new Date(now);
   midnight.setHours(0, 0, 0, 0);
   if (now.getTime() - midnight.getTime() < 60000) {
     state.triggeredPrayers.clear();
+    state.triggeredAdhans.clear();
   }
 
   const prayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
@@ -60,48 +63,91 @@ const checkPrayerTimes = () => {
     const prayerTime = state.prayerTimes![prayer as keyof PrayerTimings];
     const prayerKey = `${prayer}-${currentDateKey}`;
 
-    // Check if we haven't triggered this prayer today
-    if (!state.triggeredPrayers.has(prayerKey)) {
-      // Check if current time matches prayer time (within the same minute)
-      if (currentTime === prayerTime) {
-        // Trigger Adhan if enabled
+    // Check and trigger adhan notification 5 minutes before prayer
+    try {
+      const [ph, pm] = prayerTime.split(':').map(Number);
+      const prayerDate = new Date(now);
+      prayerDate.setHours(ph, pm, 0, 0);
+
+      const adhanDate = new Date(prayerDate.getTime() - 5 * 60 * 1000);
+      const adhanTimeStr = `${String(adhanDate.getHours()).padStart(2, '0')}:${String(adhanDate.getMinutes()).padStart(2, '0')}`;
+      const adhanKey = `adhan-${prayer}-${currentDateKey}`;
+
+      if (state.adhanSettings[prayer] && !state.triggeredAdhans.has(adhanKey)) {
+        if (currentTime === adhanTimeStr) {
+          console.log(`🔔 Sending Adhan notification for ${prayer} (5 min before)`);
+          // send via NTE
+          try {
+            nteClient.triggerEvent('ADHAN_NOTIFICATION', { prayer }, {
+              title: `Adhan Time - ${prayer}`,
+              body: `It's time for ${prayer} adhan`,
+              icon: '/icon-192.png',
+              tag: `adhan-${prayer}`,
+              data: { prayer }
+            });
+          } catch (err) {
+            console.error('NTE trigger error (adhan):', err);
+            if ('Notification' in window && Notification.permission === 'granted') {
+              try {
+                new Notification(`${prayerNamesBn[prayer]} এর সময়`, {
+                  body: `${prayerNamesBn[prayer]} নামাজের জন্য ৫ মিনিট বাকি`,
+                  icon: '/icon-192.png',
+                  tag: `adhan-${prayer}`,
+                });
+              } catch (e) { console.error(e); }
+            }
+          }
+
+          state.triggeredAdhans.add(adhanKey);
+        }
+      }
+
+      // Now check exact prayer time for adhan playback and prayer notification
+      if (!state.triggeredPrayers.has(prayerKey) && currentTime === prayerTime) {
+        // Play adhan locally if enabled
         if (state.adhanSettings[prayer]) {
           console.log(`🕌 Playing Adhan for ${prayer}`);
           const defaultStyle = getDefaultAdhanStyle();
           playAdhan(defaultStyle.audioUrl);
-
-          // Show notification
-          if (Notification.permission === 'granted') {
-            new Notification(`${prayerNamesBn[prayer]} এর সময়`, {
-              body: 'আযান চলছে...',
-              icon: '/icon-192.png',
-              tag: `adhan-${prayer}`,
-              requireInteraction: true,
-            });
-          }
         }
 
-        // Trigger alarm if enabled
+        // Trigger alarm if enabled (local alarm sound)
         if (state.alarmSettings[prayer]) {
           console.log(`⏰ Triggering alarm for ${prayer}`);
           const alarmAudio = new Audio('/alarm-clock-short-6402.mp3');
           alarmAudio.volume = 0.7;
           alarmAudio.play().catch(err => console.error('Alarm sound error:', err));
+        }
 
-          if (Notification.permission === 'granted') {
-            new Notification(`${prayerNamesBn[prayer]} এর সময়`, {
-              body: `${prayerNamesBn[prayer]} নামাজের সময় হয়ে গেছে`,
-              icon: '/icon-192.png',
-              badge: '/icon-192.png',
-              tag: `prayer-${prayer}`,
-              requireInteraction: true,
-            });
+        // Send prayer-time notification via NTE
+        try {
+          nteClient.triggerEvent('PRAYER_NOTIFICATION', { prayer }, {
+            title: `Prayer Time - ${prayer}`,
+            body: `${prayer} prayer time has arrived. It's time to pray.`,
+            icon: '/icon-192.png',
+            tag: `prayer-${prayer}`,
+            data: { prayer }
+          });
+        } catch (err) {
+          console.error('NTE trigger error (prayer):', err);
+          if ('Notification' in window && Notification.permission === 'granted') {
+            try {
+              new Notification(`${prayerNamesBn[prayer]} এর সময়`, {
+                body: `${prayerNamesBn[prayer]} নামাজের সময় হয়ে গেছে`,
+                icon: '/icon-192.png',
+                badge: '/icon-192.png',
+                tag: `prayer-${prayer}`,
+                requireInteraction: true,
+              });
+            } catch (e) { console.error(e); }
           }
         }
 
         // Mark as triggered
         state.triggeredPrayers.add(prayerKey);
       }
+    } catch (err) {
+      console.error('Error checking prayer/adhan times:', err);
     }
   });
 

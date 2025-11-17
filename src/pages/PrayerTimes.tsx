@@ -12,6 +12,7 @@ import { toBengaliNumerals, formatCountdownToBengali, formatBengaliDate } from "
 import { convertTo12Hour, formatCurrentTime12Hour } from "@/utils/timeUtils";
 import { getUpcomingEvents } from "@/data/islamicEvents";
 import { getDefaultAdhanStyle } from "@/data/adhanAudio";
+import nteClient from '@/nteClient';
 import { usePermissions } from "@/contexts/PermissionsContext";
 import {
   scheduleNotification,
@@ -391,14 +392,29 @@ const PrayerTimes = () => {
         const timeoutId = scheduleAdhan(prayer, time, () => {
           const defaultStyle = getDefaultAdhanStyle();
           playAdhan(defaultStyle.audioUrl);
-          
-          // Show notification
-          if (Notification.permission === 'granted') {
-            new Notification(`${prayerNamesBn[prayer]} এর সময়`, {
-              body: 'আযান চলছে...',
+
+          // Send prayer-time notification via NTE (fallback to local Notification if needed)
+          try {
+            nteClient.triggerEvent('PRAYER_NOTIFICATION', { prayer }, {
+              title: `Prayer Time - ${prayer}`,
+              body: `${prayer} prayer time has arrived. It's time to pray.`,
               icon: '/icon-192.png',
-              tag: `adhan-${prayer}`,
+              tag: `prayer-${prayer}`,
+              data: { prayer }
             });
+          } catch (err) {
+            console.error('NTE trigger error (prayer):', err);
+            if ('Notification' in window && Notification.permission === 'granted') {
+              try {
+                new Notification(`${prayerNamesBn[prayer]} এর সময়`, {
+                  body: 'আযান চলছে...',
+                  icon: '/icon-192.png',
+                  tag: `adhan-${prayer}`,
+                });
+              } catch (e) {
+                console.error('Local notification fallback failed:', e);
+              }
+            }
           }
         });
         

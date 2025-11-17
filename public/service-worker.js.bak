@@ -25,12 +25,35 @@ const AUDIO_FILES = [
 
 // Install service worker and precache app shell
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    Promise.all([
-      caches.open(DYNAMIC_CACHE).then((cache) => cache.addAll(APP_SHELL)),
-      caches.open(AUDIO_CACHE).then((cache) => cache.addAll(AUDIO_FILES))
-    ])
-  );
+  event.waitUntil((async () => {
+    // Cache app shell entries individually so one failing request doesn't abort the whole install
+    try {
+      const dynamicCache = await caches.open(DYNAMIC_CACHE);
+      for (const url of APP_SHELL) {
+        try {
+          await dynamicCache.add(url);
+        } catch (err) {
+          // Log and continue; missing optional assets shouldn't block SW install
+          console.warn('[SW] Failed to cache app shell asset', url, err);
+        }
+      }
+    } catch (err) {
+      console.error('[SW] Error caching app shell', err);
+    }
+
+    try {
+      const audioCache = await caches.open(AUDIO_CACHE);
+      for (const url of AUDIO_FILES) {
+        try {
+          await audioCache.add(url);
+        } catch (err) {
+          console.warn('[SW] Failed to cache audio asset', url, err);
+        }
+      }
+    } catch (err) {
+      console.error('[SW] Error caching audio files', err);
+    }
+  })());
   // Don't skip waiting - let the new SW wait until user updates
 });
 

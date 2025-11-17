@@ -1,4 +1,5 @@
 // Prayer notification and alarm utilities
+import nteClient from '@/nteClient';
 
 export interface PrayerAlarm {
   prayer: string;
@@ -12,9 +13,7 @@ export interface AdhanSettings {
 
 // Schedule notification 5 minutes before prayer with alarm sound
 export const scheduleNotification = (prayerName: string, prayerTime: string, prayerNameBn: string) => {
-  if (!('Notification' in window) || Notification.permission !== 'granted') {
-    return false;
-  }
+  // Use NTE to send push notifications. If NTE isn't ready, still schedule local behavior when possible.
 
   const [hours, minutes] = prayerTime.split(':').map(Number);
   const now = new Date();
@@ -37,14 +36,32 @@ export const scheduleNotification = (prayerName: string, prayerTime: string, pra
       const alarmAudio = new Audio('/alarm-clock-short-6402.mp3');
       alarmAudio.volume = 0.7;
       alarmAudio.play().catch(err => console.error('Alarm sound error:', err));
-      
-      new Notification(`${prayerNameBn} এর সময় হয়ে গেছে`, {
-        body: `${prayerNameBn} নামাজের সময় ৫ মিনিট পরে`,
-        icon: '/icon-192.png',
-        badge: '/icon-192.png',
-        tag: `prayer-${prayerName}`,
-        requireInteraction: true,
-      });
+      // Send push via NTE (Adhan notification - 5 minutes before)
+      try {
+        nteClient.triggerEvent('ADHAN_NOTIFICATION', { prayer: prayerName }, {
+          title: `Adhan Time - ${prayerName}`,
+          body: `It's time for ${prayerName} adhan`,
+          icon: '/icon-192.png',
+          tag: `adhan-${prayerName}`,
+          data: { prayer: prayerName }
+        });
+      } catch (err) {
+        console.error('NTE trigger error (adhan):', err);
+        // Fallback to local Notification when possible
+        if ('Notification' in window && Notification.permission === 'granted') {
+          try {
+            new Notification(`${prayerNameBn} এর সময়`, {
+              body: `${prayerNameBn} নামাজের সময় ৫ মিনিট পরে`,
+              icon: '/icon-192.png',
+              badge: '/icon-192.png',
+              tag: `prayer-${prayerName}`,
+              requireInteraction: true,
+            });
+          } catch (e) {
+            console.error('Local notification fallback failed:', e);
+          }
+        }
+      }
     }, timeUntilNotification);
 
     return true;

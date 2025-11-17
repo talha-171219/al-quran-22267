@@ -8,6 +8,15 @@ export interface ReleaseNote {
 }
 
 export const changelog: ReleaseNote[] = [
+  {
+    version: '5.5',
+    date: '২০২৫-১১-১৭',
+    features: [],
+    improvements: [
+      '🚀 অ্যাপটি 5.5 ভার্সনে রান করছে বর্তমানে',
+      '   Update notification functionality',
+    ],
+  },
 
 {
     version: '5.4',
