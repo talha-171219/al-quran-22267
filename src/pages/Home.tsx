@@ -125,7 +125,6 @@ const Home = () => {
           imageSrc={[
             'https://i.postimg.cc/Y2ghd5qq/hq720-(1).jpg',
             'https://i.postimg.cc/Qx8hcwFQ/hq720-(2)-(1).jpg',
-            'https://i.postimg.cc/gkvXD9St/images-(1).jpg'
           ]}
           imageAlt="Islamic Lectures"
           linkPath="/lectures"
