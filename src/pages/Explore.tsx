@@ -12,6 +12,7 @@ import mosqueFinderIcon from "@/assets/icons/mosque-finder-3d.png";
 import galleryIcon from "@/assets/icons/gallery-3d.png";
 import storeIcon from "@/assets/icons/store-3d.png";
 import islamicNamesIcon from "@/assets/icons/islamic-names-3d.png";
+import islamiclecturesIcon from "@/assets/icons/islamic-lecture.png";
 import moreDuasIcon from "@/assets/icons/more-duas-3d.png";
 import gojolIcon from "@/assets/icons/gojol-3d.png";
 import audioRecitationIcon from "@/assets/icons/audio-recitation-3d.png";
@@ -58,7 +59,7 @@ const otherFeatures = [
     path: "/more-duas",
   },
   {
-    icon: audioRecitationIcon,
+    icon:   islamiclecturesIcon,
     title: "Islamic Lectures • লেকচার",
     path: "/lectures",
   },

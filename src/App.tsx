@@ -241,6 +241,7 @@ const App = () => {
             <Route path="/lectures" element={<Lectures />} />
             <Route path="/lectures/ahmadullah" element={React.createElement(React.lazy(() => import('./pages/lectures/Ahmadullah')))} />
             <Route path="/lectures/mizanur-rahman-azhari" element={React.createElement(React.lazy(() => import('./pages/lectures/MizanurRahmanAzhari')))} />
+            <Route path="/lectures/rukaiyah" element={React.createElement(React.lazy(() => import('./pages/lectures/Rukaiyah')))} />
             <Route path="/shahada" element={<Shahada />} />
             <Route path="/salah" element={<Salah />} />
             <Route path="/namaz" element={<Namaz />} />

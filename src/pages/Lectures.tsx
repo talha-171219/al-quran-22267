@@ -38,6 +38,14 @@ export default function Lectures() {
               <div className="text-xs text-muted-foreground">Lectures</div>
             </div>
           </Link>
+          
+          <Link to="/lectures/rukaiyah" className="rounded-xl overflow-hidden bg-card p-4 flex items-center gap-3 hover:shadow-lg transition">
+            <div className="w-14 h-14 bg-slate-700 rounded-md flex items-center justify-center text-slate-300 text-lg">R</div>
+            <div>
+              <div className="text-base font-semibold text-foreground">Rukaiyah</div>
+              <div className="text-xs text-muted-foreground">Long lectures</div>
+            </div>
+          </Link>
         </div>
 
         <div className="flex gap-2">

@@ -122,7 +122,11 @@ const Home = () => {
         <NasheedSection
           title="Islamic Lectures"
           subtitle="Short lectures and talks — click to explore speakers"
-          imageSrc="https://i.postimg.cc/nrX0qHts/Copilot-20251116-224659.png"
+          imageSrc={[
+            'https://i.postimg.cc/Y2ghd5qq/hq720-(1).jpg',
+            'https://i.postimg.cc/Qx8hcwFQ/hq720-(2)-(1).jpg',
+            'https://i.postimg.cc/gkvXD9St/images-(1).jpg'
+          ]}
           imageAlt="Islamic Lectures"
           linkPath="/lectures"
           linkLabel="Explore Lectures"

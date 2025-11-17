@@ -1,10 +1,12 @@
+import React from 'react';
 import { Link } from "react-router-dom";
 import { Card } from "@/components/ui/card";
 
 interface NasheedSectionProps {
   title: string;
   subtitle?: string;
-  imageSrc: string;
+  // allow single image or array of images for a small slider
+  imageSrc: string | string[];
   imageAlt: string;
   linkPath: string;
   linkLabel?: string;
@@ -17,7 +19,29 @@ export const NasheedSection = ({
   imageAlt,
   linkPath,
   linkLabel,
-}: NasheedSectionProps) => {
+  // optional slider props
+  intervalMs = 4000,
+  pauseOnHover = true,
+  showControls = true,
+  transition = 'fade',
+}: NasheedSectionProps & { intervalMs?: number; pauseOnHover?: boolean; showControls?: boolean; transition?: 'fade' | 'none' }) => {
+  const imgs = Array.isArray(imageSrc) ? imageSrc : [imageSrc];
+  const [index, setIndex] = React.useState(0);
+  const [hovered, setHovered] = React.useState(false);
+  const intervalRef = React.useRef<number | null>(null);
+
+  React.useEffect(() => {
+    if (imgs.length <= 1) return;
+    if (pauseOnHover && hovered) return;
+    intervalRef.current = window.setInterval(() => setIndex(i => (i + 1) % imgs.length), intervalMs);
+    return () => {
+      if (intervalRef.current) { window.clearInterval(intervalRef.current); intervalRef.current = null; }
+    };
+  }, [imgs.length, intervalMs, pauseOnHover, hovered]);
+
+  const prev = (e?: React.MouseEvent) => { e?.preventDefault(); setIndex(i => (i - 1 + imgs.length) % imgs.length); };
+  const next = (e?: React.MouseEvent) => { e?.preventDefault(); setIndex(i => (i + 1) % imgs.length); };
+
   return (
     <section className="space-y-4">
       <div className="flex items-center justify-between">
@@ -35,21 +59,47 @@ export const NasheedSection = ({
         </Link>
       </div>
 
-      <Link to={linkPath}>
+      <Link to={linkPath} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
         <Card className="relative w-full h-48 overflow-hidden rounded-xl shadow-lg group hover:shadow-primary-glow transition-all duration-300">
-          <img
-            src={imageSrc}
-            alt={imageAlt}
-            className="w-full h-full object-cover absolute inset-0"
-            loading="lazy"
-            decoding="async"
-          />
+          {/* render images stacked for fade transition */}
+          {imgs.map((src, i) => (
+            <img
+              key={i}
+              src={src}
+              alt={`${imageAlt} ${i + 1}`}
+              className={"w-full h-full object-cover absolute inset-0 " + (transition === 'fade' ? 'transition-opacity duration-500 ease-in-out' : '')}
+              style={{ opacity: i === index ? 1 : 0 }}
+              loading="lazy"
+              decoding="async"
+            />
+          ))}
+
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
           <div className="absolute inset-0 flex items-end p-4">
-            <h3 className="text-white text-lg font-semibold z-10">
-               
-            </h3>
+            <h3 className="text-white text-lg font-semibold z-10"></h3>
           </div>
+
+          {/* prev/next controls shown on hover */}
+          {showControls && imgs.length > 1 ? (
+            <>
+              <button onClick={prev} className={"absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/40 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"} aria-label="Previous slide">‹</button>
+              <button onClick={next} className={"absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/40 text-white rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity"} aria-label="Next slide">›</button>
+            </>
+          ) : null}
+
+          {/* indicators */}
+          {imgs.length > 1 ? (
+            <div className="absolute left-1/2 transform -translate-x-1/2 bottom-3 z-20 flex gap-2">
+              {imgs.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={(e) => { e.preventDefault(); setIndex(i); }}
+                  className={"w-2 h-2 rounded-full " + (i === index ? 'bg-white' : 'bg-white/40')}
+                  aria-label={`Slide ${i + 1}`}
+                />
+              ))}
+            </div>
+          ) : null}
         </Card>
       </Link>
     </section>
