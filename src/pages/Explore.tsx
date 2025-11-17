@@ -1,6 +1,6 @@
 import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
-import { CircularIconCard } from "@/components/features/CircularIconCard";
+import { SquareIconCard } from "@/components/features/SquareIconCard";
 import exploreBanner from "@/assets/explore-banner-premium.jpg";
 import shahadaIcon from "@/assets/icons/shahada-3d.png";
 import prayerIcon from "@/assets/icons/prayer-times-3d.png";
@@ -122,11 +122,11 @@ const Explore = () => {
                 className="animate-fade-in"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <CircularIconCard
+                <SquareIconCard
                   icon={feature.icon}
                   title={feature.title}
                   path={feature.path}
-                  size="small"
+                  size="large"
                 />
               </div>
             ))}
@@ -145,11 +145,11 @@ const Explore = () => {
                 className="animate-fade-in"
                 style={{ animationDelay: `${(index + 5) * 0.1}s` }}
               >
-                <CircularIconCard
+                <SquareIconCard
                   icon={feature.icon}
                   title={feature.title}
                   path={feature.path}
-                  size="small"
+                  size="large"
                 />
               </div>
             ))}

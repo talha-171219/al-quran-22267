@@ -5,7 +5,8 @@ import { Card } from "@/components/ui/card";
 interface NasheedSectionProps {
   title: string;
   subtitle?: string;
-  // allow single image or array of images for a small slider
+  // allow single image/video or array of images/videos for a small slider
+  // items may be image URLs (jpg/png/...) or video URLs (mp4/webm)
   imageSrc: string | string[];
   imageAlt: string;
   linkPath: string;
@@ -29,6 +30,7 @@ export const NasheedSection = ({
   const [index, setIndex] = React.useState(0);
   const [hovered, setHovered] = React.useState(false);
   const intervalRef = React.useRef<number | null>(null);
+  const videoRefs = React.useRef<Array<HTMLVideoElement | null>>([]);
 
   React.useEffect(() => {
     if (imgs.length <= 1) return;
@@ -38,6 +40,26 @@ export const NasheedSection = ({
       if (intervalRef.current) { window.clearInterval(intervalRef.current); intervalRef.current = null; }
     };
   }, [imgs.length, intervalMs, pauseOnHover, hovered]);
+
+  // control video playback on hover / slide change
+  React.useEffect(() => {
+    // when slide changes, ensure current video's playback state matches hovered/pauseOnHover
+    const current = videoRefs.current[index];
+    if (current) {
+      if (hovered && pauseOnHover) {
+        try { current.pause(); } catch (e) {}
+      } else {
+        try { current.play().catch(() => {}); } catch (e) {}
+      }
+    }
+    // pause other videos
+    videoRefs.current.forEach((v, i) => {
+      if (!v) return;
+      if (i !== index) {
+        try { v.pause(); v.currentTime = 0; } catch (e) {}
+      }
+    });
+  }, [index, hovered, pauseOnHover]);
 
   const prev = (e?: React.MouseEvent) => { e?.preventDefault(); setIndex(i => (i - 1 + imgs.length) % imgs.length); };
   const next = (e?: React.MouseEvent) => { e?.preventDefault(); setIndex(i => (i + 1) % imgs.length); };
@@ -62,17 +84,36 @@ export const NasheedSection = ({
       <Link to={linkPath} onMouseEnter={() => setHovered(true)} onMouseLeave={() => setHovered(false)}>
         <Card className="relative w-full h-48 overflow-hidden rounded-xl shadow-lg group hover:shadow-primary-glow transition-all duration-300">
           {/* render images stacked for fade transition */}
-          {imgs.map((src, i) => (
-            <img
-              key={i}
-              src={src}
-              alt={`${imageAlt} ${i + 1}`}
-              className={"w-full h-full object-cover absolute inset-0 " + (transition === 'fade' ? 'transition-opacity duration-500 ease-in-out' : '')}
-              style={{ opacity: i === index ? 1 : 0 }}
-              loading="lazy"
-              decoding="async"
-            />
-          ))}
+          {imgs.map((src, i) => {
+            const isVideo = /\.(mp4|webm|ogg)(\?.*)?$/i.test(src) || /^data:video\//.test(src);
+            if (isVideo) {
+              return (
+                <video
+                  key={i}
+                  ref={el => videoRefs.current[i] = el}
+                  src={src}
+                  className={"w-full h-full object-cover absolute inset-0 " + (transition === 'fade' ? 'transition-opacity duration-500 ease-in-out' : '')}
+                  style={{ opacity: i === index ? 1 : 0 }}
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                />
+              );
+            }
+
+            return (
+              <img
+                key={i}
+                src={src}
+                alt={`${imageAlt} ${i + 1}`}
+                className={"w-full h-full object-cover absolute inset-0 " + (transition === 'fade' ? 'transition-opacity duration-500 ease-in-out' : '')}
+                style={{ opacity: i === index ? 1 : 0 }}
+                loading="lazy"
+                decoding="async"
+              />
+            );
+          })}
 
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
           <div className="absolute inset-0 flex items-end p-4">

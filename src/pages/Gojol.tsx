@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Bookmark, ImageIcon, BookOpen, Music } from "lucide-react";
 import { Link } from "react-router-dom";
 import headerImg from "@/assets/explore-banner.jpg";
+import YouTubePreview from "@/components/gojol/YouTubePreview";
 
 const Gojol = () => {
   return (
@@ -12,14 +13,14 @@ const Gojol = () => {
       <TopBar title="Islamic Gojol" showBack />
 
       <main className="max-w-lg mx-auto px-4 py-6 space-y-6">
-        {/* Header image */}
+        {/* Header area replaced with a short-style video preview (autoplay when visible) */}
         <div className="relative h-44 rounded-lg overflow-hidden">
-          <img src={headerImg} alt="Gojol Banner" className="w-full h-full object-cover" />
+          <YouTubePreview
+            videoUrl="https://youtu.be/-uzp4xkqTRg?si=Y2gyonpJyrcrVDqN"
+            visibilityThreshold={0.4}
+            className="w-full h-full"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-          <div className="absolute left-4 bottom-4">
-            <h1 className="text-white text-2xl font-bold">Islamic Gojol • গজল</h1>
-            <p className="text-sm text-white/90">গজল শোনুন,দেখুন এবং পড়ুন — আরবী, বাংলা ও সিম্পল সাউন্ড</p>
-          </div>
         </div>
 
         {/* Sections as buttons */}

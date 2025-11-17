@@ -19,6 +19,7 @@ import digitalTasbihIcon from "@/assets/icons/digital-tasbih-3d.png";
 import qiblaFinderIcon from "@/assets/icons/qibla-finder-3d.png";
 import fastingTrackerIcon from "@/assets/icons/fasting-tracker-3d.png";
 import { NasheedSection } from "@/components/gojol/NasheedSection"; // Import the new component
+import FeatureCards from "@/components/home/FeatureCards";
 
 const features = [
   {
@@ -117,6 +118,9 @@ const Home = () => {
           ))}
         </div>
 
+        {/* Feature cards (big left + two stacked right) */}
+        <FeatureCards />
+
         {/* Arabic Nasheed Section */}
         {/* Islamic Lectures Section */}
         <NasheedSection
@@ -131,23 +135,23 @@ const Home = () => {
           linkLabel="Explore Lectures"
         />
 
+        {/* Arabic Nasheed removed from here — will show a Shorts-style card at the bottom of the page */}
+          {/* Premium Nasheed Section removed — using redesigned Arabic Nasheed page instead */}
+
+        {/* Short-style Arabic Nasheed (Portrait) — placed at the bottom of the page */}
+        <div className="pt-6" />
         <NasheedSection
           title="Arabic Nasheed"
-          subtitle="Heart-touching Islamic Nasheeds to listen anytime."
-          imageSrc="https://i.postimg.cc/VNtR2FR0/Copilot-20251116-165530.png" // Placeholder image
+          subtitle="আরবীতে গজল তালিকা এবং টেক্সট"
+          imageSrc={[
+            '/icons/nasheed/nasheed-1.png',
+            '/icons/nasheed/nasheed-2.png',
+            '/icons/nasheed/nasheed-3.png',
+          ]}
           imageAlt="Arabic Nasheed"
-          linkPath="/gojol/arabic" // Link to the Nasheed page
+          linkPath="/gojol/arabic"
+          linkLabel="Explore Nasheeds"
         />
-        {/* Premium Nasheed Section removed — using redesigned Arabic Nasheed page instead */}
-          {/* Store Section (styled like Nasheed) - placeholder image, links to Store page */}
-          <NasheedSection
-            title="Store"
-            subtitle="Islamic card images available in the store."
-            imageSrc="https://i.postimg.cc/cJKnz4dB/Copilot-20251116-172838.png" // Placeholder - you can replace with your image
-            imageAlt="Store"
-            linkPath="/store" // Link to the Store page
-            linkLabel="See Images"
-          />
       </main>
 
       <BottomNav />
