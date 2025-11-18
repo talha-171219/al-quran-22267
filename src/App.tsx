@@ -5,6 +5,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import React, { useEffect, useState, lazy, Suspense } from "react";
 import useNTE from "./hooks/useNTE";
+import NTEHealth from "./components/NTEHealth";
 
 import { surahPreloader } from "@/utils/surahPreloader";
 import { hadithPreloader } from "@/utils/hadithPreloader";
@@ -321,8 +322,10 @@ const App = () => {
           }}
           aria-hidden={true}
         >
-          <div style={{ marginBottom: 6 }}>NTE: {nteReady ? '✅' : '⏳'}</div>
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ marginBottom: 6 }}>
+            <NTEHealth />
+          </div>
+          <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
             <button
               onClick={() => requestPermission()}
               style={{ padding: '6px 8px', fontSize: 12 }}
