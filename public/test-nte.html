@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Test NTE iframe</title>
+</head>
+<body>
+  <h3>Test NTE iframe (for local development)</h3>
+  <p>This page simulates the NTE iframe and responds to postMessage requests from the parent app.</p>
+
+  <script>
+    (function () {
+      console.info('[Test NTE] started');
+
+      // Helper to send responses back to parent preserving requestId
+      function respond(requestId, type, data, error) {
+        const payload = { type, requestId, data, error };
+        try {
+          window.parent.postMessage(payload, '*');
+          console.debug('[Test NTE] respond ->', payload);
+        } catch (e) {
+          console.error('[Test NTE] respond error', e);
+        }
+      }
+
+      // Send NTE_READY on load
+      window.addEventListener('load', () => {
+        try {
+          window.parent.postMessage({ type: 'NTE_READY' }, '*');
+          console.info('[Test NTE] sent NTE_READY');
+        } catch (e) {
+          console.error('[Test NTE] NTE_READY post failed', e);
+        }
+      });
+
+      // Listen for messages from parent
+      window.addEventListener('message', async (ev) => {
+        if (!ev || !ev.data) return;
+        const payload = ev.data;
+        const { type, requestId, payload: inner } = payload;
+        console.debug('[Test NTE] received', payload);
+
+        try {
+          switch (type) {
+            case 'PING':
+              respond(requestId, 'PONG', { ts: Date.now() });
+              break;
+
+            case 'REQUEST_PERMISSION': {
+              // Try native Notification.requestPermission inside iframe (may be blocked in cross-origin scenarios)
+              if ('Notification' in window && Notification.requestPermission) {
+                try {
+                  const p = await Notification.requestPermission();
+                  respond(requestId, 'PERMISSION_RESPONSE', { permission: p });
+                } catch (e) {
+                  respond(requestId, 'ERROR', null, String(e));
+                }
+              } else {
+                // fallback: return 'default'
+                respond(requestId, 'PERMISSION_RESPONSE', { permission: 'default' });
+              }
+              break;
+            }
+
+            case 'GET_SUBSCRIPTION':
+              // For testing, return a fake subscription object
+              respond(requestId, 'SUBSCRIPTION_RESPONSE', { subscription: null });
+              break;
+
+            case 'TRIGGER_EVENT':
+              // Log the event and respond success
+              console.info('[Test NTE] TRIGGER_EVENT', inner);
+              respond(requestId, 'TRIGGER_EVENT_RESPONSE', { ok: true });
+              break;
+
+            case 'SEND_FOREGROUND_NOTIFICATION':
+              // Show a simple Notification (if permission granted)
+              try {
+                if ('Notification' in window && Notification.permission === 'granted') {
+                  const title = inner && inner.title ? inner.title : 'Test Notification';
+                  const opts = (inner && inner.options) || {};
+                  new Notification(title, opts);
+                }
+                respond(requestId, 'SEND_FOREGROUND_NOTIFICATION_RESPONSE', { ok: true });
+              } catch (e) {
+                respond(requestId, 'ERROR', null, String(e));
+              }
+              break;
+
+            default:
+              // Unknown type: echo
+              respond(requestId, 'UNKNOWN', { received: payload });
+              break;
+          }
+        } catch (err) {
+          console.error('[Test NTE] handler error', err);
+          if (requestId) respond(requestId, 'ERROR', null, String(err));
+        }
+      }, false);
+    })();
+  </script>
+</body>
+</html>

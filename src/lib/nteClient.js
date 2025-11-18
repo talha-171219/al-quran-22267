@@ -1,6 +1,7 @@
 // Single NTE client implementation
-const NTE_ORIGIN = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_NTE_ORIGIN) || 'https://silent-notify-engine.lovable.app';
-const NTE_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_NTE_URL) || `${NTE_ORIGIN}`;
+// Hardcoded origin per app configuration
+const NTE_ORIGIN = 'https://silent-notify-engine.lovable.app';
+const NTE_URL = 'https://silent-notify-engine.lovable.app';
 
 class NTEClient {
   constructor() {
@@ -11,8 +12,10 @@ class NTEClient {
     this.requestCounter = 1;
     this.iframeOrigin = null;
 
+    this.responseTimeout = 15000; // ms
     this._onMessage = this._onMessage.bind(this);
     window.addEventListener('message', this._onMessage);
+    console.debug('[NTE Client] constructed');
   }
 
   init({ iframeId = 'nte-iframe', createIfMissing = false } = {}) {
@@ -23,6 +26,15 @@ class NTEClient {
       this.iframe.src = NTE_URL;
       this.iframe.style.display = 'none';
       this.iframe.title = 'Notification Engine';
+      this.iframe.addEventListener('load', () => {
+        console.info('[NTE Client] iframe loaded:', this.iframe && this.iframe.src);
+        try {
+          const src = this.iframe.getAttribute('src') || this.iframe.src || '';
+          if (src) this.iframeOrigin = new URL(src, window.location.href).origin;
+        } catch (e) {
+          this.iframeOrigin = null;
+        }
+      });
       document.body.appendChild(this.iframe);
     }
 
@@ -45,8 +57,25 @@ class NTEClient {
       this.iframeOrigin = null;
     }
 
-    // ping to check readiness
-    this.ping();
+    // ping to check readiness. If we created the iframe just now, wait until it finishes loading
+    // to improve chances of a timely response from the remote NTE.
+    try {
+      if (createIfMissing && this.iframe) {
+        const loadOrTimeout = new Promise((resolve) => {
+          let settled = false;
+          const onLoad = () => { if (!settled) { settled = true; resolve(); } };
+          this.iframe.addEventListener('load', onLoad, { once: true });
+          // Fallback timeout: resolve after 4s so we still attempt to ping
+          setTimeout(() => { if (!settled) { settled = true; resolve(); } }, 4000);
+        });
+        loadOrTimeout.then(() => this.ping()).catch(() => this.ping());
+      } else {
+        this.ping();
+      }
+    } catch (e) {
+      // ensure we still attempt to ping even on unexpected errors
+      this.ping();
+    }
     return true;
   }
 
@@ -57,6 +86,7 @@ class NTEClient {
 
     const payload = event.data || {};
     const { type, requestId, data, error } = payload;
+    console.debug('[NTE Client] message received', { origin: event.origin, type, requestId, data, error });
 
     if (type === 'NTE_READY') {
       this.isReady = true;
@@ -91,16 +121,16 @@ class NTEClient {
     if (!this.iframe || !this.iframe.contentWindow) return Promise.reject(new Error('NTE iframe not initialized'));
     const requestId = `r_${Date.now()}_${this.requestCounter++}`;
     const payload = Object.assign({}, message, { requestId });
-
     return new Promise((resolve, reject) => {
       if (expectResponse) {
         this.pendingRequests.set(requestId, { resolve, reject });
         setTimeout(() => {
           if (this.pendingRequests.has(requestId)) {
             this.pendingRequests.delete(requestId);
+            console.warn('[NTE Client] response timeout for', requestId, payload);
             reject(new Error('NTE response timeout'));
           }
-        }, 15000);
+        }, this.responseTimeout);
       }
 
       try {
@@ -109,16 +139,31 @@ class NTEClient {
         // — using '*' avoids uncatchable DOM exceptions in that case while still working.
         const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
         const targetOrigin = isLocalhost ? '*' : (this.iframeOrigin || NTE_ORIGIN || '*');
+        console.debug('[NTE Client] postMessage ->', { payload, targetOrigin });
         this.iframe.contentWindow.postMessage(payload, targetOrigin);
         if (!expectResponse) resolve(true);
       } catch (err) {
         if (expectResponse) this.pendingRequests.delete(requestId);
+        console.error('[NTE Client] postMessage error', err);
         reject(err);
       }
     });
   }
 
-  requestPermission() { return this._postMessage({ type: 'REQUEST_PERMISSION' }, true); }
+  requestPermission() {
+    return this._postMessage({ type: 'REQUEST_PERMISSION' }, true).catch(async (err) => {
+      console.warn('[NTE Client] requestPermission via iframe failed, falling back to Notification.requestPermission()', err);
+      if (typeof window !== 'undefined' && 'Notification' in window && Notification.requestPermission) {
+        try {
+          const p = await Notification.requestPermission();
+          return { permission: p };
+        } catch (e) {
+          throw e;
+        }
+      }
+      throw err;
+    });
+  }
   getSubscription() { return this._postMessage({ type: 'GET_SUBSCRIPTION' }, true); }
   triggerEvent(eventName, eventData = {}, notificationConfig = {}) {
     return this._postMessage({ type: 'TRIGGER_EVENT', payload: { eventName, eventData, notificationConfig } }, true);
