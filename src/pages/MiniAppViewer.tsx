@@ -26,6 +26,8 @@ const MiniAppViewer = () => {
     return null;
   }
 
+  const isComingSoon = !app.url || app.url === "/explore";
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header with Back Button */}
@@ -43,27 +45,47 @@ const MiniAppViewer = () => {
         </div>
       </div>
 
-      {/* Loading Indicator */}
-      {loading && (
-        <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-40">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Loading mini-app...</p>
+      {isComingSoon ? (
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="text-center space-y-4 max-w-md">
+            <div className="text-6xl mb-4">🚀</div>
+            <h2 className="text-3xl font-bold text-foreground">Coming Soon</h2>
+            <p className="text-muted-foreground text-lg">
+              This mini-app is under development and will be available soon.
+            </p>
+            <Button
+              onClick={() => navigate("/explore")}
+              className="mt-6"
+            >
+              Back to Explore
+            </Button>
           </div>
         </div>
-      )}
+      ) : (
+        <>
+          {/* Loading Indicator */}
+          {loading && (
+            <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-40">
+              <div className="flex flex-col items-center gap-3">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <p className="text-sm text-muted-foreground">Loading mini-app...</p>
+              </div>
+            </div>
+          )}
 
-      {/* iFrame Container */}
-      <div className="flex-1 relative">
-        <iframe
-          src={app.url}
-          className="w-full h-full border-0"
-          title={app.title}
-          onLoad={() => setLoading(false)}
-          sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-          style={{ minHeight: "calc(100vh - 60px)" }}
-        />
-      </div>
+          {/* iFrame Container */}
+          <div className="flex-1 relative">
+            <iframe
+              src={app.url}
+              className="w-full h-full border-0"
+              title={app.title}
+              onLoad={() => setLoading(false)}
+              sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
+              style={{ minHeight: "calc(100vh - 60px)" }}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 };

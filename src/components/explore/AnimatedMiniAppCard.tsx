@@ -18,7 +18,7 @@ export const AnimatedMiniAppCard = ({ apps }: AnimatedMiniAppCardProps) => {
 
   useEffect(() => {
     const animation = setInterval(() => {
-      setOffset((prev) => (prev - 0.5) % (apps.length * 320));
+      setOffset((prev) => (prev - 0.5) % (apps.length * 408));
     }, 30);
 
     return () => clearInterval(animation);
@@ -29,29 +29,34 @@ export const AnimatedMiniAppCard = ({ apps }: AnimatedMiniAppCardProps) => {
   };
 
   return (
-    <div className="w-full overflow-hidden rounded-2xl bg-card/50 backdrop-blur-sm shadow-lg border border-border/30 p-4">
-      <div className="relative w-full h-48 overflow-hidden">
-        <div
-          className="flex gap-4 transition-transform duration-100 ease-linear"
-          style={{
-            transform: `translateX(${offset}px)`,
-          }}
-        >
-          {[...apps, ...apps, ...apps].map((app, index) => (
-            <button
-              key={`${app.id}-${index}`}
-              onClick={() => handleAppClick(app)}
-              className="flex-shrink-0 w-80 h-48 rounded-xl overflow-hidden hover:scale-105 transition-transform duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary shadow-md"
-            >
-              <img
-                src={app.thumbnail}
-                alt={app.title}
-                className="w-full h-full object-cover"
-              />
-            </button>
-          ))}
+    <div className="w-full">
+      <div className="w-full overflow-hidden rounded-2xl bg-card/50 backdrop-blur-sm shadow-lg border border-border/30 p-6">
+        <div className="relative w-full h-64 overflow-hidden">
+          <div
+            className="flex gap-6 transition-transform duration-100 ease-linear"
+            style={{
+              transform: `translateX(${offset}px)`,
+            }}
+          >
+            {[...apps, ...apps, ...apps].map((app, index) => (
+              <button
+                key={`${app.id}-${index}`}
+                onClick={() => handleAppClick(app)}
+                className="flex-shrink-0 w-96 h-64 rounded-xl overflow-hidden hover:scale-105 transition-transform duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary shadow-md"
+              >
+                <img
+                  src={app.thumbnail}
+                  alt={app.title}
+                  className="w-full h-full object-cover"
+                />
+              </button>
+            ))}
+          </div>
         </div>
       </div>
+      <p className="text-center text-sm text-muted-foreground mt-3 animate-pulse">
+        tap to open
+      </p>
     </div>
   );
 };
