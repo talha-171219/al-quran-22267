@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import lottie from 'lottie-web';
+import locationFindingData from '@/assets/lottie/location_finding.json';
 
 interface CardItem {
   id: string;
@@ -11,7 +13,6 @@ interface CardItem {
   link?: string;
 }
 
-import mosque3d from '@/assets/icons/mosque.jpg';
 import moreDuas3d from '@/assets/icons/more-duas-3d.png';
 import store3d from '@/assets/icons/store-3d.png';
 
@@ -20,7 +21,7 @@ const defaultItems: CardItem[] = [
     id: 'mosque_finder',
     title: 'Mosque Finder',
     subtitle: 'Locate nearby mosques',
-    icon: mosque3d,
+    icon: 'lottie', // Special marker for Lottie animation
     link: '/mosque-finder',
   },
   {
@@ -41,6 +42,25 @@ const defaultItems: CardItem[] = [
 
 export const FeatureCards: React.FC<{ items?: CardItem[] }> = ({ items = defaultItems }) => {
   const navigate = useNavigate();
+  const lottieContainerRef = useRef<HTMLDivElement>(null);
+
+  // Initialize Lottie animation for Mosque Finder
+  useEffect(() => {
+    if (lottieContainerRef.current) {
+      lottieContainerRef.current.innerHTML = '';
+      const anim = lottie.loadAnimation({
+        container: lottieContainerRef.current,
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        animationData: locationFindingData,
+      });
+
+      return () => {
+        anim.destroy();
+      };
+    }
+  }, []);
 
   const InnerGoButton: React.FC<{ to: string }> = ({ to }) => {
     return (
@@ -74,7 +94,9 @@ export const FeatureCards: React.FC<{ items?: CardItem[] }> = ({ items = default
                 {/* large decorative icon bottom-right */}
                 <div className="pointer-events-none absolute bottom-4 right-4 w-28 h-28 rounded-lg">
                   <div className="w-full h-full flex items-center justify-center">
-                    {typeof items[0].icon === 'string' ? (
+                    {items[0].icon === 'lottie' ? (
+                      <div ref={lottieContainerRef} className="w-full h-full" />
+                    ) : typeof items[0].icon === 'string' ? (
                       <img src={items[0].icon} alt="mosque" className="w-full h-full object-contain rounded-lg p-1" />
                     ) : (
                       items[0].icon
