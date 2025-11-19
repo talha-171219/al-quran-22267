@@ -18,6 +18,7 @@ const MiniAppViewer = () => {
   const [loading, setLoading] = useState(true);
   const app = location.state?.app as MiniApp;
   const lottieContainerRef = useRef<HTMLDivElement>(null);
+  const loadingStartTime = useRef<number>(Date.now());
 
   useEffect(() => {
     if (!app) {
@@ -48,6 +49,16 @@ const MiniAppViewer = () => {
   }
 
   const isComingSoon = !app.url || app.url === "/explore";
+
+  const handleIframeLoad = () => {
+    const elapsedTime = Date.now() - loadingStartTime.current;
+    const minLoadingTime = 5500; // 5.5 seconds
+    const remainingTime = Math.max(0, minLoadingTime - elapsedTime);
+    
+    setTimeout(() => {
+      setLoading(false);
+    }, remainingTime);
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -100,7 +111,7 @@ const MiniAppViewer = () => {
               src={app.url}
               className="w-full h-full border-0"
               title={app.title}
-              onLoad={() => setLoading(false)}
+              onLoad={handleIframeLoad}
               sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
               style={{ minHeight: "calc(100vh - 60px)" }}
             />
