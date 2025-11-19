@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import lottie from "lottie-web";
+import loadingData from "@/assets/lottie/loading.json";
 
 interface MiniApp {
   id: string;
@@ -15,12 +17,31 @@ const MiniAppViewer = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const app = location.state?.app as MiniApp;
+  const lottieContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!app) {
       navigate("/explore");
     }
   }, [app, navigate]);
+
+  // Initialize Lottie loading animation
+  useEffect(() => {
+    if (loading && lottieContainerRef.current) {
+      lottieContainerRef.current.innerHTML = '';
+      const anim = lottie.loadAnimation({
+        container: lottieContainerRef.current,
+        renderer: 'svg',
+        loop: true,
+        autoplay: true,
+        animationData: loadingData,
+      });
+
+      return () => {
+        anim.destroy();
+      };
+    }
+  }, [loading]);
 
   if (!app) {
     return null;
@@ -66,8 +87,8 @@ const MiniAppViewer = () => {
           {/* Loading Indicator */}
           {loading && (
             <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-40">
-              <div className="flex flex-col items-center gap-3">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <div className="flex flex-col items-center gap-4">
+                <div ref={lottieContainerRef} className="w-20 h-20" />
                 <p className="text-sm text-muted-foreground">Loading mini-app...</p>
               </div>
             </div>

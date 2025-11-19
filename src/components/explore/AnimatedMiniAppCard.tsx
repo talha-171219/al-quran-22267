@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import lottie from "lottie-web";
+import clickHandData from "@/assets/lottie/click_hand_tap.json";
 
 interface MiniApp {
   id: string;
@@ -19,6 +21,7 @@ export const AnimatedMiniAppCard = ({ apps }: AnimatedMiniAppCardProps) => {
   const [startX, setStartX] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
   const animationRef = useRef<number | null>(null);
+  const lottieContainersRef = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     if (!isDragging) {
@@ -29,6 +32,29 @@ export const AnimatedMiniAppCard = ({ apps }: AnimatedMiniAppCardProps) => {
       return () => clearInterval(animation);
     }
   }, [apps.length, isDragging]);
+
+  // Initialize Lottie animations for tap hand icons
+  useEffect(() => {
+    const animations: any[] = [];
+    
+    lottieContainersRef.current.forEach((container) => {
+      if (container) {
+        container.innerHTML = ''; // Clear previous animations
+        const anim = lottie.loadAnimation({
+          container: container,
+          renderer: 'svg',
+          loop: true,
+          autoplay: true,
+          animationData: clickHandData,
+        });
+        animations.push(anim);
+      }
+    });
+
+    return () => {
+      animations.forEach(anim => anim.destroy());
+    };
+  }, [apps]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
@@ -86,7 +112,7 @@ export const AnimatedMiniAppCard = ({ apps }: AnimatedMiniAppCardProps) => {
               <button
                 key={`${app.id}-${index}`}
                 onClick={() => handleAppClick(app)}
-                className="flex-shrink-0 w-96 h-64 rounded-xl overflow-hidden hover:scale-105 transition-transform duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary shadow-md"
+                className="flex-shrink-0 w-96 h-64 rounded-xl overflow-hidden hover:scale-105 transition-transform duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary shadow-md relative"
                 onMouseDown={(e) => e.stopPropagation()}
                 onTouchStart={(e) => e.stopPropagation()}
               >
@@ -94,6 +120,12 @@ export const AnimatedMiniAppCard = ({ apps }: AnimatedMiniAppCardProps) => {
                   src={app.thumbnail}
                   alt={app.title}
                   className="w-full h-full object-cover pointer-events-none"
+                />
+                {/* Lottie Tap Hand Icon */}
+                <div 
+                  ref={(el) => lottieContainersRef.current[index] = el}
+                  className="absolute bottom-2 left-2 w-10 h-10 pointer-events-none"
+                  style={{ zIndex: 10 }}
                 />
               </button>
             ))}
