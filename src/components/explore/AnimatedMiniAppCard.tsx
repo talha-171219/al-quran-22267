@@ -26,8 +26,8 @@ export const AnimatedMiniAppCard = ({ apps }: AnimatedMiniAppCardProps) => {
   useEffect(() => {
     if (!isDragging) {
       const animation = setInterval(() => {
-        setOffset((prev) => (prev - 0.35) % (apps.length * 408));
-      }, 45); // Slower animation speed (reduced from 30ms, decreased step from 0.5 to 0.35)
+        setOffset((prev) => (prev - 0.45) % (apps.length * 408));
+      }, 35); // Slightly slower animation speed
 
       return () => clearInterval(animation);
     }
