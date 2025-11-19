@@ -19,6 +19,7 @@ interface BackgroundTimerState {
   adhanSettings: { [key: string]: boolean };
   lastCheck: number;
   triggeredPrayers: Set<string>;
+  triggeredAdhans: Set<string>;
 }
 
 const state: BackgroundTimerState = {
