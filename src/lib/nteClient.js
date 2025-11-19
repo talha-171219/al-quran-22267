@@ -4,12 +4,12 @@
 // - VITE_NTE_ORIGIN (origin used for postMessage checks)
 const envNteUrl = import.meta.env && import.meta.env.VITE_NTE_URL ? import.meta.env.VITE_NTE_URL : null;
 const envNteOrigin = import.meta.env && import.meta.env.VITE_NTE_ORIGIN ? import.meta.env.VITE_NTE_ORIGIN : null;
-const NTE_URL = envNteUrl || 'https://silent-notify-engine.lovable.app';
+const NTE_URL = envNteUrl || 'https://silent-notify-engine2.vercel.app';
 let computedOrigin = null;
 try {
   computedOrigin = new URL(NTE_URL, typeof window !== 'undefined' ? window.location.href : NTE_URL).origin;
 } catch (e) {
-  computedOrigin = 'https://silent-notify-engine.lovable.app';
+  computedOrigin = 'https://silent-notify-engine2.vercel.app';
 }
 const NTE_ORIGIN = envNteOrigin || computedOrigin;
 

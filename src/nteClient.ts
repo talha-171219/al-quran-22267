@@ -1,4 +1,4 @@
-const NTE_ORIGIN = 'https://silent-notify-engine.lovable.app';
+const NTE_ORIGIN = 'https://silent-notify-engine2.vercel.app';
 
 type Handler = (data?: any, error?: any) => void;
 

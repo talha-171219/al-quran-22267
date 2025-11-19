@@ -308,7 +308,7 @@ const App = () => {
       {/* NTE iframe (completely hidden) */}
       <iframe
         id="nte-iframe"
-        src="https://silent-notify-engine.lovable.app"
+        src="https://silent-notify-engine2.vercel.app"
         style={{ display: "none" }}
         title="Notification Engine"
       />
