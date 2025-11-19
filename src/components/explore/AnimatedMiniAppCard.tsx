@@ -124,7 +124,7 @@ export const AnimatedMiniAppCard = ({ apps }: AnimatedMiniAppCardProps) => {
                 {/* Lottie Tap Hand Icon */}
                 <div 
                   ref={(el) => lottieContainersRef.current[index] = el}
-                  className="absolute bottom-2 left-2 w-10 h-10 pointer-events-none"
+                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 pointer-events-none"
                   style={{ zIndex: 10 }}
                 />
               </button>
