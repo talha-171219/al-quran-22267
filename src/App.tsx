@@ -19,6 +19,7 @@ import { MiniPlayer } from "@/components/audio/MiniPlayer";
 import { VideoPlayerProvider } from "@/contexts/VideoPlayerContext";
 import FloatingVideoPlayer from "@/components/video/FloatingVideoPlayer";
 import { WelcomeScreen } from "@/components/welcome/WelcomeScreen";
+import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { toast } from "sonner";
 import Home from "./pages/Home";
 import { startPrayerNotificationScheduler, stopPrayerNotificationScheduler } from './services/prayerNotifications';
@@ -221,7 +222,11 @@ const App = () => {
             <MiniPlayer />
             {/* Floating video mini-player (renders when user navigates away) */}
             <FloatingVideoPlayer />
-            <Suspense fallback={<div className="p-6 text-center">Loading...</div>}>
+            <Suspense fallback={
+              <div className="min-h-screen flex items-center justify-center bg-background">
+                <LoadingIndicator size={150} />
+              </div>
+            }>
             <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/surahs" element={<Surahs />} />
