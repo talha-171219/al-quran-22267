@@ -87,6 +87,7 @@ import IslamicNames from "./pages/IslamicNames";
 import NotificationSettings from "./pages/NotificationSettings";
 import MoreDuas from "./pages/MoreDuas";
 import DuaCategoryDetail from "./pages/DuaCategoryDetail";
+import MiniAppViewer from "./pages/MiniAppViewer";
 
 const queryClient = new QueryClient();
 
@@ -250,6 +251,7 @@ const App = () => {
             <Route path="/prayer-tracker" element={<PrayerTracker />} />
             <Route path="/azkar" element={<Azkar />} />
             <Route path="/explore" element={<Explore />} />
+            <Route path="/explore/mini-app/:appId" element={<MiniAppViewer />} />
             <Route path="/more-duas" element={<MoreDuas />} />
             <Route path="/more-duas/:slug" element={<DuaCategoryDetail />} />
             <Route path="/hajj" element={<Hajj />} />

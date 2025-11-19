@@ -1,7 +1,10 @@
 import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SquareIconCard } from "@/components/features/SquareIconCard";
-import exploreBanner from "@/assets/explore-banner-premium.jpg";
+import { AnimatedMiniAppCard } from "@/components/explore/AnimatedMiniAppCard";
+import wordByWordThumbnail from "@/assets/mini-apps/wordbyword-quran.png";
+import placeholderApp1 from "@/assets/mini-apps/placeholder-app-1.png";
+import placeholderApp2 from "@/assets/mini-apps/placeholder-app-2.png";
 import shahadaIcon from "@/assets/icons/shahada-3d.png";
 import prayerIcon from "@/assets/icons/prayer-times-3d.png";
 import zakatIcon from "@/assets/icons/zakat-calculator-3d.png";
@@ -90,26 +93,41 @@ const otherFeatures = [
   },
 ];
 
+// Mini-apps configuration
+const miniApps = [
+  {
+    id: "wordbyword-quran",
+    thumbnail: wordByWordThumbnail,
+    url: "https://wordbyword-quran.vercel.app/",
+    title: "Word by Word Quran",
+  },
+  {
+    id: "placeholder-1",
+    thumbnail: placeholderApp1,
+    url: "/explore",
+    title: "Coming Soon",
+  },
+  {
+    id: "placeholder-2",
+    thumbnail: placeholderApp2,
+    url: "/explore",
+    title: "Coming Soon",
+  },
+];
+
 const Explore = () => {
   return (
     <div className="min-h-screen bg-background pb-20">
       <TopBar title="Explore" showBack />
 
-      {/* Banner with Fade Effect */}
-      <div className="relative h-56 overflow-hidden">
-        <img 
-          src={exploreBanner} 
-          alt="Islamic Explore Banner" 
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
-        <div className="absolute bottom-6 left-4 right-4">
-          <h1 className="text-2xl font-bold mb-1 text-foreground drop-shadow-lg">Explore Islamic Features</h1>
-          <p className="text-sm text-foreground/90 drop-shadow-md">ইসলামিক বৈশিষ্ট্য অন্বেষণ করুন</p>
-        </div>
-      </div>
-
       <main className="max-w-lg mx-auto px-4 py-8">
+        {/* Mini-Apps Section */}
+        <div className="mb-12">
+          <h2 className="text-lg font-semibold text-center text-foreground mb-6">
+            See our other apps — tap to open
+          </h2>
+          <AnimatedMiniAppCard apps={miniApps} />
+        </div>
         {/* Five Pillars of Islam Section */}
         <div className="mb-8">
           <h2 className="text-xl font-bold mb-4 text-center text-foreground">
