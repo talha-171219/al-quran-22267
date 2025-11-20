@@ -26,7 +26,7 @@ export const AnimatedMiniAppCard = ({ apps }: AnimatedMiniAppCardProps) => {
   useEffect(() => {
     if (!isDragging) {
       const animation = setInterval(() => {
-        setOffset((prev) => (prev - 0.48) % (apps.length * 408));
+        setOffset((prev) => (prev - 0.52) % (apps.length * 408));
       }, 32); // Slightly faster animation speed
 
       return () => clearInterval(animation);
@@ -124,7 +124,7 @@ export const AnimatedMiniAppCard = ({ apps }: AnimatedMiniAppCardProps) => {
                 {/* Lottie Tap Hand Icon */}
                 <div 
                   ref={(el) => lottieContainersRef.current[index] = el}
-                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 pointer-events-none"
+                  className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-30 h-30 pointer-events-none"
                   style={{ zIndex: 10 }}
                 />
               </button>
