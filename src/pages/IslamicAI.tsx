@@ -7,6 +7,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Send, Sparkles, Settings, Lock, Key } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { toast } from "sonner";
+import lottie from "lottie-web";
+import chatbotAnimation from "@/assets/lottie/chatbot.json";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +43,21 @@ const IslamicAI = () => {
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [loadingConvos, setLoadingConvos] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const chatbotLottieRef = useRef<HTMLDivElement>(null);
+
+  // Initialize chatbot Lottie animation
+  useEffect(() => {
+    if (chatbotLottieRef.current && !isPremium) {
+      const anim = lottie.loadAnimation({
+        container: chatbotLottieRef.current,
+        animationData: chatbotAnimation,
+        loop: true,
+        autoplay: true,
+        renderer: "svg",
+      });
+      return () => anim.destroy();
+    }
+  }, [isPremium]);
 
   // Check premium status on mount
   useEffect(() => {
@@ -284,12 +301,10 @@ const IslamicAI = () => {
           <Card className="w-full p-8 space-y-6 text-center">
             <div className="flex justify-center">
               <div className="relative">
-                <div className="w-24 h-24 bg-gradient-to-br from-primary/20 to-primary/5 rounded-full flex items-center justify-center">
-                  <Lock className="h-12 w-12 text-primary" />
-                </div>
-                <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-primary rounded-full flex items-center justify-center animate-pulse">
-                  <Sparkles className="h-5 w-5 text-primary-foreground" />
-                </div>
+                <div 
+                  ref={chatbotLottieRef}
+                  className="w-32 h-32 flex items-center justify-center"
+                />
               </div>
             </div>
             
