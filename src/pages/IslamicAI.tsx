@@ -303,7 +303,7 @@ const IslamicAI = () => {
               <div className="relative">
                 <div 
                   ref={chatbotLottieRef}
-                  className="w-32 h-32 flex items-center justify-center"
+                  className="w-42 h-42 flex items-center justify-center"
                 />
               </div>
             </div>
