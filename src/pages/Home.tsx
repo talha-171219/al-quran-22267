@@ -123,7 +123,7 @@ const Home = () => {
               key={index}
               className="animate-fade-in opacity-0"
               style={{
-                animationDelay: `${index * 0.1}s`,
+                animationDelay: `${index * 0.04}s`,
                 animationFillMode: 'forwards'
               }}
             >
