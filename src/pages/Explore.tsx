@@ -1,8 +1,9 @@
 import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SquareIconCard } from "@/components/features/SquareIconCard";
-import { AnimatedMiniAppCard } from "@/components/explore/AnimatedMiniAppCard";
+import { MiniAppsGrid } from "@/components/explore/MiniAppsGrid";
 import wordByWordThumbnail from "@/assets/mini-apps/wordbyword-quran-new.png";
+import muslimCornerThumbnail from "@/assets/mini-apps/muslim-corner.png";
 import placeholderApp1 from "@/assets/mini-apps/placeholder-app-1.png";
 import placeholderApp2 from "@/assets/mini-apps/placeholder-app-2.png";
 import shahadaIcon from "@/assets/icons/shahada-3d.png";
@@ -102,6 +103,12 @@ const miniApps = [
     title: "Word by Word Quran",
   },
   {
+    id: "muslim-corner",
+    thumbnail: muslimCornerThumbnail,
+    url: "https://muslim-corner-by-talha.vercel.app/",
+    title: "Muslim Corner",
+  },
+  {
     id: "placeholder-1",
     thumbnail: placeholderApp1,
     url: "/explore",
@@ -124,9 +131,9 @@ const Explore = () => {
         {/* Mini-Apps Section */}
         <div className="mb-12">
           <h2 className="text-lg font-semibold text-center text-foreground mb-6">
-            See our other apps
+            Mini Apps • মিনি অ্যাপস
           </h2>
-          <AnimatedMiniAppCard apps={miniApps} />
+          <MiniAppsGrid apps={miniApps} />
         </div>
         {/* Five Pillars of Islam Section */}
         <div className="mb-8">
