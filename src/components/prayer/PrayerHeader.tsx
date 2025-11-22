@@ -198,7 +198,7 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
     };
 
     updateCurrentPrayer();
-    const interval = setInterval(updateCurrentPrayer, 1000); // Update every second
+    const interval = setInterval(updateCurrentPrayer, 3000); // Update every 3 seconds for better performance
 
     return () => clearInterval(interval);
   }, [prayerTimes]);
@@ -210,7 +210,7 @@ export const PrayerHeader = ({ className }: PrayerHeaderProps) => {
     };
     
     updateTime();
-    const interval = setInterval(updateTime, 1000);
+    const interval = setInterval(updateTime, 30000); // Update every 30 seconds for date
     
     return () => clearInterval(interval);
   }, []);
