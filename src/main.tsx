@@ -9,8 +9,23 @@ if (!rootElement) {
   throw new Error("Root element not found");
 }
 
-// VitePWA auto-registers service worker
-// Works on both Lovable publish and Vercel deployment
+// Register Service Worker manually for PWABuilder compatibility
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then((reg) => {
+        console.log('✅ Service Worker registered successfully:', reg.scope);
+        
+        // Check for updates periodically
+        setInterval(() => {
+          reg.update();
+        }, 60000); // Check every minute
+      })
+      .catch((err) => {
+        console.error('❌ Service Worker registration failed:', err);
+      });
+  });
+}
 
 createRoot(rootElement).render(
   <PermissionsProvider>
