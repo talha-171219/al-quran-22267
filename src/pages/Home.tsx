@@ -54,8 +54,8 @@ const features = [
   },
   {
     icon: islamicBooksIcon,
-    title: "Islamic Books",
-    path: "/books",
+    title: "Muslim Corner",
+    path: "/explore",
   },
   {
     icon: prayerTimesIcon,
