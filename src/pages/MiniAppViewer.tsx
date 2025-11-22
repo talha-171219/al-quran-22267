@@ -42,18 +42,18 @@ const MiniAppViewer = () => {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      {/* Header with Back Button */}
+      {/* Header with Back Button - Compact */}
       <div className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+        <div className="max-w-7xl mx-auto px-2 py-1.5 flex items-center gap-2">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate("/explore")}
-            className="hover:bg-primary/10"
+            className="hover:bg-primary/10 h-8 w-8"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-lg font-semibold text-foreground">{app.title}</h1>
+          <h1 className="text-sm font-semibold text-foreground">{app.title}</h1>
         </div>
       </div>
 
@@ -90,7 +90,7 @@ const MiniAppViewer = () => {
               title={app.title}
               onLoad={handleIframeLoad}
               sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
-              style={{ minHeight: "calc(100vh - 60px)" }}
+              style={{ minHeight: "calc(100vh - 40px)" }}
             />
           </div>
         </>
