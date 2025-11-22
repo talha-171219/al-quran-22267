@@ -135,7 +135,7 @@ const Home = () => {
                     <div className="relative rounded-full overflow-hidden w-28 h-28 border-2 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15),inset_0_0_10px_rgba(16,185,129,0.05)] transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.25),inset_0_0_15px_rgba(16,185,129,0.08)] group-hover:border-emerald-400/30 backdrop-blur-sm">
                       <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/80 via-emerald-900/60 to-emerald-950/90" />
                       <div className="absolute inset-0 bg-gradient-radial from-emerald-500/8 via-transparent to-transparent" />
-                      <div className="absolute inset-0 flex items-center justify-center p-3">
+                      <div className="absolute inset-0 flex items-center justify-center p-1">
                         <DotLottieReact
                           data={bookAnimation}
                           loop
