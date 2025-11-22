@@ -4,6 +4,8 @@ import { CircularIconCard } from "@/components/features/CircularIconCard";
 import { PrayerHeader } from "@/components/prayer/PrayerHeader";
 import { useNavigate } from "react-router-dom";
 import muslimCornerThumbnail from "@/assets/mini-apps/muslim-corner.png";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import bookAnimation from "@/assets/lottie/book.json";
 
 // Import 3D icon images
 import alQuranIcon from "@/assets/icons/al-quran-3d.png";
@@ -133,11 +135,12 @@ const Home = () => {
                     <div className="relative rounded-full overflow-hidden w-28 h-28 border-2 border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15),inset_0_0_10px_rgba(16,185,129,0.05)] transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.25),inset_0_0_15px_rgba(16,185,129,0.08)] group-hover:border-emerald-400/30 backdrop-blur-sm">
                       <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/80 via-emerald-900/60 to-emerald-950/90" />
                       <div className="absolute inset-0 bg-gradient-radial from-emerald-500/8 via-transparent to-transparent" />
-                      <div className="absolute inset-0 flex items-center justify-center p-2">
-                        <img
-                          src={feature.icon}
-                          alt={feature.title}
-                          className="w-full h-full object-cover rounded-full drop-shadow-[0_0_8px_rgba(16,185,129,0.2)] mix-blend-lighten"
+                      <div className="absolute inset-0 flex items-center justify-center p-3">
+                        <DotLottieReact
+                          data={bookAnimation}
+                          loop
+                          autoplay
+                          className="w-full h-full"
                         />
                       </div>
                       <div className="absolute -inset-2 rounded-full bg-gradient-to-r from-emerald-500/12 via-emerald-400/15 to-emerald-500/12 opacity-0 group-hover:opacity-100 transition-opacity duration-300 blur-xl -z-10" />
