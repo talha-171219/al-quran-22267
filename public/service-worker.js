@@ -1,5 +1,5 @@
 // DeenSphereX Service Worker - PWA Support
-const CACHE_VERSION = 'v5.7.1';
+const CACHE_VERSION = 'v5.7.2';
 const CACHE_NAME = `deenspherex-${CACHE_VERSION}`;
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const AUDIO_CACHE = `audio-${CACHE_VERSION}`;
@@ -153,22 +153,17 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle navigation requests (SPA routing)
+  // Handle navigation requests (SPA routing) - Always return index.html
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request).then((response) => {
-        // If we get a 404 or other error status, return index.html for SPA routing
-        if (!response.ok) {
-          return caches.match('/index.html');
-        }
-        const responseClone = response.clone();
-        caches.open(DYNAMIC_CACHE).then((cache) => {
-          cache.put(request, responseClone);
+      caches.match('/index.html').then((cachedResponse) => {
+        return cachedResponse || fetch('/index.html').then((response) => {
+          const responseClone = response.clone();
+          caches.open(STATIC_CACHE).then((cache) => {
+            cache.put('/index.html', responseClone);
+          });
+          return response;
         });
-        return response;
-      }).catch(() => {
-        // Network failed, return cached index.html for SPA routing
-        return caches.match('/index.html');
       })
     );
     return;
@@ -176,6 +171,23 @@ self.addEventListener('fetch', (event) => {
 
   // Handle same-origin assets (JS, CSS, images)
   if (url.origin === location.origin) {
+    // Network-first for JS and CSS to avoid stale bundles
+    if (request.url.endsWith('.js') || request.url.endsWith('.css')) {
+      event.respondWith(
+        fetch(request).then((networkResponse) => {
+          const responseClone = networkResponse.clone();
+          caches.open(DYNAMIC_CACHE).then((cache) => {
+            cache.put(request, responseClone);
+          });
+          return networkResponse;
+        }).catch(() => {
+          return caches.match(request);
+        })
+      );
+      return;
+    }
+    
+    // Cache-first for other assets (images, fonts, etc.)
     event.respondWith(
       caches.match(request).then((response) => {
         return response || fetch(request).then((networkResponse) => {
@@ -183,11 +195,6 @@ self.addEventListener('fetch', (event) => {
             cache.put(request, networkResponse.clone());
             return networkResponse;
           });
-        }).catch(() => {
-          // Fallback to index.html for SPA routing
-          if (request.destination === 'document') {
-            return caches.match('/index.html');
-          }
         });
       })
     );
