@@ -1,5 +1,5 @@
 // DeenSphereX Service Worker - PWA Support
-const CACHE_VERSION = 'v5.7';
+const CACHE_VERSION = 'v5.7.1';
 const CACHE_NAME = `deenspherex-${CACHE_VERSION}`;
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const AUDIO_CACHE = `audio-${CACHE_VERSION}`;
@@ -153,19 +153,22 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle navigation requests
+  // Handle navigation requests (SPA routing)
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request).then((response) => {
+        // If we get a 404 or other error status, return index.html for SPA routing
+        if (!response.ok) {
+          return caches.match('/index.html');
+        }
         const responseClone = response.clone();
         caches.open(DYNAMIC_CACHE).then((cache) => {
           cache.put(request, responseClone);
         });
         return response;
       }).catch(() => {
-        return caches.match(request).then((response) => {
-          return response || caches.match('/index.html');
-        });
+        // Network failed, return cached index.html for SPA routing
+        return caches.match('/index.html');
       })
     );
     return;
