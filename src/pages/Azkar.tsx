@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
+import { SEOHelmet } from "@/components/SEOHelmet";
 import { Label } from "@/components/ui/label";
 import { Sunrise, Sunset, Sparkles, Search, Volume2, CheckCircle, Settings, Vibrate } from "lucide-react";
 import { azkarCategories } from "@/data/azkar";
@@ -104,8 +105,15 @@ const Azkar = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <TopBar title="আযকার" showBack />
+    <>
+      <SEOHelmet 
+        title="Azkar - Daily Remembrance"
+        description="Practice daily Islamic Azkar and remembrance of Allah. Morning azkar, evening azkar, after-prayer supplications with Bengali translation and tracking."
+        keywords="Azkar, Islamic Remembrance, Morning Azkar, Evening Azkar, Dhikr, Daily Azkar, Islamic Supplications"
+        canonicalUrl="/azkar"
+      />
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar title="আযকার" showBack />
 
       <main className="max-w-lg mx-auto px-4 py-6 space-y-4">
         {/* Search Bar */}
@@ -332,6 +340,7 @@ const Azkar = () => {
 
       <BottomNav />
     </div>
+    </>
   );
 };
 

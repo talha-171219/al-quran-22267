@@ -5,11 +5,19 @@ import { ScrollText, Search, Bookmark } from "lucide-react";
 import { Link } from "react-router-dom";
 import { hadithCollections } from "@/data/hadiths";
 import { cn } from "@/lib/utils";
+import { SEOHelmet } from "@/components/SEOHelmet";
 
 const Hadith = () => {
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <TopBar title="হাদিস শরীফ" showBack />
+    <>
+      <SEOHelmet 
+        title="Hadith Collection"
+        description="Explore authentic Hadith collections including Sahih Bukhari, Sahih Muslim, and Tirmidhi in Bengali. Learn from the sayings and teachings of Prophet Muhammad (PBUH)."
+        keywords="Hadith, Sahih Bukhari, Sahih Muslim, Tirmidhi, Islamic Hadith, Bengali Hadith, Prophet Muhammad"
+        canonicalUrl="/hadith"
+      />
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar title="হাদিস শরীফ" showBack />
 
       <main className="max-w-lg mx-auto px-4 py-6 space-y-4">
         {/* Quick Access Buttons */}
@@ -107,6 +115,7 @@ const Hadith = () => {
 
       <BottomNav />
     </div>
+    </>
   );
 };
 

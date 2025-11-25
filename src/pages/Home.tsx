@@ -3,6 +3,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { CircularIconCard } from "@/components/features/CircularIconCard";
 import { PrayerHeader } from "@/components/prayer/PrayerHeader";
 import { useNavigate } from "react-router-dom";
+import { SEOHelmet } from "@/components/SEOHelmet";
 import muslimCornerThumbnail from "@/assets/mini-apps/muslim-corner.png";
 import muslimCorner3D from "@/assets/muslim-corner-3d.jpg";
 
@@ -111,8 +112,15 @@ const Home = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background dark:bg-gradient-to-b dark:from-[#0a2818] dark:via-[#0f1f16] dark:to-[#0a1510] pb-20">
-      <TopBar title="DeenSphereX" />
+    <>
+      <SEOHelmet 
+        title="Islamic Companion App"
+        description="DeenSphereX - Complete Islamic app with Al-Quran, Hadith, Prayer Times, Azkar, Duas, Tasbih, Qibla Finder, and more. Your digital companion for daily Islamic practices."
+        keywords="Quran, Hadith, Prayer Times, Islamic App, Azkar, Duas, Tasbih, Qibla, Muslim App, Islamic Companion"
+        canonicalUrl="/"
+      />
+      <div className="min-h-screen bg-background dark:bg-gradient-to-b dark:from-[#0a2818] dark:via-[#0f1f16] dark:to-[#0a1510] pb-20">
+        <TopBar title="DeenSphereX" />
 
       <main className="max-w-lg mx-auto px-4 py-6 space-y-6">
         <PrayerHeader className="mx-0.5" />
@@ -193,6 +201,7 @@ const Home = () => {
 
       <BottomNav />
     </div>
+    </>
   );
 };
 
