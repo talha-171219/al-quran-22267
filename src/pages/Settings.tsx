@@ -102,9 +102,6 @@ const Settings = () => {
     localStorage.setItem('showTourNow', 'true');
     toast.success('অ্যাপ টুর শুরু হচ্ছে...');
     navigate('/');
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
   };
 
   const handleCheckForUpdates = async () => {
