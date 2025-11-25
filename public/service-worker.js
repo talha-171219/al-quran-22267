@@ -1,5 +1,5 @@
 // DeenSphereX Service Worker - PWA Support
-const CACHE_VERSION = 'v5.7.2';
+const CACHE_VERSION = 'v5.8.0';
 const CACHE_NAME = `deenspherex-${CACHE_VERSION}`;
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const AUDIO_CACHE = `audio-${CACHE_VERSION}`;
@@ -169,21 +169,11 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle same-origin assets (JS, CSS, images)
+  // Handle same-origin assets
   if (url.origin === location.origin) {
-    // Network-first for JS and CSS to avoid stale bundles
+    // NEVER cache JS/CSS files - always fetch fresh to prevent stale React bundles
     if (request.url.endsWith('.js') || request.url.endsWith('.css')) {
-      event.respondWith(
-        fetch(request).then((networkResponse) => {
-          const responseClone = networkResponse.clone();
-          caches.open(DYNAMIC_CACHE).then((cache) => {
-            cache.put(request, responseClone);
-          });
-          return networkResponse;
-        }).catch(() => {
-          return caches.match(request);
-        })
-      );
+      event.respondWith(fetch(request));
       return;
     }
     
@@ -191,10 +181,10 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       caches.match(request).then((response) => {
         return response || fetch(request).then((networkResponse) => {
-          return caches.open(DYNAMIC_CACHE).then((cache) => {
+          caches.open(DYNAMIC_CACHE).then((cache) => {
             cache.put(request, networkResponse.clone());
-            return networkResponse;
           });
+          return networkResponse;
         });
       })
     );
