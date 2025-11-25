@@ -28,10 +28,10 @@ const NTEHealth: React.FC = () => {
     };
     doPing();
 
-    // periodic ping every 60s in background to update health
+    // periodic ping every 5 minutes in background to update health (reduced frequency)
     const id = setInterval(() => {
       doPing();
-    }, 60000);
+    }, 300000);
 
     return () => {
       mounted.current = false;
