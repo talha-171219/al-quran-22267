@@ -19,7 +19,6 @@ import { MiniPlayer } from "@/components/audio/MiniPlayer";
 import { VideoPlayerProvider } from "@/contexts/VideoPlayerContext";
 import FloatingVideoPlayer from "@/components/video/FloatingVideoPlayer";
 import { WelcomeScreen } from "@/components/welcome/WelcomeScreen";
-import { AppTour } from "@/components/tour/AppTour";
 import { LoadingIndicator } from "@/components/ui/loading-indicator";
 import { toast } from "sonner";
 import Home from "./pages/Home";
@@ -98,17 +97,7 @@ const queryClient = new QueryClient();
 const App = () => {
   const [isInitializing, setIsInitializing] = useState(true);
   const [showWelcome, setShowWelcome] = useState(false);
-  const [showTour, setShowTour] = useState(false);
   const { ready: nteReady, permission: ntePermission, requestPermission, sendForegroundNotification } = useNTE();
-
-  // Check for tour replay on route changes
-  useEffect(() => {
-    const showTourNow = localStorage.getItem('showTourNow');
-    if (showTourNow === 'true') {
-      localStorage.removeItem('showTourNow');
-      setShowTour(true);
-    }
-  }, []);
 
   useEffect(() => {
     // Initialize app and start preloading content
@@ -143,16 +132,6 @@ const App = () => {
         initializeMidnightRefresh();
 
         setIsInitializing(false);
-        
-        // Check if user has seen the tour (for users who already saw welcome screen)
-        const hasSeenTour = localStorage.getItem('hasSeenAppTour');
-        
-        if (!hasSeenTour) {
-          // Show tour after 2-3 minutes (150 seconds) for first-time users
-          setTimeout(() => {
-            setShowTour(true);
-          }, 150000);
-        }
       } catch (error) {
         console.error('App initialization error:', error);
         setIsInitializing(false);
@@ -224,22 +203,7 @@ const App = () => {
       console.error('Initialization error:', error);
     } finally {
       setIsInitializing(false);
-      
-      // Check if user has seen the tour
-      const hasSeenTour = localStorage.getItem('hasSeenAppTour');
-      
-      if (!hasSeenTour) {
-        // Show tour after 2-3 minutes (150 seconds) for first-time users
-        setTimeout(() => {
-          setShowTour(true);
-        }, 150000);
-      }
     }
-  };
-
-  const handleTourComplete = () => {
-    localStorage.setItem('hasSeenAppTour', 'true');
-    setShowTour(false);
   };
 
   // Show welcome screen if needed
@@ -254,8 +218,6 @@ const App = () => {
           {/* Video player provider + floating mini-player (keeps playing across pages) */}
           <BrowserRouter>
             <VideoPlayerProvider>
-            {/* App Tour - Shows after 2-3 minutes for first-time users */}
-            {showTour && <AppTour onComplete={handleTourComplete} />}
             <UpdateNotification />
             <InstallPromptModal />
             <OfflineIndicator />
