@@ -134,6 +134,21 @@ const App = () => {
         initializeMidnightRefresh();
 
         setIsInitializing(false);
+        
+        // Check if user has seen the tour (for users who already saw welcome screen)
+        const hasSeenTour = localStorage.getItem('hasSeenAppTour');
+        const showTourNow = localStorage.getItem('showTourNow');
+        
+        if (showTourNow === 'true') {
+          // Show tour immediately if triggered from Settings
+          localStorage.removeItem('showTourNow');
+          setShowTour(true);
+        } else if (!hasSeenTour) {
+          // Show tour after 2-3 minutes (150 seconds) for first-time users
+          setTimeout(() => {
+            setShowTour(true);
+          }, 150000);
+        }
       } catch (error) {
         console.error('App initialization error:', error);
         setIsInitializing(false);
@@ -208,8 +223,14 @@ const App = () => {
       
       // Check if user has seen the tour
       const hasSeenTour = localStorage.getItem('hasSeenAppTour');
-      if (!hasSeenTour) {
-        // Show tour after 2-3 minutes (150 seconds)
+      const showTourNow = localStorage.getItem('showTourNow');
+      
+      if (showTourNow === 'true') {
+        // Show tour immediately if triggered from Settings
+        localStorage.removeItem('showTourNow');
+        setShowTour(true);
+      } else if (!hasSeenTour) {
+        // Show tour after 2-3 minutes (150 seconds) for first-time users
         setTimeout(() => {
           setShowTour(true);
         }, 150000);
