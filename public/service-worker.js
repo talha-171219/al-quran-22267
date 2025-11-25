@@ -1,5 +1,5 @@
 // DeenSphereX Service Worker - PWA Support
-const CACHE_VERSION = 'v6.0.0';
+const CACHE_VERSION = 'v6.1.0';
 const CACHE_NAME = `deenspherex-${CACHE_VERSION}`;
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const AUDIO_CACHE = `audio-${CACHE_VERSION}`;
@@ -173,29 +173,31 @@ self.addEventListener('fetch', (event) => {
   if (url.origin === location.origin) {
     event.respondWith(
       caches.match(request).then((cachedResponse) => {
-        // Always return cached version immediately if available (for offline support)
-        const fetchPromise = fetch(request).then((networkResponse) => {
-          // Update cache in background for next time
-          const responseClone = networkResponse.clone();
-          caches.open(DYNAMIC_CACHE).then((cache) => {
-            cache.put(request, responseClone);
-          });
-          return networkResponse;
-        }).catch(() => {
-          // Network failed, return cached version if available
+        if (cachedResponse) {
+          // Return cached version and update in background
+          fetch(request).then((networkResponse) => {
+            caches.open(DYNAMIC_CACHE).then((cache) => {
+              cache.put(request, networkResponse.clone());
+            });
+          }).catch(() => {}); // Ignore network errors when cached version exists
+          
           return cachedResponse;
-        });
+        }
         
-        // Return cached immediately, or wait for network if not cached
-        return cachedResponse || fetchPromise;
-      }).catch(() => {
-        // If cache fails, try network
+        // Not cached, try network
         return fetch(request).then((networkResponse) => {
           const responseClone = networkResponse.clone();
           caches.open(DYNAMIC_CACHE).then((cache) => {
             cache.put(request, responseClone);
           });
           return networkResponse;
+        }).catch(() => {
+          // Network failed and no cache, return offline page for navigation
+          if (request.mode === 'navigate') {
+            return caches.match('/index.html');
+          }
+          // For other requests, return nothing (will fail gracefully)
+          return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
         });
       })
     );
@@ -212,7 +214,12 @@ self.addEventListener('fetch', (event) => {
         });
         return response;
       }).catch(() => {
-        return caches.match(request);
+        return caches.match(request).then((cachedResponse) => {
+          return cachedResponse || new Response(JSON.stringify({ error: 'Offline' }), { 
+            status: 503, 
+            headers: { 'Content-Type': 'application/json' }
+          });
+        });
       })
     );
     return;
@@ -228,14 +235,20 @@ self.addEventListener('fetch', (event) => {
         });
         return response;
       }).catch(() => {
-        return caches.match(request);
+        return caches.match(request).then((cachedResponse) => {
+          return cachedResponse || new Response(JSON.stringify({ error: 'Offline' }), { 
+            status: 503, 
+            headers: { 'Content-Type': 'application/json' }
+          });
+        });
       })
     );
     return;
   }
 
-  // Handle other cross-origin API requests
-  if (request.url.includes('api.') || request.url.includes('/api/')) {
+  // Handle other cross-origin API requests (including Nominatim)
+  if (request.url.includes('api.') || request.url.includes('/api/') || 
+      request.url.includes('nominatim.openstreetmap.org')) {
     event.respondWith(
       fetch(request).then((response) => {
         const responseClone = response.clone();
@@ -244,18 +257,35 @@ self.addEventListener('fetch', (event) => {
         });
         return response;
       }).catch(() => {
-        return caches.match(request).then((response) => {
-          return response || caches.match('/index.html');
+        return caches.match(request).then((cachedResponse) => {
+          return cachedResponse || new Response(JSON.stringify({ error: 'Offline' }), { 
+            status: 503, 
+            headers: { 'Content-Type': 'application/json' }
+          });
         });
       })
     );
     return;
   }
 
-  // Default: network first, fallback to cache
+  // Default: network first, fallback to cache or offline response
   event.respondWith(
-    fetch(request).catch(() => {
-      return caches.match(request);
+    fetch(request).then((response) => {
+      // Cache successful responses
+      if (response.ok) {
+        const responseClone = response.clone();
+        caches.open(DYNAMIC_CACHE).then((cache) => {
+          cache.put(request, responseClone);
+        });
+      }
+      return response;
+    }).catch(() => {
+      return caches.match(request).then((cachedResponse) => {
+        return cachedResponse || new Response('Offline', { 
+          status: 503, 
+          statusText: 'Service Unavailable' 
+        });
+      });
     })
   );
 });
