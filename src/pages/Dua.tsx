@@ -8,6 +8,7 @@ import { Search, Copy, BookmarkPlus, Bookmark as BookmarkIcon, Volume2, ChevronR
 import { duaCategories } from "@/data/duas";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { SEOHelmet } from "@/components/SEOHelmet";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 const Dua = () => {
@@ -72,8 +73,15 @@ const Dua = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <TopBar title="দোয়া সমূহ" showBack />
+    <>
+      <SEOHelmet 
+        title="Islamic Duas"
+        description="Collection of essential Islamic Duas for daily life, prayer, eating, sleeping, traveling and more. Arabic text with Bengali translation and audio pronunciation."
+        keywords="Islamic Duas, Daily Duas, Prayer Supplications, Bengali Duas, Arabic Duas, Dua Collection"
+        canonicalUrl="/dua"
+      />
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar title="দোয়া সমূহ" showBack />
 
       <main className="max-w-lg mx-auto px-4 py-6 space-y-4">
         {/* Header Card */}
@@ -202,6 +210,7 @@ const Dua = () => {
 
       <BottomNav />
     </div>
+    </>
   );
 };
 

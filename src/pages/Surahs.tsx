@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { surahList } from "@/data/surahs";
+import { SEOHelmet } from "@/components/SEOHelmet";
 
 const Surahs = () => {
   const [search, setSearch] = useState("");
@@ -19,8 +20,15 @@ const Surahs = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <TopBar title="Surahs" showBack />
+    <>
+      <SEOHelmet 
+        title="Al-Quran Surahs"
+        description="Read and explore all 114 Surahs of the Holy Quran with Bengali translation and meaning. Complete Quran with Tajweed and audio recitation."
+        keywords="Quran Surahs, Al-Quran, Bengali Quran, Quran Translation, Surah List, Islamic App"
+        canonicalUrl="/surahs"
+      />
+      <div className="min-h-screen bg-background pb-20">
+        <TopBar title="Surahs" showBack />
 
       <main className="max-w-lg mx-auto px-4 py-4 space-y-4">
         <div className="relative">
@@ -72,6 +80,7 @@ const Surahs = () => {
 
       <BottomNav />
     </div>
+    </>
   );
 };
 
