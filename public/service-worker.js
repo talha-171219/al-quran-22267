@@ -7,6 +7,9 @@ const API_CACHE = `api-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `dynamic-${CACHE_VERSION}`;
 const PRAYER_CACHE = `prayer-${CACHE_VERSION}`;
 
+// Workbox will inject the precache manifest here
+const PRECACHE_MANIFEST = self.__WB_MANIFEST || [];
+
 // Essential assets to precache on install
 const APP_SHELL = [
   '/',
@@ -29,6 +32,11 @@ self.addEventListener('install', (event) => {
   console.log('[Service Worker] Installing...');
   event.waitUntil(
     Promise.all([
+      // Precache Workbox manifest
+      PRECACHE_MANIFEST.length > 0 && caches.open(STATIC_CACHE).then((cache) => {
+        console.log('[Service Worker] Precaching Workbox manifest');
+        return cache.addAll(PRECACHE_MANIFEST.map(entry => entry.url || entry));
+      }),
       caches.open(STATIC_CACHE).then((cache) => {
         console.log('[Service Worker] Precaching app shell');
         return cache.addAll(APP_SHELL.map(url => new Request(url, { cache: 'reload' })));
