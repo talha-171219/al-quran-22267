@@ -15,8 +15,10 @@ export default defineConfig(({ mode }) => ({
     mode === "development" && componentTagger(),
     VitePWA({
       registerType: "autoUpdate",
-      injectRegister: "auto",
-      strategies: "generateSW",
+      injectRegister: false, // Manual registration in main.tsx
+      strategies: "injectManifest",
+      srcDir: "public",
+      filename: "service-worker.js",
       includeAssets: ["icon-192.jpg", "icon-512.jpg", "icon-192.png", "icon-512.png", "azan1.mp3", "alarm-clock-short-6402.mp3", "robots.txt"],
       manifest: {
         name: "DeenSphereX - সম্পূর্ণ ইসলামিক অ্যাপ",
