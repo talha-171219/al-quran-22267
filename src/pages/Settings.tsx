@@ -99,10 +99,12 @@ const Settings = () => {
 
   const handleReplayTour = () => {
     localStorage.removeItem('hasSeenAppTour');
-    toast.success('অ্যাপ টুর পুনরায় শুরু করা হবে');
+    localStorage.setItem('showTourNow', 'true');
+    toast.success('অ্যাপ টুর শুরু হচ্ছে...');
+    navigate('/');
     setTimeout(() => {
       window.location.reload();
-    }, 1000);
+    }, 500);
   };
 
   const handleCheckForUpdates = async () => {
