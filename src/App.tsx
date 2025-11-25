@@ -101,6 +101,15 @@ const App = () => {
   const [showTour, setShowTour] = useState(false);
   const { ready: nteReady, permission: ntePermission, requestPermission, sendForegroundNotification } = useNTE();
 
+  // Check for tour replay on route changes
+  useEffect(() => {
+    const showTourNow = localStorage.getItem('showTourNow');
+    if (showTourNow === 'true') {
+      localStorage.removeItem('showTourNow');
+      setShowTour(true);
+    }
+  }, []);
+
   useEffect(() => {
     // Initialize app and start preloading content
     const initializeApp = async () => {
@@ -137,13 +146,8 @@ const App = () => {
         
         // Check if user has seen the tour (for users who already saw welcome screen)
         const hasSeenTour = localStorage.getItem('hasSeenAppTour');
-        const showTourNow = localStorage.getItem('showTourNow');
         
-        if (showTourNow === 'true') {
-          // Show tour immediately if triggered from Settings
-          localStorage.removeItem('showTourNow');
-          setShowTour(true);
-        } else if (!hasSeenTour) {
+        if (!hasSeenTour) {
           // Show tour after 2-3 minutes (150 seconds) for first-time users
           setTimeout(() => {
             setShowTour(true);
@@ -223,13 +227,8 @@ const App = () => {
       
       // Check if user has seen the tour
       const hasSeenTour = localStorage.getItem('hasSeenAppTour');
-      const showTourNow = localStorage.getItem('showTourNow');
       
-      if (showTourNow === 'true') {
-        // Show tour immediately if triggered from Settings
-        localStorage.removeItem('showTourNow');
-        setShowTour(true);
-      } else if (!hasSeenTour) {
+      if (!hasSeenTour) {
         // Show tour after 2-3 minutes (150 seconds) for first-time users
         setTimeout(() => {
           setShowTour(true);
