@@ -1,5 +1,5 @@
 // DeenSphereX Service Worker - PWA Support
-const CACHE_VERSION = 'v6.1.0';
+const CACHE_VERSION = 'v6.2.0';
 const CACHE_NAME = `deenspherex-${CACHE_VERSION}`;
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const AUDIO_CACHE = `audio-${CACHE_VERSION}`;
@@ -165,35 +165,48 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle same-origin assets with cache-first strategy for full offline support
+  // Handle same-origin assets with aggressive cache-first for full offline support
   if (url.origin === location.origin) {
     event.respondWith(
-      caches.match(request).then((cachedResponse) => {
-        if (cachedResponse) {
-          // Return cached version and update in background
-          fetch(request).then((networkResponse) => {
-            caches.open(DYNAMIC_CACHE).then((cache) => {
-              cache.put(request, networkResponse.clone());
-            });
-          }).catch(() => {}); // Ignore network errors when cached version exists
-          
-          return cachedResponse;
-        }
-        
-        // Not cached, try network
-        return fetch(request).then((networkResponse) => {
-          const responseClone = networkResponse.clone();
-          caches.open(DYNAMIC_CACHE).then((cache) => {
-            cache.put(request, responseClone);
-          });
-          return networkResponse;
-        }).catch(() => {
-          // Network failed and no cache, return offline page for navigation
-          if (request.mode === 'navigate') {
-            return caches.match('/index.html');
+      // Try cache first
+      caches.open(DYNAMIC_CACHE).then((cache) => {
+        return cache.match(request).then((cachedResponse) => {
+          // If we have it cached, return it immediately
+          if (cachedResponse) {
+            // Update cache in background when online
+            fetch(request).then((networkResponse) => {
+              if (networkResponse.ok) {
+                cache.put(request, networkResponse.clone());
+              }
+            }).catch(() => {}); // Silently fail if offline
+            
+            return cachedResponse;
           }
-          // For other requests, return nothing (will fail gracefully)
-          return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
+          
+          // Not in cache, try network and cache it
+          return fetch(request).then((networkResponse) => {
+            // Cache successful responses (especially JS/CSS bundles)
+            if (networkResponse.ok && (
+              request.url.endsWith('.js') || 
+              request.url.endsWith('.css') ||
+              request.url.includes('/assets/') ||
+              request.url.endsWith('.json') ||
+              request.url.endsWith('.png') ||
+              request.url.endsWith('.jpg') ||
+              request.url.endsWith('.svg')
+            )) {
+              cache.put(request, networkResponse.clone());
+            }
+            return networkResponse;
+          }).catch(() => {
+            // Network failed and no cache
+            if (request.mode === 'navigate') {
+              // Return cached index.html for navigation
+              return caches.match('/index.html');
+            }
+            // For assets, return empty response
+            return new Response('', { status: 503, statusText: 'Offline' });
+          });
         });
       })
     );
