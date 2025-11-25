@@ -1,5 +1,5 @@
 // DeenSphereX Service Worker - PWA Support
-const CACHE_VERSION = 'v5.9.0';
+const CACHE_VERSION = 'v6.0.0';
 const CACHE_NAME = `deenspherex-${CACHE_VERSION}`;
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const AUDIO_CACHE = `audio-${CACHE_VERSION}`;
@@ -169,23 +169,27 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle same-origin assets - Cache-first for offline support
+  // Handle same-origin assets with cache-first strategy for full offline support
   if (url.origin === location.origin) {
     event.respondWith(
       caches.match(request).then((cachedResponse) => {
-        // Return cached version if available
-        if (cachedResponse) {
-          // Fetch update in background for next time
-          fetch(request).then((networkResponse) => {
-            caches.open(DYNAMIC_CACHE).then((cache) => {
-              cache.put(request, networkResponse);
-            });
-          }).catch(() => {}); // Ignore network errors
-          
+        // Always return cached version immediately if available (for offline support)
+        const fetchPromise = fetch(request).then((networkResponse) => {
+          // Update cache in background for next time
+          const responseClone = networkResponse.clone();
+          caches.open(DYNAMIC_CACHE).then((cache) => {
+            cache.put(request, responseClone);
+          });
+          return networkResponse;
+        }).catch(() => {
+          // Network failed, return cached version if available
           return cachedResponse;
-        }
+        });
         
-        // If not cached, fetch from network and cache
+        // Return cached immediately, or wait for network if not cached
+        return cachedResponse || fetchPromise;
+      }).catch(() => {
+        // If cache fails, try network
         return fetch(request).then((networkResponse) => {
           const responseClone = networkResponse.clone();
           caches.open(DYNAMIC_CACHE).then((cache) => {
