@@ -19,6 +19,7 @@ import {
   RefreshCw,
   CheckCircle2,
   Database,
+  PlayCircle,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
@@ -94,6 +95,14 @@ const Settings = () => {
 
   const handleAbout = () => {
     toast.info(`আল-কুরআন অ্যাপ v${currentVersion} - বাংলা কুরআন পাঠের জন্য সম্পূর্ণ সমাধান`);
+  };
+
+  const handleReplayTour = () => {
+    localStorage.removeItem('hasSeenAppTour');
+    toast.success('অ্যাপ টুর পুনরায় শুরু করা হবে');
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   };
 
   const handleCheckForUpdates = async () => {
@@ -297,6 +306,15 @@ const Settings = () => {
                   আপডেট চেক করুন
                 </>
               )}
+            </Button>
+
+            <Button 
+              onClick={handleReplayTour}
+              className="w-full"
+              variant="outline"
+            >
+              <PlayCircle className="mr-2 h-4 w-4" />
+              অ্যাপ টুর দেখুন
             </Button>
           </div>
 
