@@ -2,7 +2,6 @@ import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { PermissionsProvider } from "./contexts/PermissionsContext";
-import { HelmetProvider } from "react-helmet-async";
 
 const rootElement = document.getElementById("root");
 
@@ -48,9 +47,7 @@ if ('serviceWorker' in navigator) {
 }
 
 createRoot(rootElement).render(
-  <HelmetProvider>
-    <PermissionsProvider>
-      <App />
-    </PermissionsProvider>
-  </HelmetProvider>
+  <PermissionsProvider>
+    <App />
+  </PermissionsProvider>
 );

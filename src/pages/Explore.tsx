@@ -2,7 +2,6 @@ import { TopBar } from "@/components/layout/TopBar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { SquareIconCard } from "@/components/features/SquareIconCard";
 import { MiniAppsGrid } from "@/components/explore/MiniAppsGrid";
-import { SEOHelmet } from "@/components/SEOHelmet";
 import wordByWordThumbnail from "@/assets/mini-apps/wordbyword-quran-new.png";
 import muslimCornerThumbnail from "@/assets/mini-apps/muslim-corner.png";
 import placeholderApp1 from "@/assets/mini-apps/placeholder-app-1.png";
@@ -125,15 +124,8 @@ const miniApps = [
 
 const Explore = () => {
   return (
-    <>
-      <SEOHelmet 
-        title="Explore Islamic Features"
-        description="Discover comprehensive Islamic features including Hajj guide, Ramadan fasting tracker, Allah's 99 names, Shahada, Islamic gallery, store, mini-apps and more."
-        keywords="Islamic Features, Hajj, Ramadan, Fasting, 99 Names of Allah, Shahada, Islamic Gallery, Islamic Store"
-        canonicalUrl="/explore"
-      />
-      <div className="min-h-screen bg-background pb-20">
-        <TopBar title="Explore" showBack />
+    <div className="min-h-screen bg-background pb-20">
+      <TopBar title="Explore" showBack />
 
       <main className="max-w-lg mx-auto px-2 py-8">
         {/* Mini-Apps Section */}
@@ -192,7 +184,6 @@ const Explore = () => {
 
       <BottomNav />
     </div>
-    </>
   );
 };
 
