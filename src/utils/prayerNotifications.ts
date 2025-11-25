@@ -99,8 +99,14 @@ export const scheduleAdhan = (prayerName: string, prayerTime: string, callback: 
 export const getLocationName = async (lat: number, lon: number): Promise<string> => {
   try {
     const response = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=en`
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&accept-language=en`,
+      { signal: AbortSignal.timeout(5000) }
     );
+    
+    if (!response.ok) {
+      throw new Error('Geocoding failed');
+    }
+    
     const data = await response.json();
     
     const city = data.address?.city || 
@@ -108,12 +114,12 @@ export const getLocationName = async (lat: number, lon: number): Promise<string>
                  data.address?.village || 
                  data.address?.county ||
                  data.address?.state ||
-                 'Unknown';
+                 'Location';
     
     return city;
   } catch (error) {
-    console.error('Geocoding error:', error);
-    return 'Unknown';
+    // Silent fallback - no console error for CORS/offline issues
+    return 'Location';
   }
 };
 

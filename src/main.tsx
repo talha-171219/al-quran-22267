@@ -20,7 +20,9 @@ if ('serviceWorker' in navigator) {
         
         // Check for updates every 5 minutes
         setInterval(() => {
-          reg.update();
+          reg.update().catch(() => {
+            // Silently handle update check failures
+          });
         }, 300000);
         
         // Install update when available
@@ -36,7 +38,10 @@ if ('serviceWorker' in navigator) {
         });
       })
       .catch((err) => {
-        console.error('❌ Service Worker registration failed:', err);
+        // Only log critical registration errors, not state errors
+        if (err.name !== 'InvalidStateError') {
+          console.error('❌ Service Worker registration failed:', err);
+        }
       });
   });
 }
