@@ -213,7 +213,11 @@ class NTEClient {
         await this._postMessage({ type: 'PING' }, true);
         return true;
       } catch (err2) {
-        console.warn('[NTE Client] ping failed after retry', err2);
+        // Silently fail - NTE server might be slow or unavailable
+        // Only log in development mode
+        if (!import.meta.env.PROD) {
+          console.warn('[NTE Client] ping failed after retry', err2);
+        }
         return null;
       }
     }

@@ -89,6 +89,8 @@ import NotificationSettings from "./pages/NotificationSettings";
 import MoreDuas from "./pages/MoreDuas";
 import DuaCategoryDetail from "./pages/DuaCategoryDetail";
 import MiniAppViewer from "./pages/MiniAppViewer";
+import DuasVideos from "./pages/DuasVideos";
+const NasheedPremium = lazy(() => import("./pages/NasheedPremium"));
 
 const queryClient = new QueryClient();
 
@@ -259,6 +261,8 @@ const App = () => {
             <Route path="/explore/mini-app/:appId" element={<MiniAppViewer />} />
             <Route path="/more-duas" element={<MoreDuas />} />
             <Route path="/more-duas/:slug" element={<DuaCategoryDetail />} />
+            <Route path="/duas/videos" element={<DuasVideos />} />
+            <Route path="/nasheed-premium" element={<NasheedPremium />} />
             <Route path="/hajj" element={<Hajj />} />
             <Route path="/hajj/guide" element={<HajjGuide />} />
             <Route path="/hajj/steps" element={<HajjSteps />} />
