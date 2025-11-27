@@ -306,6 +306,12 @@ export const UpdateNotification = () => {
       if (registration?.waiting) {
         console.log('📤 Sending SKIP_WAITING message to service worker');
         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+        
+        // CRITICAL: Force reload after 2 seconds if controllerchange doesn't fire
+        setTimeout(() => {
+          console.log('⚠️ Fallback reload - controllerchange did not fire');
+          window.location.reload();
+        }, 2000);
       } else {
         console.log('⚠️ No waiting worker found, reloading directly');
         window.location.reload();
