@@ -1,5 +1,5 @@
 // DeenSphereX Service Worker - PWA Support
-const CACHE_VERSION = 'v6.2.0';
+const CACHE_VERSION = 'v6.3.0';
 const CACHE_NAME = `deenspherex-${CACHE_VERSION}`;
 const STATIC_CACHE = `static-${CACHE_VERSION}`;
 const AUDIO_CACHE = `audio-${CACHE_VERSION}`;
@@ -24,13 +24,25 @@ const AUDIO_FILES = [
   '/hajj/talbiyah.mp3',
 ];
 
-// Install event - precache essential assets
+// Install event - precache essential assets and clear old caches immediately
 self.addEventListener('install', (event) => {
   console.log('[Service Worker] Installing...');
   event.waitUntil(
-    caches.open(STATIC_CACHE).then((cache) => {
+    // First, clear ALL old caches to prevent stale chunk issues
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          // Delete all caches that don't match current version
+          if (!cacheName.includes(CACHE_VERSION)) {
+            console.log('[Service Worker] Clearing old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    }).then(() => {
+      return caches.open(STATIC_CACHE);
+    }).then((cache) => {
       console.log('[Service Worker] Precaching essential assets');
-      // Combine all assets and deduplicate
       const allAssets = [...new Set([...APP_SHELL, ...AUDIO_FILES])];
       return cache.addAll(allAssets.map(url => new Request(url, { cache: 'reload' })));
     }).then(() => {
@@ -40,16 +52,15 @@ self.addEventListener('install', (event) => {
   );
 });
 
-// Activate event - clean up old caches
+// Activate event - clean up old caches aggressively
 self.addEventListener('activate', (event) => {
   console.log('[Service Worker] Activating...');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName.includes('deenspherex-') && cacheName !== CACHE_NAME &&
-              cacheName !== STATIC_CACHE && cacheName !== AUDIO_CACHE &&
-              cacheName !== API_CACHE && cacheName !== DYNAMIC_CACHE && cacheName !== PRAYER_CACHE) {
+          // Delete ANY cache that doesn't match current version
+          if (!cacheName.includes(CACHE_VERSION)) {
             console.log('[Service Worker] Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
@@ -101,13 +112,43 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-// Message event - handle skipWaiting
+// Message event - handle skipWaiting and cache clearing
 self.addEventListener('message', (event) => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
     console.log('[Service Worker] Skip waiting requested');
     self.skipWaiting();
   }
+  
+  // Allow clients to request full cache clear
+  if (event.data && event.data.type === 'CLEAR_ALL_CACHES') {
+    console.log('[Service Worker] Clearing all caches...');
+    caches.keys().then((cacheNames) => {
+      return Promise.all(cacheNames.map(cacheName => caches.delete(cacheName)));
+    }).then(() => {
+      event.ports[0]?.postMessage({ success: true });
+    });
+  }
 });
+
+// Helper function to check if response is valid for the request type
+function isValidResponse(request, response) {
+  if (!response || !response.ok) return false;
+  
+  const contentType = response.headers.get('content-type') || '';
+  const url = request.url;
+  
+  // For JS files, ensure we got JavaScript, not HTML
+  if (url.endsWith('.js') || url.includes('.js?')) {
+    return contentType.includes('javascript') || contentType.includes('application/javascript');
+  }
+  
+  // For CSS files, ensure we got CSS, not HTML
+  if (url.endsWith('.css') || url.includes('.css?')) {
+    return contentType.includes('text/css');
+  }
+  
+  return true;
+}
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
@@ -119,13 +160,15 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle audio files
+  // Handle audio files - cache first
   if (request.url.endsWith('.mp3')) {
     event.respondWith(
       caches.open(AUDIO_CACHE).then((cache) => {
         return cache.match(request).then((response) => {
           return response || fetch(request).then((networkResponse) => {
-            cache.put(request, networkResponse.clone());
+            if (networkResponse.ok) {
+              cache.put(request, networkResponse.clone());
+            }
             return networkResponse;
           });
         });
@@ -134,13 +177,15 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle PDF books
+  // Handle PDF books - cache first
   if (request.url.includes('/books/') && request.url.endsWith('.pdf')) {
     event.respondWith(
       caches.open(STATIC_CACHE).then((cache) => {
         return cache.match(request).then((response) => {
           return response || fetch(request).then((networkResponse) => {
-            cache.put(request, networkResponse.clone());
+            if (networkResponse.ok) {
+              cache.put(request, networkResponse.clone());
+            }
             return networkResponse;
           });
         });
@@ -152,59 +197,98 @@ self.addEventListener('fetch', (event) => {
   // Handle navigation requests (SPA routing) - Always return index.html
   if (request.mode === 'navigate') {
     event.respondWith(
-      caches.match('/index.html').then((cachedResponse) => {
-        return cachedResponse || fetch('/index.html').then((response) => {
-          const responseClone = response.clone();
-          caches.open(STATIC_CACHE).then((cache) => {
-            cache.put('/index.html', responseClone);
+      fetch('/index.html', { cache: 'no-cache' }).then((response) => {
+        const responseClone = response.clone();
+        caches.open(STATIC_CACHE).then((cache) => {
+          cache.put('/index.html', responseClone);
+        });
+        return response;
+      }).catch(() => {
+        return caches.match('/index.html');
+      })
+    );
+    return;
+  }
+
+  // Handle JS/CSS bundles - CRITICAL: Network first with MIME type validation
+  if (url.origin === location.origin && (request.url.endsWith('.js') || request.url.endsWith('.css'))) {
+    event.respondWith(
+      fetch(request).then((networkResponse) => {
+        // Validate that we got the correct MIME type
+        if (isValidResponse(request, networkResponse)) {
+          // Cache valid response
+          const responseClone = networkResponse.clone();
+          caches.open(DYNAMIC_CACHE).then((cache) => {
+            cache.put(request, responseClone);
           });
-          return response;
+          return networkResponse;
+        } else {
+          // Got wrong MIME type (likely HTML from 404 redirect)
+          // This means the chunk doesn't exist - app needs refresh
+          console.warn('[Service Worker] MIME mismatch for:', request.url);
+          
+          // Try cache as fallback
+          return caches.match(request).then((cachedResponse) => {
+            if (cachedResponse && isValidResponse(request, cachedResponse)) {
+              return cachedResponse;
+            }
+            
+            // No valid cached version - notify client to reload
+            self.clients.matchAll().then((clients) => {
+              clients.forEach((client) => {
+                client.postMessage({ 
+                  type: 'CHUNK_LOAD_FAILED',
+                  url: request.url 
+                });
+              });
+            });
+            
+            // Return the network response anyway (will cause error, but triggers app reload logic)
+            return networkResponse;
+          });
+        }
+      }).catch(() => {
+        // Network failed, try cache
+        return caches.match(request).then((cachedResponse) => {
+          if (cachedResponse) {
+            return cachedResponse;
+          }
+          return new Response('', { status: 503, statusText: 'Offline' });
         });
       })
     );
     return;
   }
 
-  // Handle same-origin assets with aggressive cache-first for full offline support
+  // Handle other same-origin assets (images, JSON, etc.)
   if (url.origin === location.origin) {
     event.respondWith(
-      // Try cache first
       caches.open(DYNAMIC_CACHE).then((cache) => {
         return cache.match(request).then((cachedResponse) => {
-          // If we have it cached, return it immediately
           if (cachedResponse) {
             // Update cache in background when online
             fetch(request).then((networkResponse) => {
               if (networkResponse.ok) {
                 cache.put(request, networkResponse.clone());
               }
-            }).catch(() => {}); // Silently fail if offline
+            }).catch(() => {});
             
             return cachedResponse;
           }
           
-          // Not in cache, try network and cache it
           return fetch(request).then((networkResponse) => {
-            // Cache successful responses (especially JS/CSS bundles)
             if (networkResponse.ok && (
-              request.url.endsWith('.js') || 
-              request.url.endsWith('.css') ||
               request.url.includes('/assets/') ||
               request.url.endsWith('.json') ||
               request.url.endsWith('.png') ||
               request.url.endsWith('.jpg') ||
-              request.url.endsWith('.svg')
+              request.url.endsWith('.svg') ||
+              request.url.endsWith('.webp')
             )) {
               cache.put(request, networkResponse.clone());
             }
             return networkResponse;
           }).catch(() => {
-            // Network failed and no cache
-            if (request.mode === 'navigate') {
-              // Return cached index.html for navigation
-              return caches.match('/index.html');
-            }
-            // For assets, return empty response
             return new Response('', { status: 503, statusText: 'Offline' });
           });
         });
@@ -217,10 +301,12 @@ self.addEventListener('fetch', (event) => {
   if (request.url.includes('api.aladhan.com') && request.url.includes('timings')) {
     event.respondWith(
       fetch(request).then((response) => {
-        const responseClone = response.clone();
-        caches.open(PRAYER_CACHE).then((cache) => {
-          cache.put(request, responseClone);
-        });
+        if (response.ok) {
+          const responseClone = response.clone();
+          caches.open(PRAYER_CACHE).then((cache) => {
+            cache.put(request, responseClone);
+          });
+        }
         return response;
       }).catch(() => {
         return caches.match(request).then((cachedResponse) => {
@@ -238,10 +324,12 @@ self.addEventListener('fetch', (event) => {
   if (request.url.includes('hadithapi.com') || request.url.includes('api.sunnah.com')) {
     event.respondWith(
       fetch(request).then((response) => {
-        const responseClone = response.clone();
-        caches.open(API_CACHE).then((cache) => {
-          cache.put(request, responseClone);
-        });
+        if (response.ok) {
+          const responseClone = response.clone();
+          caches.open(API_CACHE).then((cache) => {
+            cache.put(request, responseClone);
+          });
+        }
         return response;
       }).catch(() => {
         return caches.match(request).then((cachedResponse) => {
@@ -255,15 +343,17 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Handle other cross-origin API requests (including Nominatim)
+  // Handle other cross-origin API requests
   if (request.url.includes('api.') || request.url.includes('/api/') || 
       request.url.includes('nominatim.openstreetmap.org')) {
     event.respondWith(
       fetch(request).then((response) => {
-        const responseClone = response.clone();
-        caches.open(API_CACHE).then((cache) => {
-          cache.put(request, responseClone);
-        });
+        if (response.ok) {
+          const responseClone = response.clone();
+          caches.open(API_CACHE).then((cache) => {
+            cache.put(request, responseClone);
+          });
+        }
         return response;
       }).catch(() => {
         return caches.match(request).then((cachedResponse) => {
@@ -277,10 +367,9 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Default: network first, fallback to cache or offline response
+  // Default: network first, fallback to cache
   event.respondWith(
     fetch(request).then((response) => {
-      // Cache successful responses
       if (response.ok) {
         const responseClone = response.clone();
         caches.open(DYNAMIC_CACHE).then((cache) => {
