@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import NasheedCardPremium from '@/components/gojol/NasheedCardPremium';
 import { useNavigate } from 'react-router-dom';
+import { BottomNav } from '@/components/layout/BottomNav';
+import { TopBar } from '@/components/layout/TopBar';
 
 export default function DuasVideos() {
   const [items, setItems] = useState<any[]>([]);
@@ -31,13 +33,18 @@ export default function DuasVideos() {
   }
 
   return (
-    <div className="p-6">
-      <h2 className="text-2xl font-bold text-white mb-4">Duas Videos</h2>
-      {loading ? <div className="text-slate-400">Loading...</div> : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {items.map(it => <NasheedCardPremium key={it.id} item={it} onPlay={handlePlay} />)}
-        </div>
-      )}
+    <div className="min-h-screen bg-background pb-20">
+      <TopBar title="Duas Videos" showBack />
+      <main className="p-4 max-w-lg mx-auto">
+        {loading ? (
+          <div className="text-muted-foreground text-center py-8">Loading...</div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {items.map(it => <NasheedCardPremium key={it.id} item={it} onPlay={handlePlay} />)}
+          </div>
+        )}
+      </main>
+      <BottomNav />
     </div>
   );
 }
