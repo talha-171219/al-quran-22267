@@ -11,22 +11,21 @@ interface MosqueMapViewProps {
 const MosqueMapView = ({ mosques, userLocation, onMosqueSelect }: MosqueMapViewProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
-  // Generate markers for all mosques
+  // Generate map URL centered on user location with proper zoom
   const generateMapUrl = () => {
-    // Create a bounding box that includes user location and all mosques
-    const lats = [userLocation.lat, ...mosques.slice(0, 20).map(m => m.lat)];
-    const lons = [userLocation.lon, ...mosques.slice(0, 20).map(m => m.lon)];
+    // Calculate zoom level based on mosque distances
+    let zoom = 15; // Default zoom for nearby mosques
     
-    const minLat = Math.min(...lats) - 0.01;
-    const maxLat = Math.max(...lats) + 0.01;
-    const minLon = Math.min(...lons) - 0.01;
-    const maxLon = Math.max(...lons) + 0.01;
+    if (mosques.length > 0) {
+      const maxDistance = Math.max(...mosques.slice(0, 10).map(m => m.distance || 0));
+      if (maxDistance > 5) zoom = 13;
+      else if (maxDistance > 2) zoom = 14;
+      else if (maxDistance > 1) zoom = 15;
+      else zoom = 16;
+    }
 
-    // Center point
-    const centerLat = (minLat + maxLat) / 2;
-    const centerLon = (minLon + maxLon) / 2;
-
-    return `https://www.openstreetmap.org/export/embed.html?bbox=${minLon}%2C${minLat}%2C${maxLon}%2C${maxLat}&layer=mapnik&marker=${centerLat}%2C${centerLon}`;
+    // Use user's actual location as center with marker
+    return `https://www.openstreetmap.org/export/embed.html?bbox=${userLocation.lon - 0.02}%2C${userLocation.lat - 0.02}%2C${userLocation.lon + 0.02}%2C${userLocation.lat + 0.02}&layer=mapnik&marker=${userLocation.lat}%2C${userLocation.lon}`;
   };
 
   return (
