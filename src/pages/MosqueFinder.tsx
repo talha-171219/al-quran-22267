@@ -70,21 +70,19 @@ const MosqueFinder = () => {
       setLoading(true);
       setError(null);
 
-      // Using Overpass API for OpenStreetMap data - fetch more mosques for better results
-      const radius = 10000; // Increased to 10km for more results
+      // Using Overpass API - use 'out center' to get center coordinates for ways
+      const radius = 10000; // 10km radius
       const query = `
         [out:json][timeout:25];
         (
           node["amenity"="place_of_worship"]["religion"="muslim"](around:${radius},${location.lat},${location.lon});
           way["amenity"="place_of_worship"]["religion"="muslim"](around:${radius},${location.lat},${location.lon});
         );
-        out body;
-        >;
-        out skel qt;
+        out center;
       `;
 
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       const response = await fetch(
         `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`,
@@ -95,9 +93,8 @@ const MosqueFinder = () => {
 
       if (!response.ok) {
         if (response.status === 504 && retryCount < 2) {
-          // Retry on gateway timeout
           console.log(`Retrying... Attempt ${retryCount + 1}`);
-          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+          await new Promise(resolve => setTimeout(resolve, 2000));
           return fetchNearbyMosques(location, retryCount + 1);
         }
         throw new Error("মসজিদের তথ্য পেতে সমস্যা হয়েছে। দয়া করে কিছুক্ষণ পরে আবার চেষ্টা করুন।");
@@ -105,28 +102,31 @@ const MosqueFinder = () => {
 
       const data = await response.json();
       
+      // Process both nodes and ways - ways have center coordinates
       const mosquesData: Mosque[] = data.elements
-        .filter((el: any) => el.type === "node" && el.tags)
+        .filter((el: any) => el.tags && (el.type === "node" || el.type === "way"))
         .map((el: any) => {
-          const distance = calculateDistance(
-            location.lat,
-            location.lon,
-            el.lat,
-            el.lon
-          );
+          // For nodes, use lat/lon directly; for ways, use center coordinates
+          const lat = el.type === "node" ? el.lat : el.center?.lat;
+          const lon = el.type === "node" ? el.lon : el.center?.lon;
+          
+          if (!lat || !lon) return null;
+          
+          const distance = calculateDistance(location.lat, location.lon, lat, lon);
           
           return {
             id: `${el.id}`,
             name: el.tags.name || el.tags["name:bn"] || el.tags["name:en"] || "নামহীন মসজিদ",
             address: formatAddress(el.tags),
-            lat: el.lat,
-            lon: el.lon,
+            lat,
+            lon,
             distance,
             type: el.tags.building || "mosque",
           };
         })
+        .filter((m: Mosque | null) => m !== null)
         .sort((a: Mosque, b: Mosque) => (a.distance || 0) - (b.distance || 0))
-        .slice(0, 20); // Get top 20 nearest mosques
+        .slice(0, 20); // Top 20 nearest
 
       setMosques(mosquesData);
       
