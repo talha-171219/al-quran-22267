@@ -16,7 +16,7 @@ export const TopBar = ({ title, showBack, backPath, showSearch, onSearch, action
   const navigate = useNavigate();
 
   return (
-    <header className="sticky top-0 z-40 bg-primary text-primary-foreground shadow-md">
+    <header className="sticky top-0 z-40 bg-primary text-primary-foreground shadow-md safe-area-top">
       <div className="flex items-center justify-between h-14 px-4 max-w-lg mx-auto">
         <div className="flex items-center gap-2">
           {showBack && (
@@ -24,7 +24,7 @@ export const TopBar = ({ title, showBack, backPath, showSearch, onSearch, action
               variant="ghost"
               size="icon"
               onClick={() => backPath ? navigate(backPath) : navigate(-1)}
-              className="text-primary-foreground hover:bg-white/10"
+              className="text-primary-foreground hover:bg-white/10 active:scale-95 transition-transform"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -39,7 +39,7 @@ export const TopBar = ({ title, showBack, backPath, showSearch, onSearch, action
               variant="ghost"
               size="icon"
               onClick={onSearch}
-              className="text-primary-foreground hover:bg-white/10"
+              className="text-primary-foreground hover:bg-white/10 active:scale-95 transition-transform"
             >
               <Search className="h-5 w-5" />
             </Button>
@@ -48,7 +48,7 @@ export const TopBar = ({ title, showBack, backPath, showSearch, onSearch, action
             <Button
               variant="ghost"
               size="icon"
-              className="text-primary-foreground hover:bg-white/10"
+              className="text-primary-foreground hover:bg-white/10 active:scale-95 transition-transform"
             >
               <MoreVertical className="h-5 w-5" />
             </Button>
