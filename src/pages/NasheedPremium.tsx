@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import NasheedCardPremium from '@/components/gojol/NasheedCardPremium';
 import { useNavigate } from 'react-router-dom';
+import { BottomNav } from '@/components/layout/BottomNav';
+import { TopBar } from '@/components/layout/TopBar';
 
 const samplePlaylistPath = '/gojol/gojol_arabic_playlist.json';
 
@@ -31,36 +33,24 @@ export default function NasheedPremium() {
 
   function handlePlay(youtubeId: string) {
     setPlayingId(youtubeId);
-    // open top mini player / route to detailed player if desired
     navigate(`/gojol/arabic?play=${youtubeId}`);
   }
 
   return (
-    <div className="p-6">
-      <header className="mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-extrabold text-white">Nasheed Videos (YouTube)</h1>
-            <p className="text-sm text-slate-300">Premium Arabic Nasheeds — curated</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <button className="px-3 py-2 bg-emerald-700 rounded text-white">Download</button>
-            <button className="px-3 py-2 bg-transparent border border-slate-700 rounded text-white">•••</button>
-          </div>
-        </div>
-      </header>
-
-      <main>
+    <div className="min-h-screen bg-background pb-20">
+      <TopBar title="Nasheed Videos" showBack />
+      <main className="p-4 max-w-lg mx-auto">
         {loading ? (
-          <div className="text-slate-400">Loading...</div>
+          <div className="text-muted-foreground text-center py-8">Loading...</div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {items.map((it) => (
               <NasheedCardPremium key={it.id} item={it} onPlay={handlePlay} />
             ))}
           </div>
         )}
       </main>
+      <BottomNav />
     </div>
   );
 }
