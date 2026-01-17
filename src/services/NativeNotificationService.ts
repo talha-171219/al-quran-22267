@@ -19,11 +19,17 @@
  * - SCHEDULE_EXACT_ALARM: For precise alarm timing (Android 12+)
  * - USE_EXACT_ALARM: Alternative for exact alarms
  *
+ * SOUND FILES:
+ * - Web: Uses /public/adhan.mp3 (or azan1.mp3)
+ * - Android: Uses android/app/src/main/res/raw/adhan.wav
+ * - iOS: Added to app bundle
+ *
  * ============================================================================
  */
 
 import { LocalNotifications, ScheduleOptions, Channel } from '@capacitor/local-notifications';
 import { Capacitor } from '@capacitor/core';
+import { getNativeSoundName } from '@/utils/adhanSound';
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -195,13 +201,14 @@ export class NativeNotificationService {
     }
 
     try {
+      const soundName = getNativeSoundName();
       const channel: Channel = {
         id: 'adhan-channel',
         name: 'আযান ও নামাজের এলার্ম',
         description: 'নামাজের সময় আযান শুনুন। নির্ভরযোগ্য এলার্মের জন্য এটি চালু রাখুন।',
         importance: 5, // MAX importance for prayer alarms
         visibility: 1, // PUBLIC on lock screen
-        sound: 'adhan', // Must exist at: android/app/src/main/res/raw/adhan.wav
+        sound: soundName, // Uses adhan from android/app/src/main/res/raw/
         vibration: true,
         lights: true,
         lightColor: '#10B981' // Green color

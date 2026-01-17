@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Android Notification Icon for Al-Quran App
+  
+  REQUIREMENTS:
+  - Must be simple, single-color (white/transparent)
+  - Size: 24dp x 24dp (this scales automatically)
+  - Only use white (#FFFFFF) and transparent
+  - Android tints the icon with iconColor from capacitor.config.ts
+  
+  This icon shows in the status bar when a notification appears.
+  Design: Mosque silhouette (simple)
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="#FFFFFF">
+  
+  <!-- Mosque dome and minaret design -->
+  <path
+      android:fillColor="#FFFFFF"
+      android:pathData="M12,2C12,2 8,6 8,9C8,10.1 8.4,11.1 9,11.8L9,20L7,20L7,22L17,22L17,20L15,20L15,11.8C15.6,11.1 16,10.1 16,9C16,6 12,2 12,2ZM11,20L11,13L13,13L13,20L11,20Z"/>
+  
+  <!-- Left minaret -->
+  <path
+      android:fillColor="#FFFFFF"
+      android:pathData="M5,12L5,20L3,20L3,22L7,22L7,20L7,12L6,10L5,12Z"/>
+  
+  <!-- Right minaret -->
+  <path
+      android:fillColor="#FFFFFF"
+      android:pathData="M19,12L19,20L21,20L21,22L17,22L17,20L17,12L18,10L19,12Z"/>
+  
+  <!-- Crescent moon on top -->
+  <path
+      android:fillColor="#FFFFFF"
+      android:pathData="M12,0.5C11.2,0.5 10.5,1 10.2,1.7C10.7,1.5 11.3,1.4 12,1.4C12.7,1.4 13.3,1.5 13.8,1.7C13.5,1 12.8,0.5 12,0.5Z"/>
+</vector>
