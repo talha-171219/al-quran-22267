@@ -4,7 +4,7 @@ import { BottomNav } from "@/components/layout/BottomNav";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { Bell, BellOff, Volume2, VolumeX, CheckCircle } from "lucide-react";
+import { Bell, BellOff, Volume2, VolumeX, CheckCircle, Smartphone, Timer } from "lucide-react";
 import { toast } from "sonner";
 import {
   subscribeToPushNotifications,
@@ -327,6 +327,27 @@ const NotificationSettings = () => {
                 disabled={!isSubscribed || isLoading}
               />
             </div>
+          </div>
+        </Card>
+
+        {/* Native Adhan Link */}
+        <Card className="p-4 border-dashed border-primary/30">
+          <div 
+            className="flex items-center justify-between cursor-pointer"
+            onClick={() => window.location.href = '/native-adhan'}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                <Smartphone className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <h4 className="font-semibold">🕌 নেটিভ আযান এলার্ম</h4>
+                <p className="text-xs text-muted-foreground">
+                  Android/iOS এ ব্যাকগ্রাউন্ড আযান (১ মিনিটে টেস্ট)
+                </p>
+              </div>
+            </div>
+            <Timer className="h-5 w-5 text-muted-foreground" />
           </div>
         </Card>
 

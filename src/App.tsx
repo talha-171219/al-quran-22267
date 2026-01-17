@@ -86,6 +86,7 @@ const Gallery = lazy(() => import("./pages/Gallery"));
 const StorePage = lazy(() => import("./pages/StorePage"));
 import IslamicNames from "./pages/IslamicNames";
 import NotificationSettings from "./pages/NotificationSettings";
+const NativeAdhanSettings = lazy(() => import("./pages/NativeAdhanSettings"));
 import MoreDuas from "./pages/MoreDuas";
 import DuaCategoryDetail from "./pages/DuaCategoryDetail";
 import MiniAppViewer from "./pages/MiniAppViewer";
@@ -300,6 +301,7 @@ const App = () => {
             <Route path="/store" element={<StorePage />} />
             <Route path="/islamic-names" element={<IslamicNames />} />
             <Route path="/notifications" element={<NotificationSettings />} />
+            <Route path="/native-adhan" element={<NativeAdhanSettings />} />
             <Route path="*" element={<NotFound />} />
             </Routes>
             </Suspense>

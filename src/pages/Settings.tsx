@@ -19,6 +19,8 @@ import {
   RefreshCw,
   CheckCircle2,
   Database,
+  Smartphone,
+  Timer,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { toast } from "sonner";
@@ -201,6 +203,24 @@ const Settings = () => {
               </div>
             </div>
             <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
+          </div>
+
+          <div 
+            className="flex items-center justify-between cursor-pointer hover:bg-accent/50 transition-colors rounded-lg p-2 -m-2"
+            onClick={() => navigate('/native-adhan')}
+          >
+            <div className="flex items-center gap-3">
+              <Smartphone className="h-5 w-5 text-primary" />
+              <div>
+                <Label className="font-medium cursor-pointer">
+                  🕌 আযান ও এলার্ম (নেটিভ)
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Android/iOS এ ব্যাকগ্রাউন্ড আযান এলার্ম
+                </p>
+              </div>
+            </div>
+            <Timer className="h-5 w-5 text-muted-foreground" />
           </div>
 
           <div className="flex items-center justify-between">
