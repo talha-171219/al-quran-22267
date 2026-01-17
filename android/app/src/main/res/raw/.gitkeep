@@ -1,0 +1,11 @@
+# Android Raw Resources
+# Place adhan.wav or adhan.mp3 here for notification sounds
+
+# INSTRUCTIONS:
+# 1. Copy your adhan audio file to this folder
+# 2. Rename it to: adhan.wav (or adhan.mp3)
+# 3. Run: npx cap sync android
+# 4. The notification service will automatically use this sound
+
+# Supported formats: .wav, .mp3, .ogg
+# File name must be lowercase with no spaces

@@ -40,6 +40,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useNativeNotifications } from "@/hooks/useNativeNotifications";
+import { playAdhan, stopAdhan, isPlaying } from "@/utils/adhanSound";
 import {
   Collapsible,
   CollapsibleContent,
@@ -154,8 +155,26 @@ const NativeAdhanSettings = () => {
   };
 
   const handleImmediateTest = async () => {
-    await sendImmediateNotification();
-    toast.success('🎵 আযান সাউন্ড টেস্ট পাঠানো হয়েছে!');
+    if (isNative) {
+      await sendImmediateNotification();
+      toast.success('🎵 আযান সাউন্ড টেস্ট পাঠানো হয়েছে!');
+    }
+  };
+
+  // Play adhan sound directly (works on both web and native)
+  const handlePlayAdhanSound = async () => {
+    if (isPlaying()) {
+      stopAdhan();
+      toast.info('আযান বন্ধ করা হয়েছে');
+    } else {
+      toast.info('🎵 আযান বাজছে...');
+      try {
+        await playAdhan('default', 1.0);
+        toast.success('আযান শেষ হয়েছে');
+      } catch (error) {
+        toast.error('আযান বাজাতে সমস্যা হয়েছে');
+      }
+    }
   };
 
   // ============================================================================
@@ -346,10 +365,20 @@ const NativeAdhanSettings = () => {
                 ১ মিনিট পরে
               </Button>
               <Button variant="outline" onClick={handleImmediateTest}>
-                <Play className="mr-2 h-4 w-4" />
-                এখনই বাজান
+                <Bell className="mr-2 h-4 w-4" />
+                নোটিফিকেশন
               </Button>
             </div>
+
+            {/* Direct sound playback - works on web too */}
+            <Button 
+              variant="secondary" 
+              className="w-full" 
+              onClick={handlePlayAdhanSound}
+            >
+              <Play className="mr-2 h-4 w-4" />
+              আযান সাউন্ড শুনুন
+            </Button>
           </Card>
         )}
 
